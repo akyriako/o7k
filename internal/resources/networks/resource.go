@@ -2,6 +2,7 @@ package networks
 
 import (
 	"context"
+	"time"
 
 	"github.com/akyriako/o7k/internal/resource"
 )
@@ -63,6 +64,8 @@ func (r *Resource) Commands() []resource.Command {
 }
 
 func (r *Resource) List(_ context.Context) ([]resource.Row, error) {
+	time.Sleep(2 * time.Second)
+
 	return []resource.Row{
 		{
 			ID: "network-1",

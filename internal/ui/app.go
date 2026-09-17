@@ -22,11 +22,13 @@ type Model struct {
 	resource resource.Resource
 	table    table.Model
 	err      error
-	status   string
-	width    int
-	height   int
 
 	itemCount int
+	status    string
+	loading   bool
+
+	width  int
+	height int
 
 	profile string
 	region  string
@@ -78,6 +80,7 @@ func New(registry *resource.Registry) Model {
 		resource: r,
 		table:    t,
 		command:  command,
+		loading:  true,
 
 		profile: "default",
 		region:  "RegionOne",
@@ -140,6 +143,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case resourcesLoadedMsg:
+		m.loading = false
+
 		if msg.err != nil {
 			m.err = msg.err
 			return m, nil
@@ -194,8 +199,13 @@ func (m *Model) switchResource(name string) tea.Cmd {
 	m.resource = r
 	m.err = nil
 	m.status = ""
+	m.loading = true
+	m.itemCount = 0
 
+	// Immediately remove the previous resource's data.
+	m.table.SetRows(nil)
 	m.table.SetCursor(0)
+
 	m.resize()
 
 	return m.loadResource()
@@ -347,9 +357,24 @@ func (m Model) View() string {
 	tableView := m.renderTable()
 
 	resourceLine := ""
+
 	if m.resource != nil {
-		resourceLine = resourceTagStyle.Render(
+		resourceTag := resourceTagStyle.Render(
 			"<" + m.resource.Kind() + ">",
+		)
+
+		loadingTag := ""
+
+		if m.loading {
+			loadingTag = loadingStyle.Render(" Loading... ")
+		}
+
+		resourceLine = lipgloss.JoinHorizontal(
+			lipgloss.Top,
+			lipgloss.NewStyle().
+				Width(max(m.width-lipgloss.Width(loadingTag), 1)).
+				Render(resourceTag),
+			loadingTag,
 		)
 	}
 
