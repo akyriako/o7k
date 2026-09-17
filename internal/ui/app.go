@@ -28,6 +28,11 @@ type Model struct {
 
 	itemCount int
 
+	profile string
+	region  string
+	project string
+	domain  string
+
 	commandMode bool
 	command     textinput.Model
 }
@@ -73,6 +78,11 @@ func New(registry *resource.Registry) Model {
 		resource: r,
 		table:    t,
 		command:  command,
+
+		profile: "default",
+		region:  "RegionOne",
+		project: "default",
+		domain:  "Default",
 	}
 }
 
@@ -210,7 +220,7 @@ func (m Model) loadResource() tea.Cmd {
 
 func (m *Model) resize() {
 	const (
-		headerHeight         = 2
+		headerHeight         = 5
 		footerHeight         = 2
 		tableContainerBorder = 2
 	)
@@ -339,11 +349,7 @@ func (m Model) View() string {
 		return fmt.Sprintf("Error: %v", m.err)
 	}
 
-	header := "o7k — OpenStack TUI"
-	if m.resource != nil {
-		header += " — " + m.resource.Title()
-	}
-
+	header := m.renderHeader()
 	tableView := m.renderTable()
 
 	resourceLine := ""
