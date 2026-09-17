@@ -6,6 +6,7 @@ import (
 
 	"github.com/akyriako/o7k/internal/logging"
 	"github.com/akyriako/o7k/internal/resource"
+	"github.com/akyriako/o7k/internal/resources/networks"
 	"github.com/akyriako/o7k/internal/resources/servers"
 	tea "github.com/charmbracelet/bubbletea"
 
@@ -32,6 +33,12 @@ func main() {
 		fmt.Fprintf(os.Stderr, "error registering servers resource: %v\n", err)
 		os.Exit(1)
 	}
+
+	if err := registry.Register(networks.New()); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering networks resource: %v\n", err)
+		os.Exit(1)
+	}
+
 	p := tea.NewProgram(
 		ui.New(registry),
 		tea.WithAltScreen(),

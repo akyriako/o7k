@@ -151,6 +151,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		m.table.SetRows(rows)
+		m.table.SetCursor(0)
 
 		return m, nil
 
@@ -180,6 +181,7 @@ func (m *Model) switchResource(name string) tea.Cmd {
 	m.err = nil
 	m.status = ""
 
+	m.table.SetCursor(0)
 	m.resize()
 
 	return m.loadResource()
