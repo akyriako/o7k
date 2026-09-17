@@ -95,11 +95,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.table.SetRows(rows)
 
 		return m, nil
-		//case tea.WindowSizeMsg:
-		//	m.width = msg.Width
-		//	m.height = msg.Height
-		//
-		//	return m, nil
+	case tea.WindowSizeMsg:
+		m.width = msg.Width
+		m.height = msg.Height
+
+		m.resize()
+
+		return m, nil
 	}
 
 	var cmd tea.Cmd
@@ -127,22 +129,27 @@ func (m Model) loadServers() tea.Cmd {
 }
 
 func (m *Model) resize() {
-	const reservedHeight = 5
+	const (
+		headerHeight = 2
+		footerHeight = 1
+	)
 
-	height := max(m.height-reservedHeight, 1)
-	m.table.SetHeight(height)
+	tableHeight := max(m.height-headerHeight-footerHeight, 1)
+
+	m.table.SetHeight(tableHeight)
 }
 
 func (m Model) View() string {
 	if m.err != nil {
-		return fmt.Sprintf(
-			"o7k — OpenStack TUI\n\nError: %v\n\nPress q to quit.\n",
-			m.err,
-		)
+		return fmt.Sprintf("Error: %v", m.err)
 	}
 
-	return fmt.Sprintf(
-		"o7k — OpenStack TUI\n\n%s\nPress q to quit.\n",
-		m.table.View(),
-	)
+	header := "o7k — OpenStack TUI\n"
+	footer := "q quit"
+
+	return header +
+		"\n" +
+		m.table.View() +
+		"\n" +
+		footer
 }

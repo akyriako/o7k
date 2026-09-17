@@ -32,7 +32,10 @@ func main() {
 		fmt.Fprintf(os.Stderr, "error registering servers resource: %v\n", err)
 		os.Exit(1)
 	}
-	p := tea.NewProgram(ui.New(registry))
+	p := tea.NewProgram(
+		ui.New(registry),
+		tea.WithAltScreen(),
+	)
 
 	if _, err := p.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "error running o7k: %v\n", err)
