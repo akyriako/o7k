@@ -127,6 +127,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.command.Blur()
 		m.command.SetValue("")
 
+		if len(m.navigation) > 0 {
+			return m, m.navigateBack()
+		}
+
 		return m, nil
 	}
 
@@ -246,7 +250,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				cursor = min(msg.cursor, len(msg.rows)-1)
 			}
 
-			m.table.SetCursor(cursor)
+			m.table.SetCursor(0)
+			m.table.MoveDown(cursor)
 		}
 
 		return m, nil
@@ -381,6 +386,28 @@ func (m *Model) navigateResource(name string) tea.Cmd {
 	navigateID := m.navigateID
 
 	cmd := m.switchResource(name)
+
+	m.navigation = navigation
+	m.navigateID = navigateID
+
+	return cmd
+}
+
+func (m *Model) navigateBack() tea.Cmd {
+	if len(m.navigation) == 0 {
+		return nil
+	}
+
+	last := len(m.navigation) - 1
+	entry := m.navigation[last]
+
+	m.navigation = m.navigation[:last]
+	m.navigateID = entry.id
+
+	navigation := m.navigation
+	navigateID := m.navigateID
+
+	cmd := m.switchResource(entry.resource)
 
 	m.navigation = navigation
 	m.navigateID = navigateID
