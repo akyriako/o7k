@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/akyriako/o7k/internal/resource"
 	"github.com/charmbracelet/bubbles/table"
@@ -12,23 +13,31 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+const refreshInterval = 10 * time.Second
+
 type resourcesLoadedMsg struct {
-	loadID uint64
-	rows   []resource.Row
-	err    error
+	loadID     uint64
+	rows       []resource.Row
+	selectedID string
+	cursor     int
+	err        error
 }
 
-type Model struct {
-	registry *resource.Registry
-	resource resource.Resource
-	table    table.Model
-	err      error
+type autoRefreshMsg struct{}
 
-	itemCount int
-	status    string
-	loading   bool
-	loaded    bool
-	loadID    uint64
+type Model struct {
+	registry     *resource.Registry
+	resource     resource.Resource
+	resourceRows []resource.Row
+	table        table.Model
+	err          error
+
+	itemCount   int
+	status      string
+	loading     bool
+	showLoading bool
+	loaded      bool
+	loadID      uint64
 
 	width  int
 	height int
@@ -84,9 +93,10 @@ func New(registry *resource.Registry) Model {
 		table:    t,
 		command:  command,
 
-		loading: true,
-		loaded:  false,
-		loadID:  1,
+		loading:     true,
+		showLoading: true,
+		loaded:      false,
+		loadID:      1,
 
 		profile: "default",
 		region:  "RegionOne",
@@ -96,7 +106,10 @@ func New(registry *resource.Registry) Model {
 }
 
 func (m Model) Init() tea.Cmd {
-	return m.loadResource()
+	return tea.Batch(
+		m.loadResource(),
+		autoRefreshCmd(),
+	)
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -146,14 +159,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.command.Focus()
 
 			return m, textinput.Blink
+
+		case "r":
+			return m, m.refreshResource()
 		}
 
 	case resourcesLoadedMsg:
+		// Ignore responses belonging to an older load.
 		if msg.loadID != m.loadID {
 			return m, nil
 		}
 
 		m.loading = false
+		m.showLoading = false
 
 		if msg.err != nil {
 			m.err = msg.err
@@ -174,17 +192,51 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			values := make(table.Row, 0, len(columns))
 
 			for _, column := range columns {
-				values = append(values, row.Fields[column.Key])
+				values = append(
+					values,
+					row.Fields[column.Key],
+				)
 			}
 
 			rows = append(rows, values)
 		}
 
+		m.resourceRows = msg.rows
 		m.table.SetRows(rows)
-		m.table.SetCursor(0)
 		m.itemCount = len(rows)
 
+		cursor := 0
+
+		if len(msg.rows) > 0 {
+			found := false
+
+			if msg.selectedID != "" {
+				for i, row := range msg.rows {
+					if row.ID == msg.selectedID {
+						cursor = i
+						found = true
+						break
+					}
+				}
+			}
+
+			if !found {
+				cursor = min(msg.cursor, len(msg.rows)-1)
+			}
+
+			m.table.SetCursor(cursor)
+		}
+
 		return m, nil
+
+	case autoRefreshMsg:
+		cmd := m.autoRefreshResource()
+
+		// tea.Tick fires once, so every tick must schedule the next one.
+		return m, tea.Batch(
+			cmd,
+			autoRefreshCmd(),
+		)
 
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
@@ -204,23 +256,61 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *Model) switchResource(name string) tea.Cmd {
 	r, ok := m.registry.Get(name)
 	if !ok {
-		m.status = fmt.Sprintf("unknown resource: %s", name)
+		m.status = fmt.Sprintf(
+			"unknown resource: %s",
+			name,
+		)
 		return nil
 	}
 
 	m.resource = r
 	m.err = nil
 	m.status = ""
+
 	m.loading = true
+	m.showLoading = true
 	m.loaded = false
 	m.itemCount = 0
 	m.loadID++
 
-	// Immediately remove the previous resource's data.
+	// A resource switch must not display rows belonging to the
+	// previously selected resource.
 	m.table.SetRows(nil)
 	m.table.SetCursor(0)
+	m.resourceRows = nil
 
 	m.resize()
+
+	return m.loadResource()
+}
+
+func (m *Model) refreshResource() tea.Cmd {
+	if m.resource == nil || m.loading {
+		return nil
+	}
+
+	m.err = nil
+	m.status = ""
+
+	// Manual refresh keeps the existing rows visible while the
+	// request runs, but gives the user visual feedback.
+	m.loading = true
+	m.showLoading = true
+	m.loadID++
+
+	return m.loadResource()
+}
+
+func (m *Model) autoRefreshResource() tea.Cmd {
+	if m.resource == nil || m.loading {
+		return nil
+	}
+
+	// Background refresh deliberately leaves the existing table
+	// untouched and does not show the loading badge.
+	m.loading = true
+	m.showLoading = false
+	m.loadID++
 
 	return m.loadResource()
 }
@@ -229,22 +319,42 @@ func (m Model) loadResource() tea.Cmd {
 	loadID := m.loadID
 	r := m.resource
 
+	selectedID := ""
+	cursor := m.table.Cursor()
+
+	if cursor >= 0 && cursor < len(m.resourceRows) {
+		selectedID = m.resourceRows[cursor].ID
+	}
+
 	return func() tea.Msg {
 		if r == nil {
 			return resourcesLoadedMsg{
-				loadID: loadID,
-				err:    fmt.Errorf("no active resource"),
+				loadID:     loadID,
+				selectedID: selectedID,
+				cursor:     cursor,
+				err:        fmt.Errorf("no active resource"),
 			}
 		}
 
 		rows, err := r.List(context.Background())
 
 		return resourcesLoadedMsg{
-			loadID: loadID,
-			rows:   rows,
-			err:    err,
+			loadID:     loadID,
+			rows:       rows,
+			selectedID: selectedID,
+			cursor:     cursor,
+			err:        err,
 		}
 	}
+}
+
+func autoRefreshCmd() tea.Cmd {
+	return tea.Tick(
+		refreshInterval,
+		func(time.Time) tea.Msg {
+			return autoRefreshMsg{}
+		},
+	)
 }
 
 func (m *Model) resize() {
@@ -279,16 +389,22 @@ func (m *Model) resize() {
 	}
 
 	tableWidth := max(m.width-2, 1)
+
 	const tableHorizontalPadding = 2
 
 	contentWidth := max(
-		tableWidth-(len(resourceColumns)*tableHorizontalPadding),
+		tableWidth-
+			(len(resourceColumns)*tableHorizontalPadding),
 		1,
 	)
 
 	extra := max(contentWidth-minWidth, 0)
 
-	columns := make([]table.Column, 0, len(resourceColumns))
+	columns := make(
+		[]table.Column,
+		0,
+		len(resourceColumns),
+	)
 
 	for _, column := range resourceColumns {
 		width := column.MinWidth
@@ -347,7 +463,8 @@ func (m Model) renderTable() string {
 		Render(m.table.View())
 
 	// A successfully loaded resource with zero items is not an
-	// error. Render an explicit empty state instead.
+	// error. Keep the table header and render an explicit empty
+	// state in the row area.
 	if m.loaded && !m.loading && m.itemCount == 0 {
 		lines := strings.Split(body, "\n")
 
@@ -379,9 +496,10 @@ func (m Model) renderTable() string {
 			)
 		}
 
-		bodyLines[i] = borderStyle.Render("│") +
-			line +
-			borderStyle.Render("│")
+		bodyLines[i] =
+			borderStyle.Render("│") +
+				line +
+				borderStyle.Render("│")
 	}
 
 	return top +
@@ -392,7 +510,10 @@ func (m Model) renderTable() string {
 }
 
 func repeat(s string, count int) string {
-	return strings.Repeat(s, max(count, 0))
+	return strings.Repeat(
+		s,
+		max(count, 0),
+	)
 }
 
 func (m Model) View() string {
@@ -412,14 +533,22 @@ func (m Model) View() string {
 
 		loadingTag := ""
 
-		if m.loading {
-			loadingTag = loadingStyle.Render(" Loading... ")
+		if m.showLoading {
+			loadingTag = loadingStyle.Render(
+				" Loading... ",
+			)
 		}
 
 		resourceLine = lipgloss.JoinHorizontal(
 			lipgloss.Top,
 			lipgloss.NewStyle().
-				Width(max(m.width-lipgloss.Width(loadingTag), 1)).
+				Width(
+					max(
+						m.width-
+							lipgloss.Width(loadingTag),
+						1,
+					),
+				).
 				Render(resourceTag),
 			loadingTag,
 		)
@@ -434,7 +563,9 @@ func (m Model) View() string {
 	}
 
 	if m.commandMode {
-		commandLine = commandStyle.Render(m.command.View())
+		commandLine = commandStyle.Render(
+			m.command.View(),
+		)
 	}
 
 	return header +

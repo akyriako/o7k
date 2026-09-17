@@ -72,18 +72,10 @@ func renderHeaderCommand(key, description string) string {
 
 func (m Model) renderCommands() string {
 	commands := []resource.Command{
-		{
-			Key:         "<q>",
-			Description: "Quit",
-		},
-		{
-			Key:         "<:>",
-			Description: "Resource",
-		},
-		{
-			Key:         "<Esc>",
-			Description: "Dismiss",
-		},
+		{Key: "<q>", Description: "Quit"},
+		{Key: "<:>", Description: "Resource"},
+		{Key: "<r>", Description: "Refresh"},
+		{Key: "<Esc>", Description: "Dismiss"},
 	}
 
 	if m.resource != nil {
