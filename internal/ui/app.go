@@ -3,6 +3,7 @@ package ui
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/akyriako/o7k/internal/resource"
 	"github.com/charmbracelet/bubbles/table"
@@ -24,6 +25,8 @@ type Model struct {
 	status   string
 	width    int
 	height   int
+
+	itemCount int
 
 	commandMode bool
 	command     textinput.Model
@@ -152,6 +155,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		m.table.SetRows(rows)
 		m.table.SetCursor(0)
+		m.itemCount = len(rows)
 
 		return m, nil
 
@@ -206,12 +210,16 @@ func (m Model) loadResource() tea.Cmd {
 
 func (m *Model) resize() {
 	const (
-		headerHeight = 2
-		footerHeight = 2
+		headerHeight         = 2
+		footerHeight         = 2
+		tableContainerBorder = 2
 	)
 
 	tableHeight := max(
-		m.height-headerHeight-footerHeight,
+		m.height-
+			headerHeight-
+			footerHeight-
+			tableContainerBorder,
 		1,
 	)
 
@@ -231,7 +239,21 @@ func (m *Model) resize() {
 		totalFlex += column.Flex
 	}
 
-	extra := max(m.width-minWidth, 0)
+	// The outer table container uses one character on each side
+	// for its border.
+	tableWidth := max(m.width-2, 1)
+
+	// bubbles/table adds horizontal padding around each cell.
+	// Reserve that space before distributing the remaining width
+	// between our flexible resource columns.
+	const tableHorizontalPadding = 2
+
+	contentWidth := max(
+		tableWidth-(len(resourceColumns)*tableHorizontalPadding),
+		1,
+	)
+
+	extra := max(contentWidth-minWidth, 0)
 
 	columns := make([]table.Column, 0, len(resourceColumns))
 
@@ -251,20 +273,66 @@ func (m *Model) resize() {
 	m.table.SetColumns(columns)
 }
 
-var (
-	resourceTagStyle = lipgloss.NewStyle().
-				Foreground(lipgloss.Color("255")).
-				Background(lipgloss.Color("#ED1944")).
-				Bold(true)
+func (m Model) renderTable() string {
+	title := ""
 
-	commandStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#87CEFA"))
+	if m.resource != nil {
+		title = fmt.Sprintf(" %s[%d] ", m.resource.Kind(), m.itemCount)
+	}
 
-	statusStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#000000")).
-			Background(lipgloss.Color("#FFA500")).
-			Align(lipgloss.Center)
-)
+	innerWidth := max(m.width-2, 1)
+
+	titleWidth := lipgloss.Width(title)
+	remaining := max(innerWidth-titleWidth, 0)
+
+	left := remaining / 2
+	right := remaining - left
+
+	borderStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("#00BFFF"))
+
+	top := borderStyle.Render(
+		"┌" +
+			repeat("─", left) +
+			title +
+			repeat("─", right) +
+			"┐",
+	)
+
+	bottom := borderStyle.Render(
+		"└" +
+			repeat("─", innerWidth) +
+			"┘",
+	)
+
+	body := lipgloss.NewStyle().
+		Width(innerWidth).
+		Render(m.table.View())
+
+	bodyLines := strings.Split(body, "\n")
+
+	for i, line := range bodyLines {
+		lineWidth := lipgloss.Width(line)
+
+		if lineWidth < innerWidth {
+			line += strings.Repeat(" ", innerWidth-lineWidth)
+		}
+
+		bodyLines[i] = borderStyle.Render("│") +
+			line +
+			borderStyle.Render("│")
+	}
+
+	return top +
+		"\n" +
+		strings.Join(bodyLines, "\n") +
+		"\n" +
+		bottom
+}
+
+func repeat(s string, count int) string {
+	return strings.Repeat(s, max(count, 0))
+}
 
 func (m Model) View() string {
 	if m.err != nil {
@@ -275,6 +343,8 @@ func (m Model) View() string {
 	if m.resource != nil {
 		header += " — " + m.resource.Title()
 	}
+
+	tableView := m.renderTable()
 
 	resourceLine := ""
 	if m.resource != nil {
@@ -297,7 +367,7 @@ func (m Model) View() string {
 
 	return header +
 		"\n\n" +
-		m.table.View() +
+		tableView +
 		"\n" +
 		resourceLine +
 		"\n" +
