@@ -1,6 +1,9 @@
 package ui
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	"github.com/charmbracelet/bubbles/table"
+	"github.com/charmbracelet/lipgloss"
+)
 
 var (
 	resourceTagStyle = lipgloss.NewStyle().
@@ -39,3 +42,14 @@ var (
 			Background(lipgloss.Color("#00BFFF")).
 			Bold(true)
 )
+
+func tableStyles() table.Styles {
+	styles := table.DefaultStyles()
+
+	styles.Selected = styles.Selected.
+		Foreground(lipgloss.Color("255")).
+		Background(lipgloss.Color("#ED1944")).
+		Bold(true)
+
+	return styles
+}

@@ -79,13 +79,7 @@ func New(registry *resource.Registry, openstackContext *openstack.Context) Model
 		table.WithHeight(10),
 	)
 
-	styles := table.DefaultStyles()
-	styles.Selected = styles.Selected.
-		Foreground(lipgloss.Color("255")).
-		Background(lipgloss.Color("#ED1944")).
-		Bold(false)
-
-	t.SetStyles(styles)
+	t.SetStyles(tableStyles())
 
 	command := textinput.New()
 	command.Prompt = ":"
