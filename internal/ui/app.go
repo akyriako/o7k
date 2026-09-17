@@ -281,7 +281,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 
-		m.context = msg.Context
+		*m.context = *msg.Context
 		m.status = fmt.Sprintf("connected to %s", msg.Context.Cloud)
 
 		cmd := m.autoRefreshResource()
