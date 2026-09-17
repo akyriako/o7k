@@ -25,6 +25,11 @@ func NewRegistry() *Registry {
 	}
 }
 
+func (r *Registry) Get(name string) (Resource, bool) {
+	resource, ok := r.resources[normalize(name)]
+	return resource, ok
+}
+
 func (r *Registry) Register(resource Resource) error {
 	if err := r.validateCommands(resource); err != nil {
 		return err
@@ -53,11 +58,6 @@ func (r *Registry) Register(resource Resource) error {
 	}
 
 	return nil
-}
-
-func (r *Registry) Get(name string) (Resource, bool) {
-	resource, ok := r.resources[normalize(name)]
-	return resource, ok
 }
 
 func (r *Registry) validateCommands(resource Resource) error {
