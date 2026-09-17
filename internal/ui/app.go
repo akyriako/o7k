@@ -354,7 +354,7 @@ func autoRefreshCmd() tea.Cmd {
 
 func (m *Model) resize() {
 	const (
-		headerHeight         = 6
+		headerHeight         = 7
 		footerHeight         = 2
 		tableContainerBorder = 2
 	)

@@ -14,41 +14,24 @@ const logo = `  ___   _____  _
  \___/  /_/   |_|\_\`
 
 func (m Model) renderHeader() string {
-	profile := strings.Join([]string{
-		headerLabelStyle.Render("Profile: ") +
-			headerValueStyle.Render(m.context.Profile),
-
-		headerLabelStyle.Render("Region:  ") +
-			headerValueStyle.Render(m.context.Region),
-
-		headerLabelStyle.Render("Project: ") +
-			headerValueStyle.Render(m.context.Project),
-
-		headerLabelStyle.Render("Domain:  ") +
-			headerValueStyle.Render(m.context.Domain),
-	}, "\n")
-
-	commands := m.renderCommands()
-
-	renderedLogo := logoStyle.Render(logo)
-
 	const (
-		profileWidth = 32
+		contextWidth = 60
 		logoWidth    = 23
 	)
 
-	centerWidth := max(
-		m.width-profileWidth-logoWidth,
-		1,
-	)
+	profile := m.renderContext(contextWidth)
+	commands := m.renderCommands()
+	renderedLogo := logoStyle.Render(logo)
+
+	commandWidth := max(m.width-contextWidth-logoWidth, 1)
 
 	left := lipgloss.NewStyle().
-		Width(profileWidth).
+		Width(contextWidth).
 		Render(profile)
 
 	center := lipgloss.NewStyle().
-		Width(centerWidth).
-		Align(lipgloss.Center).
+		Width(commandWidth).
+		Align(lipgloss.Left).
 		Render(commands)
 
 	right := lipgloss.NewStyle().
@@ -56,16 +39,30 @@ func (m Model) renderHeader() string {
 		Align(lipgloss.Right).
 		Render(renderedLogo)
 
-	return lipgloss.JoinHorizontal(
-		lipgloss.Top,
-		left,
-		center,
-		right,
-	)
+	return lipgloss.JoinHorizontal(lipgloss.Top, left, center, right)
 }
 
-func renderHeaderCommand(key, description string) string {
-	return headerCommandKeyStyle.Render(key) + " " + headerCommandTextStyle.Render(description)
+func (m Model) renderContext(width int) string {
+	const labelWidth = 10
+
+	valueWidth := max(width-labelWidth, 1)
+
+	field := func(label, value string) string {
+		value = truncate(value, valueWidth)
+
+		return headerLabelStyle.
+			Width(labelWidth).
+			Render(label) +
+			headerValueStyle.Render(value)
+	}
+
+	return strings.Join([]string{
+		field("Cloud:", m.context.Cloud),
+		field("Identity:", m.context.Identity),
+		field("Region:", m.context.Region),
+		field("Project:", m.context.Project),
+		field("Domain:", m.context.Domain),
+	}, "\n")
 }
 
 func (m Model) renderCommands() string {
@@ -83,14 +80,32 @@ func (m Model) renderCommands() string {
 	lines := make([]string, 0, len(commands))
 
 	for _, command := range commands {
-		lines = append(
-			lines,
-			renderHeaderCommand(
-				command.Key,
-				command.Description,
-			),
-		)
+		key := headerCommandKeyStyle.
+			Width(8).
+			Render(command.Key)
+
+		text := headerCommandTextStyle.Render(command.Description)
+
+		lines = append(lines, key+text)
 	}
 
 	return strings.Join(lines, "\n")
+}
+
+func truncate(value string, width int) string {
+	if lipgloss.Width(value) <= width {
+		return value
+	}
+
+	if width <= 3 {
+		return strings.Repeat(".", width)
+	}
+
+	runes := []rune(value)
+
+	for len(runes) > 0 && lipgloss.Width(string(runes)) > width-3 {
+		runes = runes[:len(runes)-1]
+	}
+
+	return string(runes) + "..."
 }

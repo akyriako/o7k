@@ -1,8 +1,39 @@
 package openstack
 
+import (
+	"context"
+	"fmt"
+
+	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack/config"
+	"github.com/gophercloud/gophercloud/v2/openstack/config/clouds"
+)
+
 type Context struct {
-	Profile string
-	Region  string
-	Project string
-	Domain  string
+	Cloud    string
+	Region   string
+	Project  string
+	Domain   string
+	Identity string
+
+	Provider *gophercloud.ProviderClient
+}
+
+func (c *Context) Connect(ctx context.Context, cloudsPath string) error {
+	authOpts, _, tlsConfig, err := clouds.Parse(
+		clouds.WithLocations(cloudsPath),
+		clouds.WithCloudName(c.Cloud),
+	)
+	if err != nil {
+		return fmt.Errorf("parsing cloud %q: %w", c.Cloud, err)
+	}
+
+	provider, err := config.NewProviderClient(ctx, authOpts, config.WithTLSConfig(tlsConfig))
+	if err != nil {
+		return fmt.Errorf("authenticating cloud %q: %w", c.Cloud, err)
+	}
+
+	c.Provider = provider
+
+	return nil
 }

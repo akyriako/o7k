@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -40,15 +41,39 @@ func main() {
 		os.Exit(1)
 	}
 
+	cloudsPath, err := openstack.DiscoverCloudsFile("")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error discovering clouds.yaml: %v\n", err)
+		os.Exit(1)
+	}
+
+	availableClouds, err := openstack.LoadClouds(cloudsPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error loading clouds.yaml: %v\n", err)
+		os.Exit(1)
+	}
+
+	cloud := availableClouds.Items[0]
+
+	openstackContext := openstack.Context{
+		Cloud:    cloud.Name,
+		Region:   cloud.Region,
+		Project:  cloud.Project,
+		Domain:   cloud.Domain,
+		Identity: cloud.Identity,
+	}
+
+	if err := openstackContext.Connect(context.Background(), cloudsPath); err != nil {
+		fmt.Fprintf(os.Stderr, "error connecting to OpenStack: %v\n", err)
+		os.Exit(1)
+	}
+
+	logger.Info("connected to OpenStack", "cloud", openstackContext.Cloud)
+
 	p := tea.NewProgram(
 		ui.New(
 			registry,
-			openstack.Context{
-				Profile: "default",
-				Region:  "RegionOne",
-				Project: "default",
-				Domain:  "Default",
-			},
+			openstackContext,
 		),
 		tea.WithAltScreen(),
 	)
