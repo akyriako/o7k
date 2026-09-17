@@ -11,6 +11,10 @@ var (
 				Background(lipgloss.Color("#ED1944")).
 				Bold(true)
 
+	navigationTagStyle = lipgloss.NewStyle().
+				Foreground(lipgloss.Color("0")).
+				Background(lipgloss.Color("255"))
+
 	commandStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#87CEFA"))
 

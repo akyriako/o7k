@@ -34,6 +34,11 @@ type navigateMsg struct {
 	id       string
 }
 
+type navigationEntry struct {
+	resource string
+	id       string
+}
+
 type autoRefreshMsg struct{}
 
 type Model struct {
@@ -55,6 +60,7 @@ type Model struct {
 
 	context *openstack.Context
 
+	navigation []navigationEntry
 	navigateID string
 
 	commandMode bool
@@ -286,8 +292,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case resource.NavigateMsg:
+		cursor := m.table.Cursor()
+
+		if cursor >= 0 && cursor < len(m.resourceRows) {
+			m.navigation = append(m.navigation, navigationEntry{
+				resource: m.resource.Kind(),
+				id:       m.resourceRows[cursor].ID,
+			})
+		}
+
 		m.navigateID = msg.ID
-		return m, m.switchResource(msg.Resource)
+
+		return m, m.navigateResource(msg.Resource)
 	}
 
 	var cmd tea.Cmd
@@ -330,6 +346,9 @@ func (m *Model) executeResourceCommand(key string) tea.Cmd {
 }
 
 func (m *Model) switchResource(name string) tea.Cmd {
+	m.navigation = nil
+	m.navigateID = ""
+
 	r, ok := m.registry.Get(name)
 	if !ok {
 		m.status = fmt.Sprintf("unknown resource: %s", name)
@@ -355,6 +374,18 @@ func (m *Model) switchResource(name string) tea.Cmd {
 	m.resize()
 
 	return m.loadResource()
+}
+
+func (m *Model) navigateResource(name string) tea.Cmd {
+	navigation := m.navigation
+	navigateID := m.navigateID
+
+	cmd := m.switchResource(name)
+
+	m.navigation = navigation
+	m.navigateID = navigateID
+
+	return cmd
 }
 
 func (m *Model) refreshResource() tea.Cmd {
@@ -596,7 +627,14 @@ func (m Model) View() string {
 	resourceLine := ""
 
 	if m.resource != nil {
-		resourceTag := resourceTagStyle.Render("<" + m.resource.Kind() + ">")
+		var resourceTags strings.Builder
+
+		for _, entry := range m.navigation {
+			resourceTags.WriteString(navigationTagStyle.Render(" <"+entry.resource+"> ") + " ")
+		}
+		resourceTags.WriteString(resourceTagStyle.Render(" <" + m.resource.Kind() + "> "))
+
+		//resourceTag := resourceTagStyle.Render("< " + m.resource.Kind() + " >")
 
 		loadingTag := ""
 
@@ -608,7 +646,7 @@ func (m Model) View() string {
 			lipgloss.Top,
 			lipgloss.NewStyle().
 				Width(max(m.width-lipgloss.Width(loadingTag), 1)).
-				Render(resourceTag),
+				Render(resourceTags.String()),
 			loadingTag,
 		)
 	}
