@@ -16,14 +16,21 @@ var (
 			Background(lipgloss.Color("#FFA500")).
 			Align(lipgloss.Center)
 
-	tableContainerStyle = lipgloss.NewStyle().
-				Border(lipgloss.NormalBorder()).
-				BorderForeground(lipgloss.Color("#00BFFF"))
-
 	headerLabelStyle = lipgloss.NewStyle().
 				Foreground(lipgloss.Color("#FFA500")).
 				Bold(true)
 
 	headerValueStyle = lipgloss.NewStyle().
 				Foreground(lipgloss.Color("#FFFFFF"))
+
+	headerCommandKeyStyle = lipgloss.NewStyle().
+				Foreground(lipgloss.Color("#00BFFF")).
+				Bold(true)
+
+	headerCommandTextStyle = lipgloss.NewStyle().
+				Foreground(lipgloss.Color("#FFFFFF"))
+
+	logoStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#FFA500")).
+			Bold(true)
 )

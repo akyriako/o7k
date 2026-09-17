@@ -220,7 +220,7 @@ func (m Model) loadResource() tea.Cmd {
 
 func (m *Model) resize() {
 	const (
-		headerHeight         = 5
+		headerHeight         = 6
 		footerHeight         = 2
 		tableContainerBorder = 2
 	)
