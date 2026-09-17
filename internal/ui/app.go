@@ -8,6 +8,7 @@ import (
 
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
+	"github.com/akyriako/o7k/internal/resources/contexts"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -22,6 +23,10 @@ type resourcesLoadedMsg struct {
 	selectedID string
 	cursor     int
 	err        error
+}
+
+type clearStatusMsg struct {
+	status string
 }
 
 type autoRefreshMsg struct{}
@@ -43,19 +48,19 @@ type Model struct {
 	width  int
 	height int
 
-	context openstack.Context
+	context *openstack.Context
 
 	commandMode bool
 	command     textinput.Model
 }
 
-func New(registry *resource.Registry, openstackContext openstack.Context) Model {
-	r, ok := registry.Get("servers")
+func New(registry *resource.Registry, openstackContext *openstack.Context) Model {
+	r, ok := registry.Get("contexts")
 	if !ok {
 		return Model{
 			registry: registry,
 			context:  openstackContext,
-			err:      fmt.Errorf("servers resource not registered"),
+			err:      fmt.Errorf("contexts resource not registered"),
 		}
 	}
 
@@ -157,6 +162,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "r":
 			return m, m.refreshResource()
+
+		case "enter":
+			return m, m.executeDefaultCommand()
+		}
+
+		if cmd := m.executeResourceCommand(msg.String()); cmd != nil {
+			return m, cmd
 		}
 
 	case resourcesLoadedMsg:
@@ -187,10 +199,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			values := make(table.Row, 0, len(columns))
 
 			for _, column := range columns {
-				values = append(
-					values,
-					row.Fields[column.Key],
-				)
+				values = append(values, row.Fields[column.Key])
 			}
 
 			rows = append(rows, values)
@@ -240,6 +249,24 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.resize()
 
 		return m, nil
+
+	case contexts.ActivatedMsg:
+		if msg.Err != nil {
+			m.status = fmt.Sprintf("context activation failed: %v", msg.Err)
+			return m, nil
+		}
+
+		m.context = msg.Context
+		m.status = fmt.Sprintf("connected to %s", msg.Context.Cloud)
+
+		return m, clearStatusCmd(m.status)
+
+	case clearStatusMsg:
+		if m.status == msg.status {
+			m.status = ""
+		}
+
+		return m, nil
 	}
 
 	var cmd tea.Cmd
@@ -248,13 +275,43 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
+func (m *Model) executeDefaultCommand() tea.Cmd {
+	if m.resource == nil {
+		return nil
+	}
+
+	for _, command := range m.resource.Commands() {
+		if command.Default {
+			return m.executeResourceCommand(command.Key)
+		}
+	}
+
+	return nil
+}
+
+func (m *Model) executeResourceCommand(key string) tea.Cmd {
+	if m.resource == nil {
+		return nil
+	}
+
+	cursor := m.table.Cursor()
+	if cursor < 0 || cursor >= len(m.resourceRows) {
+		return nil
+	}
+
+	for _, command := range m.resource.Commands() {
+		if command.Key == key {
+			return m.resource.Execute(command, m.resourceRows[cursor])
+		}
+	}
+
+	return nil
+}
+
 func (m *Model) switchResource(name string) tea.Cmd {
 	r, ok := m.registry.Get(name)
 	if !ok {
-		m.status = fmt.Sprintf(
-			"unknown resource: %s",
-			name,
-		)
+		m.status = fmt.Sprintf("unknown resource: %s", name)
 		return nil
 	}
 
@@ -388,18 +445,13 @@ func (m *Model) resize() {
 	const tableHorizontalPadding = 2
 
 	contentWidth := max(
-		tableWidth-
-			(len(resourceColumns)*tableHorizontalPadding),
+		tableWidth-(len(resourceColumns)*tableHorizontalPadding),
 		1,
 	)
 
 	extra := max(contentWidth-minWidth, 0)
 
-	columns := make(
-		[]table.Column,
-		0,
-		len(resourceColumns),
-	)
+	columns := make([]table.Column, 0, len(resourceColumns))
 
 	for _, column := range resourceColumns {
 		width := column.MinWidth
@@ -422,9 +474,10 @@ func (m Model) renderTable() string {
 
 	if m.resource != nil {
 		title = fmt.Sprintf(
-			" %s[%d] ",
+			" %s[%d] | last update: %s ",
 			m.resource.Kind(),
 			m.itemCount,
+			time.Now().Format("02.01.2006 15:04:05"),
 		)
 	}
 
@@ -485,10 +538,7 @@ func (m Model) renderTable() string {
 		lineWidth := lipgloss.Width(line)
 
 		if lineWidth < innerWidth {
-			line += strings.Repeat(
-				" ",
-				innerWidth-lineWidth,
-			)
+			line += strings.Repeat(" ", innerWidth-lineWidth)
 		}
 
 		bodyLines[i] =
@@ -505,10 +555,13 @@ func (m Model) renderTable() string {
 }
 
 func repeat(s string, count int) string {
-	return strings.Repeat(
-		s,
-		max(count, 0),
-	)
+	return strings.Repeat(s, max(count, 0))
+}
+
+func clearStatusCmd(status string) tea.Cmd {
+	return tea.Tick(3*time.Second, func(time.Time) tea.Msg {
+		return clearStatusMsg{status: status}
+	})
 }
 
 func (m Model) View() string {
@@ -522,28 +575,18 @@ func (m Model) View() string {
 	resourceLine := ""
 
 	if m.resource != nil {
-		resourceTag := resourceTagStyle.Render(
-			"<" + m.resource.Kind() + ">",
-		)
+		resourceTag := resourceTagStyle.Render("<" + m.resource.Kind() + ">")
 
 		loadingTag := ""
 
 		if m.showLoading {
-			loadingTag = loadingStyle.Render(
-				" Loading... ",
-			)
+			loadingTag = loadingStyle.Render(" Loading... ")
 		}
 
 		resourceLine = lipgloss.JoinHorizontal(
 			lipgloss.Top,
 			lipgloss.NewStyle().
-				Width(
-					max(
-						m.width-
-							lipgloss.Width(loadingTag),
-						1,
-					),
-				).
+				Width(max(m.width-lipgloss.Width(loadingTag), 1)).
 				Render(resourceTag),
 			loadingTag,
 		)
@@ -558,9 +601,7 @@ func (m Model) View() string {
 	}
 
 	if m.commandMode {
-		commandLine = commandStyle.Render(
-			m.command.View(),
-		)
+		commandLine = commandStyle.Render(m.command.View())
 	}
 
 	return header +

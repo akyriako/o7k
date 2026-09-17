@@ -107,3 +107,13 @@ func cloudNames(root yaml.Node) []string {
 
 	return nil
 }
+
+func (c *Clouds) Get(name string) (Cloud, bool) {
+	for _, cloud := range c.Items {
+		if cloud.Name == name {
+			return cloud, true
+		}
+	}
+
+	return Cloud{}, false
+}

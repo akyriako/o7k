@@ -5,7 +5,13 @@ import (
 
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
+	tea "github.com/charmbracelet/bubbletea"
 )
+
+type ActivatedMsg struct {
+	Context *openstack.Context
+	Err     error
+}
 
 type Resource struct {
 	clouds *openstack.Clouds
@@ -38,10 +44,23 @@ func (r *Resource) Columns() []resource.Column {
 }
 
 func (r *Resource) Commands() []resource.Command {
-	return nil
+	return []resource.Command{
+		{
+			Key:         "a",
+			Description: "Activate",
+			Default:     true,
+		},
+	}
 }
 
 func (r *Resource) List(_ context.Context) ([]resource.Row, error) {
+	clouds, err := openstack.LoadClouds(r.clouds.Path)
+	if err != nil {
+		return nil, err
+	}
+
+	r.clouds = clouds
+
 	rows := make([]resource.Row, 0, len(r.clouds.Items))
 
 	for _, cloud := range r.clouds.Items {
@@ -58,4 +77,68 @@ func (r *Resource) List(_ context.Context) ([]resource.Row, error) {
 	}
 
 	return rows, nil
+}
+
+//func (r *Resource) List(_ context.Context) ([]resource.Row, error) {
+//	rows := make([]resource.Row, 0, len(r.clouds.Items))
+//
+//	for _, cloud := range r.clouds.Items {
+//		rows = append(rows, resource.Row{
+//			ID: cloud.Name,
+//			Fields: map[string]string{
+//				"name":     cloud.Name,
+//				"identity": cloud.Identity,
+//				"region":   cloud.Region,
+//				"domain":   cloud.Domain,
+//				"project":  cloud.Project,
+//			},
+//		})
+//	}
+//
+//	return rows, nil
+//}
+
+func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
+	switch command.Key {
+	case "a":
+		return r.activate(row)
+	}
+
+	return nil
+}
+
+func (r *Resource) activate(row resource.Row) tea.Cmd {
+	cloud, ok := r.clouds.Get(row.ID)
+	if !ok {
+		return func() tea.Msg {
+			return ActivatedMsg{
+				Err: &CloudNotFoundError{Name: row.ID},
+			}
+		}
+	}
+
+	return func() tea.Msg {
+		next := openstack.Context{
+			Cloud:    cloud.Name,
+			Identity: cloud.Identity,
+			Region:   cloud.Region,
+			Domain:   cloud.Domain,
+			Project:  cloud.Project,
+		}
+
+		err := next.Connect(context.Background(), r.clouds.Path)
+
+		return ActivatedMsg{
+			Context: &next,
+			Err:     err,
+		}
+	}
+}
+
+type CloudNotFoundError struct {
+	Name string
+}
+
+func (e *CloudNotFoundError) Error() string {
+	return "cloud not found: " + e.Name
 }

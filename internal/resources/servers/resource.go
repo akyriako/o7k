@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/akyriako/o7k/internal/resource"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 type Resource struct{}
@@ -72,4 +73,8 @@ func (r *Resource) List(_ context.Context) ([]resource.Row, error) {
 			},
 		},
 	}, nil
+}
+
+func (r *Resource) Execute(_ resource.Command, _ resource.Row) tea.Cmd {
+	return nil
 }

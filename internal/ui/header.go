@@ -25,19 +25,9 @@ func (m Model) renderHeader() string {
 
 	commandWidth := max(m.width-contextWidth-logoWidth, 1)
 
-	left := lipgloss.NewStyle().
-		Width(contextWidth).
-		Render(profile)
-
-	center := lipgloss.NewStyle().
-		Width(commandWidth).
-		Align(lipgloss.Left).
-		Render(commands)
-
-	right := lipgloss.NewStyle().
-		Width(logoWidth).
-		Align(lipgloss.Right).
-		Render(renderedLogo)
+	left := lipgloss.NewStyle().Width(contextWidth).Render(profile)
+	center := lipgloss.NewStyle().Width(commandWidth).Align(lipgloss.Left).Render(commands)
+	right := lipgloss.NewStyle().Width(logoWidth).Align(lipgloss.Right).Render(renderedLogo)
 
 	return lipgloss.JoinHorizontal(lipgloss.Top, left, center, right)
 }
@@ -50,9 +40,7 @@ func (m Model) renderContext(width int) string {
 	field := func(label, value string) string {
 		value = truncate(value, valueWidth)
 
-		return headerLabelStyle.
-			Width(labelWidth).
-			Render(label) +
+		return headerLabelStyle.Width(labelWidth).Render(label) +
 			headerValueStyle.Render(value)
 	}
 
@@ -67,10 +55,10 @@ func (m Model) renderContext(width int) string {
 
 func (m Model) renderCommands() string {
 	commands := []resource.Command{
-		{Key: "<q>", Description: "Quit"},
-		{Key: "<:>", Description: "Resource"},
-		{Key: "<r>", Description: "Refresh"},
-		{Key: "<Esc>", Description: "Dismiss"},
+		{Key: "q", Description: "Quit"},
+		{Key: ":", Description: "Resource"},
+		{Key: "r", Description: "Refresh"},
+		{Key: "Esc", Description: "Dismiss"},
 	}
 
 	if m.resource != nil {
@@ -80,12 +68,8 @@ func (m Model) renderCommands() string {
 	lines := make([]string, 0, len(commands))
 
 	for _, command := range commands {
-		key := headerCommandKeyStyle.
-			Width(8).
-			Render(command.Key)
-
+		key := headerCommandKeyStyle.Width(8).Render("<" + command.Key + ">")
 		text := headerCommandTextStyle.Render(command.Description)
-
 		lines = append(lines, key+text)
 	}
 

@@ -79,7 +79,7 @@ func main() {
 	p := tea.NewProgram(
 		ui.New(
 			registry,
-			openstackContext,
+			&openstackContext,
 		),
 		tea.WithAltScreen(),
 	)

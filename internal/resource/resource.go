@@ -1,6 +1,10 @@
 package resource
 
-import "context"
+import (
+	"context"
+
+	tea "github.com/charmbracelet/bubbletea"
+)
 
 type Column struct {
 	Key      string
@@ -14,16 +18,18 @@ type Row struct {
 	Fields map[string]string
 }
 
-type Resource interface {
-	Kind() string
-	Aliases() []string
-	Title() string
-	Columns() []Column
-	Commands() []Command
-	List(ctx context.Context) ([]Row, error)
-}
-
 type Command struct {
 	Key         string
 	Description string
+	Default     bool
+}
+
+type Resource interface {
+	Kind() string
+	Title() string
+	Aliases() []string
+	Columns() []Column
+	Commands() []Command
+	List(ctx context.Context) ([]Row, error)
+	Execute(command Command, row Row) tea.Cmd
 }
