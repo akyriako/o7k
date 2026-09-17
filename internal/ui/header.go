@@ -3,6 +3,7 @@ package ui
 import (
 	"strings"
 
+	"github.com/akyriako/o7k/internal/resource"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -27,11 +28,7 @@ func (m Model) renderHeader() string {
 			headerValueStyle.Render(m.domain),
 	}, "\n")
 
-	commands := strings.Join([]string{
-		renderHeaderCommand("<q>", "Quit"),
-		renderHeaderCommand("<:>", "Resource"),
-		renderHeaderCommand("<Esc>", "Dismiss"),
-	}, "\n")
+	commands := m.renderCommands()
 
 	renderedLogo := logoStyle.Render(logo)
 
@@ -71,4 +68,39 @@ func renderHeaderCommand(key, description string) string {
 	return headerCommandKeyStyle.Render(key) +
 		" " +
 		headerCommandTextStyle.Render(description)
+}
+
+func (m Model) renderCommands() string {
+	commands := []resource.Command{
+		{
+			Key:         "<q>",
+			Description: "Quit",
+		},
+		{
+			Key:         "<:>",
+			Description: "Resource",
+		},
+		{
+			Key:         "<Esc>",
+			Description: "Dismiss",
+		},
+	}
+
+	if m.resource != nil {
+		commands = append(commands, m.resource.Commands()...)
+	}
+
+	lines := make([]string, 0, len(commands))
+
+	for _, command := range commands {
+		lines = append(
+			lines,
+			renderHeaderCommand(
+				command.Key,
+				command.Description,
+			),
+		)
+	}
+
+	return strings.Join(lines, "\n")
 }

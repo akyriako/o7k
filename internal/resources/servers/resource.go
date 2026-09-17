@@ -38,6 +38,10 @@ func (r *Resource) Columns() []resource.Column {
 	}
 }
 
+func (r *Resource) Commands() []resource.Command {
+	return nil
+}
+
 func (r *Resource) List(_ context.Context) ([]resource.Row, error) {
 	return []resource.Row{
 		{

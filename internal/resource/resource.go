@@ -19,6 +19,11 @@ type Resource interface {
 	Aliases() []string
 	Title() string
 	Columns() []Column
-
+	Commands() []Command
 	List(ctx context.Context) ([]Row, error)
+}
+
+type Command struct {
+	Key         string
+	Description string
 }

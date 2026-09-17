@@ -249,13 +249,7 @@ func (m *Model) resize() {
 		totalFlex += column.Flex
 	}
 
-	// The outer table container uses one character on each side
-	// for its border.
 	tableWidth := max(m.width-2, 1)
-
-	// bubbles/table adds horizontal padding around each cell.
-	// Reserve that space before distributing the remaining width
-	// between our flexible resource columns.
 	const tableHorizontalPadding = 2
 
 	contentWidth := max(
@@ -359,7 +353,7 @@ func (m Model) View() string {
 		)
 	}
 
-	commandLine := commandStyle.Render("<q> quit")
+	commandLine := ""
 
 	if m.status != "" {
 		commandLine = statusStyle.
