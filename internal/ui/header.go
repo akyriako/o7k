@@ -58,7 +58,7 @@ func (m Model) renderCommands() string {
 		{Key: "q", Description: "Quit"},
 		{Key: ":", Description: "Resource"},
 		{Key: "r", Description: "Refresh"},
-		{Key: "Esc", Description: "Dismiss"},
+		{Key: "esc", Description: "Dismiss"},
 	}
 
 	if m.resource != nil {
@@ -68,7 +68,7 @@ func (m Model) renderCommands() string {
 	lines := make([]string, 0, len(commands))
 
 	for _, command := range commands {
-		key := headerCommandKeyStyle.Width(8).Render("<" + command.Key + ">")
+		key := headerCommandKeyStyle.Width(12).Render("<" + command.Key + ">")
 		text := headerCommandTextStyle.Render(command.Description)
 		lines = append(lines, key+text)
 	}

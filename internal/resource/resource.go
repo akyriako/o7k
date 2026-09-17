@@ -24,6 +24,11 @@ type Command struct {
 	Default     bool
 }
 
+type NavigateMsg struct {
+	Resource string
+	ID       string
+}
+
 type Resource interface {
 	Kind() string
 	Title() string

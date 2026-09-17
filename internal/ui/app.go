@@ -29,6 +29,11 @@ type clearStatusMsg struct {
 	status string
 }
 
+type navigateMsg struct {
+	resource string
+	id       string
+}
+
 type autoRefreshMsg struct{}
 
 type Model struct {
@@ -49,6 +54,8 @@ type Model struct {
 	height int
 
 	context *openstack.Context
+
+	navigateID string
 
 	commandMode bool
 	command     textinput.Model
@@ -161,7 +168,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, m.executeDefaultCommand()
 		}
 
-		if cmd := m.executeResourceCommand(msg.String()); cmd != nil {
+		if cmd := m.executeResourceCommand(commandKey(msg)); cmd != nil {
 			return m, cmd
 		}
 
@@ -208,6 +215,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.resourceRows = msg.rows
 		m.table.SetRows(rows)
 		m.itemCount = len(rows)
+
+		if m.navigateID != "" {
+			msg.selectedID = m.navigateID
+			m.navigateID = ""
+		}
 
 		cursor := 0
 
@@ -272,6 +284,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		return m, nil
+
+	case resource.NavigateMsg:
+		m.navigateID = msg.ID
+		return m, m.switchResource(msg.Resource)
 	}
 
 	var cmd tea.Cmd
@@ -616,4 +632,14 @@ func (m Model) View() string {
 		resourceLine +
 		"\n" +
 		commandLine
+}
+
+func commandKey(msg tea.KeyMsg) string {
+	key := msg.String()
+
+	if len(key) == 1 && key[0] >= 'A' && key[0] <= 'Z' {
+		return "shift-" + strings.ToLower(key)
+	}
+
+	return key
 }
