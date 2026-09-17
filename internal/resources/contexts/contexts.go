@@ -14,11 +14,11 @@ type ActivatedMsg struct {
 }
 
 type Resource struct {
-	clouds *openstack.Clouds
+	cloudsPath string
 }
 
 func New(clouds *openstack.Clouds) *Resource {
-	return &Resource{clouds: clouds}
+	return &Resource{cloudsPath: clouds.Path}
 }
 
 func (r *Resource) Kind() string {
@@ -54,16 +54,14 @@ func (r *Resource) Commands() []resource.Command {
 }
 
 func (r *Resource) List(_ context.Context) ([]resource.Row, error) {
-	clouds, err := openstack.LoadClouds(r.clouds.Path)
+	clouds, err := openstack.LoadClouds(r.cloudsPath)
 	if err != nil {
 		return nil, err
 	}
 
-	r.clouds = clouds
+	rows := make([]resource.Row, 0, len(clouds.Items))
 
-	rows := make([]resource.Row, 0, len(r.clouds.Items))
-
-	for _, cloud := range r.clouds.Items {
+	for _, cloud := range clouds.Items {
 		rows = append(rows, resource.Row{
 			ID: cloud.Name,
 			Fields: map[string]string{
@@ -79,25 +77,6 @@ func (r *Resource) List(_ context.Context) ([]resource.Row, error) {
 	return rows, nil
 }
 
-//func (r *Resource) List(_ context.Context) ([]resource.Row, error) {
-//	rows := make([]resource.Row, 0, len(r.clouds.Items))
-//
-//	for _, cloud := range r.clouds.Items {
-//		rows = append(rows, resource.Row{
-//			ID: cloud.Name,
-//			Fields: map[string]string{
-//				"name":     cloud.Name,
-//				"identity": cloud.Identity,
-//				"region":   cloud.Region,
-//				"domain":   cloud.Domain,
-//				"project":  cloud.Project,
-//			},
-//		})
-//	}
-//
-//	return rows, nil
-//}
-
 func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	switch command.Key {
 	case "a":
@@ -108,16 +87,20 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 }
 
 func (r *Resource) activate(row resource.Row) tea.Cmd {
-	cloud, ok := r.clouds.Get(row.ID)
-	if !ok {
-		return func() tea.Msg {
-			return ActivatedMsg{
-				Err: &CloudNotFoundError{Name: row.ID},
-			}
-		}
-	}
+	cloudsPath := r.cloudsPath
+	cloudName := row.ID
 
 	return func() tea.Msg {
+		clouds, err := openstack.LoadClouds(cloudsPath)
+		if err != nil {
+			return ActivatedMsg{Err: err}
+		}
+
+		cloud, ok := clouds.Get(cloudName)
+		if !ok {
+			return ActivatedMsg{Err: &CloudNotFoundError{Name: cloudName}}
+		}
+
 		next := openstack.Context{
 			Cloud:    cloud.Name,
 			Identity: cloud.Identity,
@@ -126,7 +109,7 @@ func (r *Resource) activate(row resource.Row) tea.Cmd {
 			Project:  cloud.Project,
 		}
 
-		err := next.Connect(context.Background(), r.clouds.Path)
+		err = next.Connect(context.Background(), cloudsPath)
 
 		return ActivatedMsg{
 			Context: &next,
