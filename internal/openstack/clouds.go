@@ -64,9 +64,9 @@ func LoadClouds(path string) (*Clouds, error) {
 		config := file.Clouds[name]
 
 		region := config.Region
-		if region == "" {
-			region = "N/A"
-		}
+		//if region == "" {
+		//	region = "*"
+		//}
 
 		items = append(items, Cloud{
 			Name:     name,

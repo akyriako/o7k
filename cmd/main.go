@@ -8,6 +8,7 @@ import (
 	"github.com/akyriako/o7k/internal/logging"
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
+	"github.com/akyriako/o7k/internal/resources/contexts"
 	"github.com/akyriako/o7k/internal/resources/networks"
 	"github.com/akyriako/o7k/internal/resources/servers"
 	tea "github.com/charmbracelet/bubbletea"
@@ -50,6 +51,11 @@ func main() {
 	availableClouds, err := openstack.LoadClouds(cloudsPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error loading clouds.yaml: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := registry.Register(contexts.New(availableClouds)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering contexts resource: %v\n", err)
 		os.Exit(1)
 	}
 

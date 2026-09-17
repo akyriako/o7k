@@ -60,8 +60,8 @@ func (m Model) renderContext(width int) string {
 		field("Cloud:", m.context.Cloud),
 		field("Identity:", m.context.Identity),
 		field("Region:", m.context.Region),
-		field("Project:", m.context.Project),
 		field("Domain:", m.context.Domain),
+		field("Project:", m.context.Project),
 	}, "\n")
 }
 
