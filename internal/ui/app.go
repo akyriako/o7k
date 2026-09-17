@@ -27,6 +27,7 @@ type Model struct {
 	itemCount int
 	status    string
 	loading   bool
+	loaded    bool
 	loadID    uint64
 
 	width  int
@@ -84,6 +85,7 @@ func New(registry *resource.Registry) Model {
 		command:  command,
 
 		loading: true,
+		loaded:  false,
 		loadID:  1,
 
 		profile: "default",
@@ -158,6 +160,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 
+		m.loaded = true
+
 		if m.resource == nil {
 			m.err = fmt.Errorf("no active resource")
 			return m, nil
@@ -208,6 +212,7 @@ func (m *Model) switchResource(name string) tea.Cmd {
 	m.err = nil
 	m.status = ""
 	m.loading = true
+	m.loaded = false
 	m.itemCount = 0
 	m.loadID++
 
@@ -305,7 +310,11 @@ func (m Model) renderTable() string {
 	title := ""
 
 	if m.resource != nil {
-		title = fmt.Sprintf(" %s[%d] ", m.resource.Kind(), m.itemCount)
+		title = fmt.Sprintf(
+			" %s[%d] ",
+			m.resource.Kind(),
+			m.itemCount,
+		)
 	}
 
 	innerWidth := max(m.width-2, 1)
@@ -337,13 +346,37 @@ func (m Model) renderTable() string {
 		Width(innerWidth).
 		Render(m.table.View())
 
+	// A successfully loaded resource with zero items is not an
+	// error. Render an explicit empty state instead.
+	if m.loaded && !m.loading && m.itemCount == 0 {
+		lines := strings.Split(body, "\n")
+
+		if len(lines) > 1 {
+			header := lines[0]
+			contentHeight := len(lines) - 1
+
+			emptyContent := lipgloss.Place(
+				innerWidth,
+				contentHeight,
+				lipgloss.Center,
+				lipgloss.Center,
+				"No resources found",
+			)
+
+			body = header + "\n" + emptyContent
+		}
+	}
+
 	bodyLines := strings.Split(body, "\n")
 
 	for i, line := range bodyLines {
 		lineWidth := lipgloss.Width(line)
 
 		if lineWidth < innerWidth {
-			line += strings.Repeat(" ", innerWidth-lineWidth)
+			line += strings.Repeat(
+				" ",
+				innerWidth-lineWidth,
+			)
 		}
 
 		bodyLines[i] = borderStyle.Render("│") +

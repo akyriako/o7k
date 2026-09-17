@@ -66,33 +66,35 @@ func (r *Resource) Commands() []resource.Command {
 func (r *Resource) List(_ context.Context) ([]resource.Row, error) {
 	time.Sleep(2 * time.Second)
 
-	return []resource.Row{
-		{
-			ID: "network-1",
-			Fields: map[string]string{
-				"name":     "public",
-				"status":   "ACTIVE",
-				"shared":   "true",
-				"external": "true",
-			},
-		},
-		{
-			ID: "network-2",
-			Fields: map[string]string{
-				"name":     "private",
-				"status":   "ACTIVE",
-				"shared":   "false",
-				"external": "false",
-			},
-		},
-		{
-			ID: "network-3",
-			Fields: map[string]string{
-				"name":     "storage",
-				"status":   "ACTIVE",
-				"shared":   "true",
-				"external": "false",
-			},
-		},
-	}, nil
+	return []resource.Row{}, nil
+
+	//return []resource.Row{
+	//	{
+	//		ID: "network-1",
+	//		Fields: map[string]string{
+	//			"name":     "public",
+	//			"status":   "ACTIVE",
+	//			"shared":   "true",
+	//			"external": "true",
+	//		},
+	//	},
+	//	{
+	//		ID: "network-2",
+	//		Fields: map[string]string{
+	//			"name":     "private",
+	//			"status":   "ACTIVE",
+	//			"shared":   "false",
+	//			"external": "false",
+	//		},
+	//	},
+	//	{
+	//		ID: "network-3",
+	//		Fields: map[string]string{
+	//			"name":     "storage",
+	//			"status":   "ACTIVE",
+	//			"shared":   "true",
+	//			"external": "false",
+	//		},
+	//	},
+	//}, nil
 }
