@@ -68,15 +68,30 @@ func (m Model) renderHeaderCommands() string {
 		commands = append(commands, m.resource.Commands()...)
 	}
 
-	lines := make([]string, 0, len(commands))
+	const commandsPerColumn = 5
+	const commandColumnWidth = 28
 
-	for _, command := range commands {
-		key := headerCommandKeyStyle.Width(12).Render("<" + command.Key + ">")
-		text := headerCommandTextStyle.Render(command.Description)
-		lines = append(lines, key+text)
+	columns := make([]string, 0, (len(commands)+commandsPerColumn-1)/commandsPerColumn)
+
+	for start := 0; start < len(commands); start += commandsPerColumn {
+		end := min(start+commandsPerColumn, len(commands))
+		lines := make([]string, 0, end-start)
+
+		for _, command := range commands[start:end] {
+			key := headerCommandKeyStyle.Width(10).Render("<" + command.Key + ">")
+			text := headerCommandTextStyle.Render(command.Description)
+			lines = append(lines, key+text)
+		}
+
+		columns = append(
+			columns,
+			lipgloss.NewStyle().
+				Width(commandColumnWidth).
+				Render(strings.Join(lines, "\n")),
+		)
 	}
 
-	return strings.Join(lines, "\n")
+	return lipgloss.JoinHorizontal(lipgloss.Top, columns...)
 }
 
 func (m Model) renderTable() string {
