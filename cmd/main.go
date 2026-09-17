@@ -11,6 +11,7 @@ import (
 	"github.com/akyriako/o7k/internal/resources/contexts"
 	"github.com/akyriako/o7k/internal/resources/networks"
 	"github.com/akyriako/o7k/internal/resources/servers"
+	"github.com/akyriako/o7k/internal/resources/services"
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/akyriako/o7k/internal/ui"
@@ -71,6 +72,11 @@ func main() {
 
 	if err := openstackContext.Connect(context.Background(), cloudsPath); err != nil {
 		fmt.Fprintf(os.Stderr, "error connecting to OpenStack: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := registry.Register(services.New(&openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering services resource: %v\n", err)
 		os.Exit(1)
 	}
 

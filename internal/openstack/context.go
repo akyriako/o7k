@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/openstack"
 	"github.com/gophercloud/gophercloud/v2/openstack/config"
 	"github.com/gophercloud/gophercloud/v2/openstack/config/clouds"
 )
@@ -36,4 +37,17 @@ func (c *Context) Connect(ctx context.Context, cloudsPath string) error {
 	c.Provider = provider
 
 	return nil
+}
+
+func (c *Context) IdentityV3() (*gophercloud.ServiceClient, error) {
+	if c.Provider == nil {
+		return nil, fmt.Errorf("context %q is not connected", c.Cloud)
+	}
+
+	client, err := openstack.NewIdentityV3(c.Provider, gophercloud.EndpointOpts{})
+	if err != nil {
+		return nil, fmt.Errorf("creating identity client: %w", err)
+	}
+
+	return client, nil
 }
