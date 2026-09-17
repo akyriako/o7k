@@ -16,16 +16,16 @@ const logo = `  ___   _____  _
 func (m Model) renderHeader() string {
 	profile := strings.Join([]string{
 		headerLabelStyle.Render("Profile: ") +
-			headerValueStyle.Render(m.profile),
+			headerValueStyle.Render(m.context.Profile),
 
 		headerLabelStyle.Render("Region:  ") +
-			headerValueStyle.Render(m.region),
+			headerValueStyle.Render(m.context.Region),
 
 		headerLabelStyle.Render("Project: ") +
-			headerValueStyle.Render(m.project),
+			headerValueStyle.Render(m.context.Project),
 
 		headerLabelStyle.Render("Domain:  ") +
-			headerValueStyle.Render(m.domain),
+			headerValueStyle.Render(m.context.Domain),
 	}, "\n")
 
 	commands := m.renderCommands()
@@ -65,9 +65,7 @@ func (m Model) renderHeader() string {
 }
 
 func renderHeaderCommand(key, description string) string {
-	return headerCommandKeyStyle.Render(key) +
-		" " +
-		headerCommandTextStyle.Render(description)
+	return headerCommandKeyStyle.Render(key) + " " + headerCommandTextStyle.Render(description)
 }
 
 func (m Model) renderCommands() string {

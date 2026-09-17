@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/akyriako/o7k/internal/logging"
+	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
 	"github.com/akyriako/o7k/internal/resources/networks"
 	"github.com/akyriako/o7k/internal/resources/servers"
@@ -40,7 +41,15 @@ func main() {
 	}
 
 	p := tea.NewProgram(
-		ui.New(registry),
+		ui.New(
+			registry,
+			openstack.Context{
+				Profile: "default",
+				Region:  "RegionOne",
+				Project: "default",
+				Domain:  "Default",
+			},
+		),
 		tea.WithAltScreen(),
 	)
 

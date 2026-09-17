@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -42,20 +43,18 @@ type Model struct {
 	width  int
 	height int
 
-	profile string
-	region  string
-	project string
-	domain  string
+	context openstack.Context
 
 	commandMode bool
 	command     textinput.Model
 }
 
-func New(registry *resource.Registry) Model {
+func New(registry *resource.Registry, openstackContext openstack.Context) Model {
 	r, ok := registry.Get("servers")
 	if !ok {
 		return Model{
 			registry: registry,
+			context:  openstackContext,
 			err:      fmt.Errorf("servers resource not registered"),
 		}
 	}
@@ -92,16 +91,12 @@ func New(registry *resource.Registry) Model {
 		resource: r,
 		table:    t,
 		command:  command,
+		context:  openstackContext,
 
 		loading:     true,
 		showLoading: true,
 		loaded:      false,
 		loadID:      1,
-
-		profile: "default",
-		region:  "RegionOne",
-		project: "default",
-		domain:  "Default",
 	}
 }
 
