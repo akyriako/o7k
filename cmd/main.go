@@ -8,10 +8,13 @@ import (
 	"github.com/akyriako/o7k/internal/logging"
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
-	regions "github.com/akyriako/o7k/internal/resources"
 	"github.com/akyriako/o7k/internal/resources/contexts"
+	"github.com/akyriako/o7k/internal/resources/domains"
 	"github.com/akyriako/o7k/internal/resources/endpoints"
 	"github.com/akyriako/o7k/internal/resources/networks"
+	"github.com/akyriako/o7k/internal/resources/projects"
+	"github.com/akyriako/o7k/internal/resources/regions"
+	"github.com/akyriako/o7k/internal/resources/roles"
 	"github.com/akyriako/o7k/internal/resources/servers"
 	"github.com/akyriako/o7k/internal/resources/services"
 	tea "github.com/charmbracelet/bubbletea"
@@ -34,11 +37,6 @@ func main() {
 	logger.Info("starting o7k")
 
 	registry := resource.NewRegistry()
-
-	if err := registry.Register(servers.New()); err != nil {
-		fmt.Fprintf(os.Stderr, "error registering servers resource: %v\n", err)
-		os.Exit(1)
-	}
 
 	if err := registry.Register(networks.New()); err != nil {
 		fmt.Fprintf(os.Stderr, "error registering networks resource: %v\n", err)
@@ -91,6 +89,26 @@ func main() {
 
 	if err := registry.Register(regions.New(&openstackContext)); err != nil {
 		fmt.Fprintf(os.Stderr, "error registering regions resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := registry.Register(projects.New(&openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering projects resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := registry.Register(domains.New(&openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering domains resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := registry.Register(roles.New(&openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering roles resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := registry.Register(servers.New(&openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering servers resource: %v\n", err)
 		os.Exit(1)
 	}
 

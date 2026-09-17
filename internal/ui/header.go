@@ -58,7 +58,7 @@ func (m Model) renderCommands() string {
 		{Key: "q", Description: "Quit"},
 		{Key: ":", Description: "Resource"},
 		{Key: "r", Description: "Refresh"},
-		{Key: "esc", Description: "Dismiss"},
+		{Key: "esc", Description: "Dismiss/Return"},
 	}
 
 	if m.resource != nil {

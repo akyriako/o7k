@@ -48,12 +48,13 @@ type Model struct {
 	table        table.Model
 	err          error
 
-	itemCount   int
-	status      string
-	loading     bool
-	showLoading bool
-	loaded      bool
-	loadID      uint64
+	itemCount         int
+	status            string
+	loading           bool
+	showLoading       bool
+	loaded            bool
+	loadID            uint64
+	autoRefreshPaused bool
 
 	width  int
 	height int
@@ -192,7 +193,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.showLoading = false
 
 		if msg.err != nil {
-			m.err = msg.err
+			m.status = msg.err.Error()
+			m.autoRefreshPaused = true
 			return m, nil
 		}
 
@@ -367,6 +369,7 @@ func (m *Model) switchResource(name string) tea.Cmd {
 	m.loading = true
 	m.showLoading = true
 	m.loaded = false
+	m.autoRefreshPaused = false
 	m.itemCount = 0
 	m.loadID++
 
@@ -433,7 +436,7 @@ func (m *Model) refreshResource() tea.Cmd {
 }
 
 func (m *Model) autoRefreshResource() tea.Cmd {
-	if m.resource == nil || m.loading {
+	if m.resource == nil || m.loading || m.autoRefreshPaused {
 		return nil
 	}
 
