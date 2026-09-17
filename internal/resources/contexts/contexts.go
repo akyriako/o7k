@@ -8,17 +8,12 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type ActivatedMsg struct {
-	Context *openstack.Context
-	Err     error
-}
-
 type Resource struct {
 	cloudsPath string
 }
 
-func New(clouds *openstack.Clouds) *Resource {
-	return &Resource{cloudsPath: clouds.Path}
+func New(cloudsPath string) *Resource {
+	return &Resource{cloudsPath: cloudsPath}
 }
 
 func (r *Resource) Kind() string {
@@ -85,44 +80,4 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	}
 
 	return nil
-}
-
-func (r *Resource) activate(row resource.Row) tea.Cmd {
-	cloudsPath := r.cloudsPath
-	cloudName := row.ID
-
-	return func() tea.Msg {
-		clouds, err := openstack.LoadClouds(cloudsPath)
-		if err != nil {
-			return ActivatedMsg{Err: err}
-		}
-
-		cloud, ok := clouds.Get(cloudName)
-		if !ok {
-			return ActivatedMsg{Err: &CloudNotFoundError{Name: cloudName}}
-		}
-
-		next := openstack.Context{
-			Cloud:    cloud.Name,
-			Identity: cloud.Identity,
-			Region:   cloud.Region,
-			Domain:   cloud.Domain,
-			Project:  cloud.Project,
-		}
-
-		err = next.Connect(context.Background(), cloudsPath)
-
-		return ActivatedMsg{
-			Context: &next,
-			Err:     err,
-		}
-	}
-}
-
-type CloudNotFoundError struct {
-	Name string
-}
-
-func (e *CloudNotFoundError) Error() string {
-	return "cloud not found: " + e.Name
 }

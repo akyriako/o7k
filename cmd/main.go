@@ -56,7 +56,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := registry.Register(contexts.New(availableClouds)); err != nil {
+	if err := registry.Register(contexts.New(availableClouds.Path)); err != nil {
 		fmt.Fprintf(os.Stderr, "error registering contexts resource: %v\n", err)
 		os.Exit(1)
 	}
