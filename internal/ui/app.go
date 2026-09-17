@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -19,25 +18,6 @@ import (
 )
 
 const refreshInterval = 10 * time.Second
-
-type resourcesLoadedMsg struct {
-	loadID     uint64
-	rows       []resource.Row
-	selectedID string
-	cursor     int
-	err        error
-}
-
-type clearStatusMsg struct {
-	status string
-}
-
-type navigationEntry struct {
-	resource string
-	id       string
-}
-
-type autoRefreshMsg struct{}
 
 type Model struct {
 	registry     *resource.Registry
@@ -122,7 +102,7 @@ func New(registry *resource.Registry, openstackContext *openstack.Context) Model
 func (m Model) Init() tea.Cmd {
 	return tea.Batch(
 		m.loadResource(),
-		autoRefreshCmd(),
+		autoRefresh(),
 	)
 }
 
@@ -158,11 +138,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.WindowSizeMsg:
 			m.width = msg.Width
 			m.height = msg.Height
-			m.resize()
+			m.Resize()
 			return m, nil
 
 		case autoRefreshMsg:
-			return m, autoRefreshCmd()
+			return m, autoRefresh()
 		}
 
 		var cmd tea.Cmd
@@ -300,14 +280,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, tea.Batch(
 			cmd,
-			autoRefreshCmd(),
+			autoRefresh(),
 		)
 
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
 
-		m.resize()
+		m.Resize()
 
 		return m, nil
 
@@ -323,7 +303,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmd := m.autoRefreshResource()
 
 		return m, tea.Batch(
-			clearStatusCmd(m.status),
+			clearStatus(m.status),
 			cmd,
 		)
 
@@ -364,7 +344,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.detailID = msg.Server.ID
 		m.detail.SetContent(colorizeJSON(data))
 		m.detail.GotoTop()
-		m.resize()
+		m.Resize()
 
 		return m, nil
 	}
@@ -373,387 +353,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.table, cmd = m.table.Update(msg)
 
 	return m, cmd
-}
-
-func (m *Model) executeDefaultCommand() tea.Cmd {
-	if m.resource == nil {
-		return nil
-	}
-
-	for _, command := range m.resource.Commands() {
-		if command.Default {
-			return m.executeResourceCommand(command.Key)
-		}
-	}
-
-	return nil
-}
-
-func (m *Model) executeResourceCommand(key string) tea.Cmd {
-	if m.resource == nil {
-		return nil
-	}
-
-	cursor := m.table.Cursor()
-	if cursor < 0 || cursor >= len(m.resourceRows) {
-		return nil
-	}
-
-	for _, command := range m.resource.Commands() {
-		if command.Key == key {
-			return m.resource.Execute(command, m.resourceRows[cursor])
-		}
-	}
-
-	return nil
-}
-
-func (m *Model) switchResource(name string) tea.Cmd {
-	m.navigation = nil
-	m.navigateID = ""
-	m.detailMode = false
-	m.detailID = ""
-	m.autoRefreshPaused = false
-
-	r, ok := m.registry.Get(name)
-	if !ok {
-		m.status = fmt.Sprintf("unknown resource: %s", name)
-		return nil
-	}
-
-	m.resource = r
-	m.err = nil
-	m.status = ""
-
-	m.loading = true
-	m.showLoading = true
-	m.loaded = false
-	m.itemCount = 0
-	m.loadID++
-
-	m.table.SetRows(nil)
-	m.table.SetCursor(0)
-	m.resourceRows = nil
-
-	m.resize()
-
-	return m.loadResource()
-}
-
-func (m *Model) navigateResource(name string) tea.Cmd {
-	navigation := m.navigation
-	navigateID := m.navigateID
-
-	cmd := m.switchResource(name)
-
-	m.navigation = navigation
-	m.navigateID = navigateID
-
-	return cmd
-}
-
-func (m *Model) navigateBack() tea.Cmd {
-	if len(m.navigation) == 0 {
-		return nil
-	}
-
-	last := len(m.navigation) - 1
-	entry := m.navigation[last]
-
-	m.navigation = m.navigation[:last]
-	m.navigateID = entry.id
-
-	navigation := m.navigation
-	navigateID := m.navigateID
-
-	cmd := m.switchResource(entry.resource)
-
-	m.navigation = navigation
-	m.navigateID = navigateID
-
-	return cmd
-}
-
-func (m *Model) refreshResource() tea.Cmd {
-	if m.resource == nil || m.loading {
-		return nil
-	}
-
-	m.err = nil
-	m.status = ""
-
-	m.loading = true
-	m.showLoading = true
-	m.loadID++
-
-	return m.loadResource()
-}
-
-func (m *Model) autoRefreshResource() tea.Cmd {
-	if m.resource == nil ||
-		m.loading ||
-		m.autoRefreshPaused ||
-		m.detailMode {
-		return nil
-	}
-
-	m.loading = true
-	m.showLoading = false
-	m.loadID++
-
-	return m.loadResource()
-}
-
-func (m Model) loadResource() tea.Cmd {
-	loadID := m.loadID
-	r := m.resource
-
-	selectedID := ""
-	cursor := m.table.Cursor()
-
-	if cursor >= 0 && cursor < len(m.resourceRows) {
-		selectedID = m.resourceRows[cursor].ID
-	}
-
-	return func() tea.Msg {
-		if r == nil {
-			return resourcesLoadedMsg{
-				loadID:     loadID,
-				selectedID: selectedID,
-				cursor:     cursor,
-				err:        fmt.Errorf("no active resource"),
-			}
-		}
-
-		rows, err := r.List(context.Background())
-
-		return resourcesLoadedMsg{
-			loadID:     loadID,
-			rows:       rows,
-			selectedID: selectedID,
-			cursor:     cursor,
-			err:        err,
-		}
-	}
-}
-
-func autoRefreshCmd() tea.Cmd {
-	return tea.Tick(
-		refreshInterval,
-		func(time.Time) tea.Msg {
-			return autoRefreshMsg{}
-		},
-	)
-}
-
-func (m *Model) resize() {
-	const (
-		headerHeight         = 7
-		footerHeight         = 2
-		tableContainerBorder = 2
-	)
-
-	contentHeight := max(
-		m.height-
-			headerHeight-
-			footerHeight-
-			tableContainerBorder,
-		1,
-	)
-
-	m.table.SetHeight(contentHeight)
-
-	m.detail.Width = max(m.width-2, 1)
-	m.detail.Height = contentHeight
-
-	if m.resource == nil {
-		return
-	}
-
-	resourceColumns := m.resource.Columns()
-
-	minWidth := 0
-	totalFlex := 0
-
-	for _, column := range resourceColumns {
-		minWidth += column.MinWidth
-		totalFlex += column.Flex
-	}
-
-	tableWidth := max(m.width-2, 1)
-
-	const tableHorizontalPadding = 2
-
-	contentWidth := max(
-		tableWidth-(len(resourceColumns)*tableHorizontalPadding),
-		1,
-	)
-
-	extra := max(contentWidth-minWidth, 0)
-
-	columns := make([]table.Column, 0, len(resourceColumns))
-
-	for _, column := range resourceColumns {
-		width := column.MinWidth
-
-		if totalFlex > 0 {
-			width += extra * column.Flex / totalFlex
-		}
-
-		columns = append(columns, table.Column{
-			Title: column.Title,
-			Width: width,
-		})
-	}
-
-	m.table.SetColumns(columns)
-}
-
-func (m Model) renderTable() string {
-	title := ""
-
-	if m.resource != nil {
-		title = fmt.Sprintf(
-			" %s[%d] | last update: %s ",
-			m.resource.Kind(),
-			m.itemCount,
-			time.Now().Format("02.01.2006 15:04:05"),
-		)
-	}
-
-	innerWidth := max(m.width-2, 1)
-
-	titleWidth := lipgloss.Width(title)
-	remaining := max(innerWidth-titleWidth, 0)
-
-	left := remaining / 2
-	right := remaining - left
-
-	borderStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#00BFFF"))
-
-	top := borderStyle.Render(
-		"┌" +
-			repeat("─", left) +
-			title +
-			repeat("─", right) +
-			"┐",
-	)
-
-	bottom := borderStyle.Render(
-		"└" +
-			repeat("─", innerWidth) +
-			"┘",
-	)
-
-	body := lipgloss.NewStyle().
-		Width(innerWidth).
-		Render(m.table.View())
-
-	if m.loaded && !m.loading && m.itemCount == 0 {
-		lines := strings.Split(body, "\n")
-
-		if len(lines) > 1 {
-			header := lines[0]
-			contentHeight := len(lines) - 1
-
-			emptyContent := lipgloss.Place(
-				innerWidth,
-				contentHeight,
-				lipgloss.Center,
-				lipgloss.Center,
-				"No resources found",
-			)
-
-			body = header + "\n" + emptyContent
-		}
-	}
-
-	bodyLines := strings.Split(body, "\n")
-
-	for i, line := range bodyLines {
-		lineWidth := lipgloss.Width(line)
-
-		if lineWidth < innerWidth {
-			line += strings.Repeat(" ", innerWidth-lineWidth)
-		}
-
-		bodyLines[i] =
-			borderStyle.Render("│") +
-				line +
-				borderStyle.Render("│")
-	}
-
-	return top +
-		"\n" +
-		strings.Join(bodyLines, "\n") +
-		"\n" +
-		bottom
-}
-
-func (m Model) renderDetail() string {
-	title := " server details "
-
-	if m.detailID != "" {
-		title = " server " + m.detailID + " "
-	}
-
-	innerWidth := max(m.width-2, 1)
-
-	titleWidth := lipgloss.Width(title)
-	remaining := max(innerWidth-titleWidth, 0)
-
-	left := remaining / 2
-	right := remaining - left
-
-	borderStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#00BFFF"))
-
-	top := borderStyle.Render(
-		"┌" +
-			repeat("─", left) +
-			title +
-			repeat("─", right) +
-			"┐",
-	)
-
-	bottom := borderStyle.Render(
-		"└" +
-			repeat("─", innerWidth) +
-			"┘",
-	)
-
-	body := m.detail.View()
-	bodyLines := strings.Split(body, "\n")
-
-	for i, line := range bodyLines {
-		lineWidth := lipgloss.Width(line)
-
-		if lineWidth < innerWidth {
-			line += strings.Repeat(" ", innerWidth-lineWidth)
-		}
-
-		bodyLines[i] =
-			borderStyle.Render("│") +
-				line +
-				borderStyle.Render("│")
-	}
-
-	return top +
-		"\n" +
-		strings.Join(bodyLines, "\n") +
-		"\n" +
-		bottom
-}
-
-func repeat(s string, count int) string {
-	return strings.Repeat(s, max(count, 0))
-}
-
-func clearStatusCmd(status string) tea.Cmd {
-	return tea.Tick(3*time.Second, func(time.Time) tea.Msg {
-		return clearStatusMsg{status: status}
-	})
 }
 
 func (m Model) View() string {
@@ -766,7 +365,7 @@ func (m Model) View() string {
 	contentView := m.renderTable()
 
 	if m.detailMode {
-		contentView = m.renderDetail()
+		contentView = m.renderDetails()
 	}
 
 	resourceLine := ""
@@ -829,71 +428,65 @@ func (m Model) View() string {
 		commandLine
 }
 
-func commandKey(msg tea.KeyMsg) string {
-	key := msg.String()
+func (m *Model) Resize() {
+	const (
+		headerHeight         = 7
+		footerHeight         = 2
+		tableContainerBorder = 2
+	)
 
-	if len(key) == 1 && key[0] >= 'A' && key[0] <= 'Z' {
-		return "shift-" + strings.ToLower(key)
+	contentHeight := max(
+		m.height-
+			headerHeight-
+			footerHeight-
+			tableContainerBorder,
+		1,
+	)
+
+	m.table.SetHeight(contentHeight)
+
+	m.detail.Width = max(m.width-2, 1)
+	m.detail.Height = contentHeight
+
+	if m.resource == nil {
+		return
 	}
 
-	return key
-}
+	resourceColumns := m.resource.Columns()
 
-func colorizeJSON(data []byte) string {
-	lines := strings.Split(string(data), "\n")
+	minWidth := 0
+	totalFlex := 0
 
-	for i, line := range lines {
-		trimmed := strings.TrimSpace(line)
-		indent := line[:len(line)-len(strings.TrimLeft(line, " "))]
+	for _, column := range resourceColumns {
+		minWidth += column.MinWidth
+		totalFlex += column.Flex
+	}
 
-		if strings.HasPrefix(trimmed, "\"") {
-			if colon := strings.Index(trimmed, "\":"); colon >= 0 {
-				key := trimmed[:colon+1]
-				value := trimmed[colon+1:]
+	tableWidth := max(m.width-2, 1)
 
-				lines[i] = indent +
-					jsonKeyStyle.Render(key) +
-					colorizeJSONValue(value)
+	const tableHorizontalPadding = 2
 
-				continue
-			}
+	contentWidth := max(
+		tableWidth-(len(resourceColumns)*tableHorizontalPadding),
+		1,
+	)
+
+	extra := max(contentWidth-minWidth, 0)
+
+	columns := make([]table.Column, 0, len(resourceColumns))
+
+	for _, column := range resourceColumns {
+		width := column.MinWidth
+
+		if totalFlex > 0 {
+			width += extra * column.Flex / totalFlex
 		}
 
-		lines[i] = indent + colorizeJSONValue(trimmed)
+		columns = append(columns, table.Column{
+			Title: column.Title,
+			Width: width,
+		})
 	}
 
-	return strings.Join(lines, "\n")
-}
-
-func colorizeJSONValue(value string) string {
-	leading := value[:len(value)-len(strings.TrimLeft(value, " "))]
-	trimmed := strings.TrimSpace(value)
-
-	if trimmed == "" {
-		return value
-	}
-
-	suffix := ""
-	raw := trimmed
-
-	if strings.HasSuffix(raw, ",") {
-		raw = strings.TrimSuffix(raw, ",")
-		suffix = ","
-	}
-
-	switch {
-	case strings.HasPrefix(raw, "\""):
-		raw = jsonStringStyle.Render(raw)
-
-	case raw == "true" || raw == "false":
-		raw = jsonBoolStyle.Render(raw)
-
-	case raw == "null":
-		raw = jsonNullStyle.Render(raw)
-
-	case raw != "{" && raw != "}" && raw != "[" && raw != "]":
-		raw = jsonNumberStyle.Render(raw)
-	}
-
-	return leading + raw + suffix
+	m.table.SetColumns(columns)
 }
