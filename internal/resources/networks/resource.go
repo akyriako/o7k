@@ -14,6 +14,10 @@ func New() *Resource {
 	return &Resource{}
 }
 
+func (r *Resource) Title() string {
+	return "Networks"
+}
+
 func (r *Resource) Kind() string {
 	return "networks"
 }

@@ -272,6 +272,9 @@ func (m Model) View() string {
 	}
 
 	header := "o7k — OpenStack TUI"
+	if m.resource != nil {
+		header += " — " + m.resource.Title()
+	}
 
 	resourceLine := ""
 	if m.resource != nil {

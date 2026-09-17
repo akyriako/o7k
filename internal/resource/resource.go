@@ -17,6 +17,7 @@ type Row struct {
 type Resource interface {
 	Kind() string
 	Aliases() []string
+	Title() string
 	Columns() []Column
 
 	List(ctx context.Context) ([]Row, error)
