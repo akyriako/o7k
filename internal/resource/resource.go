@@ -3,9 +3,10 @@ package resource
 import "context"
 
 type Column struct {
-	Key   string
-	Title string
-	Width int
+	Key      string
+	Title    string
+	MinWidth int
+	Flex     int
 }
 
 type Row struct {

@@ -37,7 +37,7 @@ func New(registry *resource.Registry) Model {
 	for _, column := range r.Columns() {
 		columns = append(columns, table.Column{
 			Title: column.Title,
-			Width: column.Width,
+			Width: column.MinWidth,
 		})
 	}
 
@@ -50,7 +50,7 @@ func New(registry *resource.Registry) Model {
 	styles := table.DefaultStyles()
 	styles.Selected = styles.Selected.
 		Foreground(lipgloss.Color("255")).
-		Background(lipgloss.Color("240")).
+		Background(lipgloss.Color("#ED1944")).
 		Bold(false)
 
 	t.SetStyles(styles)
@@ -137,6 +137,40 @@ func (m *Model) resize() {
 	tableHeight := max(m.height-headerHeight-footerHeight, 1)
 
 	m.table.SetHeight(tableHeight)
+
+	r, ok := m.registry.Get("servers")
+	if !ok {
+		return
+	}
+
+	resourceColumns := r.Columns()
+
+	minWidth := 0
+	totalFlex := 0
+
+	for _, column := range resourceColumns {
+		minWidth += column.MinWidth
+		totalFlex += column.Flex
+	}
+
+	extra := max(m.width-minWidth, 0)
+
+	columns := make([]table.Column, 0, len(resourceColumns))
+
+	for _, column := range resourceColumns {
+		width := column.MinWidth
+
+		if totalFlex > 0 {
+			width += extra * column.Flex / totalFlex
+		}
+
+		columns = append(columns, table.Column{
+			Title: column.Title,
+			Width: width,
+		})
+	}
+
+	m.table.SetColumns(columns)
 }
 
 func (m Model) View() string {

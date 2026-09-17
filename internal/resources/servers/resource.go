@@ -27,10 +27,10 @@ func (r *Resource) Aliases() []string {
 
 func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
-		{Key: "name", Title: "NAME", Width: 30},
-		{Key: "status", Title: "STATUS", Width: 12},
-		{Key: "flavor", Title: "FLAVOR", Width: 20},
-		{Key: "ip", Title: "IP", Width: 16},
+		{Key: "name", Title: "NAME", MinWidth: 16, Flex: 3},
+		{Key: "status", Title: "STATUS", MinWidth: 10, Flex: 1},
+		{Key: "flavor", Title: "FLAVOR", MinWidth: 12, Flex: 2},
+		{Key: "ip", Title: "IP", MinWidth: 15, Flex: 2},
 	}
 }
 
