@@ -2,6 +2,7 @@ package ui
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -9,8 +10,10 @@ import (
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
 	"github.com/akyriako/o7k/internal/resources/contexts"
+	"github.com/akyriako/o7k/internal/resources/servers"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -27,11 +30,6 @@ type resourcesLoadedMsg struct {
 
 type clearStatusMsg struct {
 	status string
-}
-
-type navigateMsg struct {
-	resource string
-	id       string
 }
 
 type navigationEntry struct {
@@ -63,6 +61,10 @@ type Model struct {
 
 	navigation []navigationEntry
 	navigateID string
+
+	detailMode bool
+	detail     viewport.Model
+	detailID   string
 
 	commandMode bool
 	command     textinput.Model
@@ -99,12 +101,16 @@ func New(registry *resource.Registry, openstackContext *openstack.Context) Model
 	command.Prompt = ":"
 	command.CharLimit = 64
 
+	detail := viewport.New(1, 1)
+	detail.SetHorizontalStep(4)
+
 	return Model{
 		registry: registry,
 		resource: r,
 		table:    t,
 		command:  command,
 		context:  openstackContext,
+		detail:   detail,
 
 		loading:     true,
 		showLoading: true,
@@ -121,8 +127,13 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	// Esc always means "cancel/dismiss and return to normal mode".
 	if keyMsg, ok := msg.(tea.KeyMsg); ok && keyMsg.String() == "esc" {
+		if m.detailMode {
+			m.detailMode = false
+			m.detailID = ""
+			return m, nil
+		}
+
 		m.status = ""
 		m.commandMode = false
 		m.command.Blur()
@@ -135,8 +146,31 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
-	// While command mode is active, keyboard input belongs to the
-	// command text input instead of the resource table.
+	if m.detailMode {
+		if keyMsg, ok := msg.(tea.KeyMsg); ok {
+			switch keyMsg.String() {
+			case "q", "ctrl+c":
+				return m, tea.Quit
+			}
+		}
+
+		switch msg := msg.(type) {
+		case tea.WindowSizeMsg:
+			m.width = msg.Width
+			m.height = msg.Height
+			m.resize()
+			return m, nil
+
+		case autoRefreshMsg:
+			return m, autoRefreshCmd()
+		}
+
+		var cmd tea.Cmd
+		m.detail, cmd = m.detail.Update(msg)
+
+		return m, cmd
+	}
+
 	if m.commandMode {
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
@@ -184,7 +218,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case resourcesLoadedMsg:
-		// Ignore responses belonging to an older load.
 		if msg.loadID != m.loadID {
 			return m, nil
 		}
@@ -199,9 +232,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		m.loaded = true
+		m.autoRefreshPaused = false
 
 		if m.resource == nil {
-			m.err = fmt.Errorf("no active resource")
+			m.status = "no active resource"
+			m.autoRefreshPaused = true
 			return m, nil
 		}
 
@@ -214,7 +249,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			for _, column := range columns {
 				value := row.Fields[column.Key]
 
-				if m.resource.Kind() == "contexts" && column.Key == "active" && row.ID == m.context.Cloud {
+				if m.resource.Kind() == "contexts" &&
+					column.Key == "active" &&
+					row.ID == m.context.Cloud {
 					value = "true"
 				}
 
@@ -261,7 +298,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case autoRefreshMsg:
 		cmd := m.autoRefreshResource()
 
-		// tea.Tick fires once, so every tick must schedule the next one.
 		return m, tea.Batch(
 			cmd,
 			autoRefreshCmd(),
@@ -282,7 +318,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		*m.context = *msg.Context
-		m.status = fmt.Sprintf("connected to %s", msg.Context.Cloud)
+		m.status = fmt.Sprintf("connected to %s", m.context.Cloud)
 
 		cmd := m.autoRefreshResource()
 
@@ -311,6 +347,26 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.navigateID = msg.ID
 
 		return m, m.navigateResource(msg.Resource)
+
+	case servers.ShowMsg:
+		if msg.Err != nil {
+			m.status = msg.Err.Error()
+			return m, nil
+		}
+
+		data, err := json.MarshalIndent(msg.Server, "", "  ")
+		if err != nil {
+			m.status = fmt.Sprintf("encoding server details: %v", err)
+			return m, nil
+		}
+
+		m.detailMode = true
+		m.detailID = msg.Server.ID
+		m.detail.SetContent(colorizeJSON(data))
+		m.detail.GotoTop()
+		m.resize()
+
+		return m, nil
 	}
 
 	var cmd tea.Cmd
@@ -355,6 +411,9 @@ func (m *Model) executeResourceCommand(key string) tea.Cmd {
 func (m *Model) switchResource(name string) tea.Cmd {
 	m.navigation = nil
 	m.navigateID = ""
+	m.detailMode = false
+	m.detailID = ""
+	m.autoRefreshPaused = false
 
 	r, ok := m.registry.Get(name)
 	if !ok {
@@ -369,12 +428,9 @@ func (m *Model) switchResource(name string) tea.Cmd {
 	m.loading = true
 	m.showLoading = true
 	m.loaded = false
-	m.autoRefreshPaused = false
 	m.itemCount = 0
 	m.loadID++
 
-	// A resource switch must not display rows belonging to the
-	// previously selected resource.
 	m.table.SetRows(nil)
 	m.table.SetCursor(0)
 	m.resourceRows = nil
@@ -426,8 +482,6 @@ func (m *Model) refreshResource() tea.Cmd {
 	m.err = nil
 	m.status = ""
 
-	// Manual refresh keeps the existing rows visible while the
-	// request runs, but gives the user visual feedback.
 	m.loading = true
 	m.showLoading = true
 	m.loadID++
@@ -436,12 +490,13 @@ func (m *Model) refreshResource() tea.Cmd {
 }
 
 func (m *Model) autoRefreshResource() tea.Cmd {
-	if m.resource == nil || m.loading || m.autoRefreshPaused {
+	if m.resource == nil ||
+		m.loading ||
+		m.autoRefreshPaused ||
+		m.detailMode {
 		return nil
 	}
 
-	// Background refresh deliberately leaves the existing table
-	// untouched and does not show the loading badge.
 	m.loading = true
 	m.showLoading = false
 	m.loadID++
@@ -498,7 +553,7 @@ func (m *Model) resize() {
 		tableContainerBorder = 2
 	)
 
-	tableHeight := max(
+	contentHeight := max(
 		m.height-
 			headerHeight-
 			footerHeight-
@@ -506,7 +561,10 @@ func (m *Model) resize() {
 		1,
 	)
 
-	m.table.SetHeight(tableHeight)
+	m.table.SetHeight(contentHeight)
+
+	m.detail.Width = max(m.width-2, 1)
+	m.detail.Height = contentHeight
 
 	if m.resource == nil {
 		return
@@ -592,9 +650,6 @@ func (m Model) renderTable() string {
 		Width(innerWidth).
 		Render(m.table.View())
 
-	// A successfully loaded resource with zero items is not an
-	// error. Keep the table header and render an explicit empty
-	// state in the row area.
 	if m.loaded && !m.loading && m.itemCount == 0 {
 		lines := strings.Split(body, "\n")
 
@@ -636,6 +691,61 @@ func (m Model) renderTable() string {
 		bottom
 }
 
+func (m Model) renderDetail() string {
+	title := " server details "
+
+	if m.detailID != "" {
+		title = " server " + m.detailID + " "
+	}
+
+	innerWidth := max(m.width-2, 1)
+
+	titleWidth := lipgloss.Width(title)
+	remaining := max(innerWidth-titleWidth, 0)
+
+	left := remaining / 2
+	right := remaining - left
+
+	borderStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("#00BFFF"))
+
+	top := borderStyle.Render(
+		"┌" +
+			repeat("─", left) +
+			title +
+			repeat("─", right) +
+			"┐",
+	)
+
+	bottom := borderStyle.Render(
+		"└" +
+			repeat("─", innerWidth) +
+			"┘",
+	)
+
+	body := m.detail.View()
+	bodyLines := strings.Split(body, "\n")
+
+	for i, line := range bodyLines {
+		lineWidth := lipgloss.Width(line)
+
+		if lineWidth < innerWidth {
+			line += strings.Repeat(" ", innerWidth-lineWidth)
+		}
+
+		bodyLines[i] =
+			borderStyle.Render("│") +
+				line +
+				borderStyle.Render("│")
+	}
+
+	return top +
+		"\n" +
+		strings.Join(bodyLines, "\n") +
+		"\n" +
+		bottom
+}
+
 func repeat(s string, count int) string {
 	return strings.Repeat(s, max(count, 0))
 }
@@ -652,7 +762,12 @@ func (m Model) View() string {
 	}
 
 	header := m.renderHeader()
-	tableView := m.renderTable()
+
+	contentView := m.renderTable()
+
+	if m.detailMode {
+		contentView = m.renderDetail()
+	}
 
 	resourceLine := ""
 
@@ -660,11 +775,23 @@ func (m Model) View() string {
 		var resourceTags strings.Builder
 
 		for _, entry := range m.navigation {
-			resourceTags.WriteString(navigationTagStyle.Render(" <"+entry.resource+"> ") + " ")
+			resourceTags.WriteString(
+				navigationTagStyle.Render(" <"+entry.resource+"> ") + " ",
+			)
 		}
-		resourceTags.WriteString(resourceTagStyle.Render(" <" + m.resource.Kind() + "> "))
 
-		//resourceTag := resourceTagStyle.Render("< " + m.resource.Kind() + " >")
+		if m.detailMode {
+			resourceTags.WriteString(
+				navigationTagStyle.Render(" <"+m.resource.Kind()+"> ") + " ",
+			)
+			resourceTags.WriteString(
+				resourceTagStyle.Render(" <show> "),
+			)
+		} else {
+			resourceTags.WriteString(
+				resourceTagStyle.Render(" <" + m.resource.Kind() + "> "),
+			)
+		}
 
 		loadingTag := ""
 
@@ -695,7 +822,7 @@ func (m Model) View() string {
 
 	return header +
 		"\n\n" +
-		tableView +
+		contentView +
 		"\n" +
 		resourceLine +
 		"\n" +
@@ -710,4 +837,63 @@ func commandKey(msg tea.KeyMsg) string {
 	}
 
 	return key
+}
+
+func colorizeJSON(data []byte) string {
+	lines := strings.Split(string(data), "\n")
+
+	for i, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		indent := line[:len(line)-len(strings.TrimLeft(line, " "))]
+
+		if strings.HasPrefix(trimmed, "\"") {
+			if colon := strings.Index(trimmed, "\":"); colon >= 0 {
+				key := trimmed[:colon+1]
+				value := trimmed[colon+1:]
+
+				lines[i] = indent +
+					jsonKeyStyle.Render(key) +
+					colorizeJSONValue(value)
+
+				continue
+			}
+		}
+
+		lines[i] = indent + colorizeJSONValue(trimmed)
+	}
+
+	return strings.Join(lines, "\n")
+}
+
+func colorizeJSONValue(value string) string {
+	leading := value[:len(value)-len(strings.TrimLeft(value, " "))]
+	trimmed := strings.TrimSpace(value)
+
+	if trimmed == "" {
+		return value
+	}
+
+	suffix := ""
+	raw := trimmed
+
+	if strings.HasSuffix(raw, ",") {
+		raw = strings.TrimSuffix(raw, ",")
+		suffix = ","
+	}
+
+	switch {
+	case strings.HasPrefix(raw, "\""):
+		raw = jsonStringStyle.Render(raw)
+
+	case raw == "true" || raw == "false":
+		raw = jsonBoolStyle.Render(raw)
+
+	case raw == "null":
+		raw = jsonNullStyle.Render(raw)
+
+	case raw != "{" && raw != "}" && raw != "[" && raw != "]":
+		raw = jsonNumberStyle.Render(raw)
+	}
+
+	return leading + raw + suffix
 }

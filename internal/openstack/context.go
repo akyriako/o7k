@@ -66,3 +66,18 @@ func (c *Context) ComputeV2() (*gophercloud.ServiceClient, error) {
 
 	return client, nil
 }
+
+func (c *Context) NetworkV2() (*gophercloud.ServiceClient, error) {
+	if c.Provider == nil {
+		return nil, fmt.Errorf("context %q is not connected", c.Cloud)
+	}
+
+	client, err := openstack.NewNetworkV2(c.Provider, gophercloud.EndpointOpts{
+		Region: c.Region,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("creating network client: %w", err)
+	}
+
+	return client, nil
+}

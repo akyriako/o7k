@@ -47,6 +47,23 @@ var (
 			Bold(true)
 )
 
+var (
+	jsonKeyStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#87CEFA"))
+
+	jsonStringStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#98C379"))
+
+	jsonNumberStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#E5C07B"))
+
+	jsonBoolStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#C678DD"))
+
+	jsonNullStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#7F848E"))
+)
+
 func tableStyles() table.Styles {
 	styles := table.DefaultStyles()
 

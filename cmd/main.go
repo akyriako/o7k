@@ -11,6 +11,7 @@ import (
 	"github.com/akyriako/o7k/internal/resources/contexts"
 	"github.com/akyriako/o7k/internal/resources/domains"
 	"github.com/akyriako/o7k/internal/resources/endpoints"
+	"github.com/akyriako/o7k/internal/resources/flavors"
 	"github.com/akyriako/o7k/internal/resources/networks"
 	"github.com/akyriako/o7k/internal/resources/projects"
 	"github.com/akyriako/o7k/internal/resources/regions"
@@ -109,6 +110,11 @@ func main() {
 
 	if err := registry.Register(servers.New(&openstackContext)); err != nil {
 		fmt.Fprintf(os.Stderr, "error registering servers resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := registry.Register(flavors.New(&openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering flavors resource: %v\n", err)
 		os.Exit(1)
 	}
 
