@@ -13,8 +13,9 @@ import (
 )
 
 type resourcesLoadedMsg struct {
-	rows []resource.Row
-	err  error
+	loadID uint64
+	rows   []resource.Row
+	err    error
 }
 
 type Model struct {
@@ -26,6 +27,7 @@ type Model struct {
 	itemCount int
 	status    string
 	loading   bool
+	loadID    uint64
 
 	width  int
 	height int
@@ -80,7 +82,9 @@ func New(registry *resource.Registry) Model {
 		resource: r,
 		table:    t,
 		command:  command,
-		loading:  true,
+
+		loading: true,
+		loadID:  1,
 
 		profile: "default",
 		region:  "RegionOne",
@@ -143,6 +147,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case resourcesLoadedMsg:
+		if msg.loadID != m.loadID {
+			return m, nil
+		}
+
 		m.loading = false
 
 		if msg.err != nil {
@@ -201,6 +209,7 @@ func (m *Model) switchResource(name string) tea.Cmd {
 	m.status = ""
 	m.loading = true
 	m.itemCount = 0
+	m.loadID++
 
 	// Immediately remove the previous resource's data.
 	m.table.SetRows(nil)
@@ -212,18 +221,23 @@ func (m *Model) switchResource(name string) tea.Cmd {
 }
 
 func (m Model) loadResource() tea.Cmd {
+	loadID := m.loadID
+	r := m.resource
+
 	return func() tea.Msg {
-		if m.resource == nil {
+		if r == nil {
 			return resourcesLoadedMsg{
-				err: fmt.Errorf("no active resource"),
+				loadID: loadID,
+				err:    fmt.Errorf("no active resource"),
 			}
 		}
 
-		rows, err := m.resource.List(context.Background())
+		rows, err := r.List(context.Background())
 
 		return resourcesLoadedMsg{
-			rows: rows,
-			err:  err,
+			loadID: loadID,
+			rows:   rows,
+			err:    err,
 		}
 	}
 }
