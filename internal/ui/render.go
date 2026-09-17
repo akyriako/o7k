@@ -60,6 +60,7 @@ func (m Model) renderHeaderCommands() string {
 		{Key: "q", Description: "Quit"},
 		{Key: ":", Description: "Resource"},
 		{Key: "r", Description: "Refresh"},
+		{Key: "c", Description: "Copy"},
 		{Key: "esc", Description: "Dismiss/Return"},
 	}
 

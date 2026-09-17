@@ -42,9 +42,10 @@ type Model struct {
 	navigation []navigationEntry
 	navigateID string
 
-	detailMode bool
-	detail     viewport.Model
-	detailID   string
+	detailMode    bool
+	detail        viewport.Model
+	detailID      string
+	detailContent string
 
 	commandMode bool
 	command     textinput.Model
@@ -107,9 +108,27 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case clipboardResultMsg:
+		if msg.err != nil {
+			m.status = fmt.Sprintf("clipboard failed: %v", msg.err)
+			return m, nil
+		}
+
+		m.status = "copied to clipboard"
+		return m, clearStatus(m.status)
+
+	case clearStatusMsg:
+		if m.status == msg.status {
+			m.status = ""
+		}
+		return m, nil
+	}
+
 	if keyMsg, ok := msg.(tea.KeyMsg); ok && keyMsg.String() == "esc" {
 		if m.detailMode {
 			m.detailMode = false
+			m.detailContent = ""
 			m.detailID = ""
 			return m, nil
 		}
@@ -131,6 +150,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch keyMsg.String() {
 			case "q", "ctrl+c":
 				return m, tea.Quit
+			case "c":
+				return m, m.copyViewport()
 			}
 		}
 
@@ -188,6 +209,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "r":
 			return m, m.refreshResource()
+
+		case "c":
+			return m, m.copyViewport()
 
 		case "enter":
 			return m, m.executeDefaultCommand()
@@ -307,13 +331,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmd,
 		)
 
-	case clearStatusMsg:
-		if m.status == msg.status {
-			m.status = ""
-		}
-
-		return m, nil
-
 	case resource.NavigateMsg:
 		cursor := m.table.Cursor()
 
@@ -342,11 +359,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		m.detailMode = true
 		m.detailID = msg.Server.ID
+		m.detailContent = string(data)
 		m.detail.SetContent(colorizeJSON(data))
 		m.detail.GotoTop()
 		m.Resize()
 
 		return m, nil
+
 	}
 
 	var cmd tea.Cmd

@@ -8,6 +8,7 @@ import (
 
 	"github.com/akyriako/o7k/internal/resource"
 	tea "github.com/charmbracelet/bubbletea"
+	"golang.design/x/clipboard"
 )
 
 type resourcesLoadedMsg struct {
@@ -20,6 +21,10 @@ type resourcesLoadedMsg struct {
 
 type clearStatusMsg struct {
 	status string
+}
+
+type clipboardResultMsg struct {
+	err error
 }
 
 type navigationEntry struct {
@@ -92,6 +97,7 @@ func (m *Model) switchResource(name string) tea.Cmd {
 	m.navigateID = ""
 	m.detailMode = false
 	m.detailID = ""
+	m.detailContent = ""
 	m.autoRefreshPaused = false
 
 	r, ok := m.registry.Get(name)
@@ -213,5 +219,27 @@ func (m Model) loadResource() tea.Cmd {
 			cursor:     cursor,
 			err:        err,
 		}
+	}
+}
+
+func (m *Model) copyViewport() tea.Cmd {
+	if !m.detailMode || m.detailContent == "" {
+		return nil
+	}
+
+	content := m.detailContent
+
+	return func() tea.Msg {
+		if err := clipboard.Init(); err != nil {
+			return clipboardResultMsg{err: err}
+		}
+
+		clipboard.Write(
+			context.Background(),
+			clipboard.FmtText,
+			[]byte(content),
+		)
+
+		return clipboardResultMsg{}
 	}
 }
