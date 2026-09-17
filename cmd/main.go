@@ -8,7 +8,9 @@ import (
 	"github.com/akyriako/o7k/internal/logging"
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
+	regions "github.com/akyriako/o7k/internal/resources"
 	"github.com/akyriako/o7k/internal/resources/contexts"
+	"github.com/akyriako/o7k/internal/resources/endpoints"
 	"github.com/akyriako/o7k/internal/resources/networks"
 	"github.com/akyriako/o7k/internal/resources/servers"
 	"github.com/akyriako/o7k/internal/resources/services"
@@ -70,6 +72,8 @@ func main() {
 		Identity: cloud.Identity,
 	}
 
+	logger.Info("connected to OpenStack", "cloud", openstackContext.Cloud)
+
 	if err := openstackContext.Connect(context.Background(), cloudsPath); err != nil {
 		fmt.Fprintf(os.Stderr, "error connecting to OpenStack: %v\n", err)
 		os.Exit(1)
@@ -80,7 +84,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	logger.Info("connected to OpenStack", "cloud", openstackContext.Cloud)
+	if err := registry.Register(endpoints.New(&openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering endpoints resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := registry.Register(regions.New(&openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering regions resource: %v\n", err)
+		os.Exit(1)
+	}
 
 	p := tea.NewProgram(
 		ui.New(
