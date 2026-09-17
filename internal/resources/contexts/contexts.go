@@ -36,6 +36,7 @@ func (r *Resource) Aliases() []string {
 func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
 		{Key: "name", Title: "NAME", MinWidth: 20, Flex: 2},
+		{Key: "active", Title: "ACTIVE", MinWidth: 8, Flex: 0},
 		{Key: "identity", Title: "IDENTITY", MinWidth: 24, Flex: 3},
 		{Key: "region", Title: "REGION", MinWidth: 12, Flex: 1},
 		{Key: "domain", Title: "DOMAIN", MinWidth: 16, Flex: 1},

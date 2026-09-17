@@ -199,7 +199,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			values := make(table.Row, 0, len(columns))
 
 			for _, column := range columns {
-				values = append(values, row.Fields[column.Key])
+				value := row.Fields[column.Key]
+
+				if m.resource.Kind() == "contexts" && column.Key == "active" && row.ID == m.context.Cloud {
+					value = "true"
+				}
+
+				values = append(values, value)
 			}
 
 			rows = append(rows, values)
@@ -259,7 +265,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.context = msg.Context
 		m.status = fmt.Sprintf("connected to %s", msg.Context.Cloud)
 
-		return m, clearStatusCmd(m.status)
+		cmd := m.autoRefreshResource()
+
+		return m, tea.Batch(
+			clearStatusCmd(m.status),
+			cmd,
+		)
 
 	case clearStatusMsg:
 		if m.status == msg.status {
