@@ -4,6 +4,8 @@
 
 It provides a fast way to inspect and navigate OpenStack resources directly from the terminal.
 
+<img width="2544" height="1247" alt="Screenshot from 2026-09-18 13-00-06" src="https://github.com/user-attachments/assets/55507289-02e6-4f91-8e5f-92ed6b14ab09" />
+
 ## Usage
 
 `o7k` uses the standard OpenStack `clouds.yaml` configuration and automatically discovers the 
@@ -73,6 +75,8 @@ Backup              -> Volume
 ```
 
 When navigating to a related collection, `o7k` filters the destination resource automatically.
+
+<img width="2544" height="1247" alt="Screenshot from 2026-09-18 13-01-45" src="https://github.com/user-attachments/assets/10652fed-f76e-4bd7-bdee-bafe20fb39a7" />
 
 Press `Esc` to return to the previous resource and selection.
 
