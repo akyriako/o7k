@@ -9,5 +9,5 @@
 | **Keystone / Catalog** | services, endpoints, regions | Essential | ✅ |
 | **Nova / Compute** | keypairs, server groups, availability zones | Useful | ⬜ |
 | **Neutron / Network** | security-group rules | Useful | ✅ |
-| **Neutron / Network** | router interfaces | Useful | ⬜ |
+| **Neutron / Network** | router interfaces | Useful | ✅ |
 | **Cinder / Block Storage** | volume backups | Useful | ⬜ |
