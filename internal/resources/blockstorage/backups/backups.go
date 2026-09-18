@@ -45,6 +45,7 @@ func (r *Resource) Columns() []resource.Column {
 func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
 		{Key: "s", Description: "Show", Default: true},
+		{Key: "shift-v", Description: "Volume"},
 	}
 }
 
@@ -87,6 +88,8 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	switch command.Key {
 	case "s":
 		return r.show(row.ID)
+	case "shift-v":
+		return r.navigateToVolume(row)
 	}
 
 	return nil

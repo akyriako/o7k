@@ -29,3 +29,27 @@ func (r *Resource) show(id string) tea.Cmd {
 		}
 	}
 }
+
+func (r *Resource) navigateToBackups(row resource.Row) tea.Cmd {
+	volumeID := row.ID
+
+	return func() tea.Msg {
+		return resource.NavigateFilteredMsg{
+			Resource: "backups",
+			Field:    "volume_id",
+			Value:    volumeID,
+		}
+	}
+}
+
+func (r *Resource) navigateToSnapshots(row resource.Row) tea.Cmd {
+	volumeID := row.ID
+
+	return func() tea.Msg {
+		return resource.NavigateFilteredMsg{
+			Resource: "snapshots",
+			Field:    "volume_id",
+			Value:    volumeID,
+		}
+	}
+}

@@ -29,3 +29,15 @@ func (r *Resource) show(id string) tea.Cmd {
 		}
 	}
 }
+
+func (r *Resource) navigateToVolume(row resource.Row) tea.Cmd {
+	volumeID := row.Fields["volume_id"]
+
+	return func() tea.Msg {
+		return resource.NavigateFilteredMsg{
+			Resource: "volumes",
+			Field:    "id",
+			Value:    volumeID,
+		}
+	}
+}
