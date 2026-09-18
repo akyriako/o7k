@@ -1,6 +1,6 @@
 # 07k
 
-`o7k` (pronounced **oooo-sjuk** 🇸🇪) is a terminal UI for OpenStack, inspired by k9s. 
+`o7k` (pronounced **oooo-sju-k** 🇸🇪) is a terminal UI for OpenStack, inspired by k9s. 
 
 It provides a fast way to inspect and navigate OpenStack resources directly from the terminal.
 
@@ -13,7 +13,8 @@ configuration files from the following places:
 * `~/.config/openstack`
 * the current working directory
 
-> [!TIP] all the discovered files will be automatically loaded as context in `o7k` 
+> [!TIP]
+> All the discovered files will be automatically loaded as context in `o7k` 
 
 ### Global Controls
 
@@ -26,7 +27,8 @@ configuration files from the following places:
 | `Esc` | Dismiss / return to the previous view |
 | `Ctrl+X` | Quit |
 
-> [!TIP] `o7k` will automatically refresh the current resource every 30s, you don't need to explicitely press `r`.
+> [!TIP] 
+> `o7k` will automatically refresh the current resource every 30s, you don't need to explicitely press `r`.
 
 To switch between resources, press `:` and enter a resource name or alias (**exactly** as you are being used to in k9s)
 
