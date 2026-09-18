@@ -156,26 +156,3 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 
 	return nil
 }
-
-type ShowMsg struct {
-	Server *computeservers.Server
-	Err    error
-}
-
-func (r *Resource) show(id string) tea.Cmd {
-	return func() tea.Msg {
-		client, err := r.context.ComputeV2()
-		if err != nil {
-			return ShowMsg{Err: err}
-		}
-
-		server, err := computeservers.Get(context.Background(), client, id).Extract()
-		if err != nil {
-			return ShowMsg{
-				Err: fmt.Errorf("getting server %q: %w", id, err),
-			}
-		}
-
-		return ShowMsg{Server: server}
-	}
-}

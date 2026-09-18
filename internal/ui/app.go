@@ -9,7 +9,6 @@ import (
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
 	"github.com/akyriako/o7k/internal/resources/contexts"
-	"github.com/akyriako/o7k/internal/resources/servers"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -366,20 +365,41 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, m.navigateFilteredResource(msg.Resource)
 
-	case servers.ShowMsg:
+	//case servers.ShowMsg:
+	//	if msg.Err != nil {
+	//		m.status = msg.Err.Error()
+	//		return m, nil
+	//	}
+	//
+	//	data, err := json.MarshalIndent(msg.Server, "", "  ")
+	//	if err != nil {
+	//		m.status = fmt.Sprintf("encoding server details: %v", err)
+	//		return m, nil
+	//	}
+	//
+	//	m.detailMode = true
+	//	m.detailID = msg.Server.ID
+	//	m.detailContent = string(data)
+	//	m.detail.SetContent(colorizeJSON(data))
+	//	m.detail.GotoTop()
+	//	m.Resize()
+	//
+	//	return m, nil
+
+	case resource.DetailsMsg:
 		if msg.Err != nil {
 			m.status = msg.Err.Error()
 			return m, nil
 		}
 
-		data, err := json.MarshalIndent(msg.Server, "", "  ")
+		data, err := json.MarshalIndent(msg.Content, "", "  ")
 		if err != nil {
-			m.status = fmt.Sprintf("encoding server details: %v", err)
+			m.status = fmt.Sprintf("encoding details: %v", err)
 			return m, nil
 		}
 
 		m.detailMode = true
-		m.detailID = msg.Server.ID
+		m.detailID = msg.ID
 		m.detailContent = string(data)
 		m.detail.SetContent(colorizeJSON(data))
 		m.detail.GotoTop()

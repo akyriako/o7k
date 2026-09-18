@@ -83,6 +83,11 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 	return rows, nil
 }
 
-func (r *Resource) Execute(_ resource.Command, _ resource.Row) tea.Cmd {
+func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
+	switch command.Key {
+	case "s":
+		return r.show(row.ID)
+	}
+
 	return nil
 }

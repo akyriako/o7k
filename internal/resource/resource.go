@@ -35,6 +35,12 @@ type NavigateFilteredMsg struct {
 	Value    string
 }
 
+type DetailsMsg struct {
+	ID      string
+	Content any
+	Err     error
+}
+
 type Resource interface {
 	Kind() string
 	Title() string
