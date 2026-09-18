@@ -85,12 +85,15 @@ Press `Esc` to return to the previous resource and selection.
 | Service | Resources | Status |
 |---|---|---|
 | **Local / Auth** | contexts | ✅ |
-| **Nova / Compute** | servers, flavors | ✅ |
-| **Neutron / Network** | networks, subnets, ports, routers, floating IPs, security groups | ✅ |
-| **Cinder / Block Storage** | volumes, snapshots, volume types, volume backups | ✅ |
-| **Glance / Image** | images | ✅ |
 | **Keystone / Identity** | projects, users, groups, roles, domains | Partial |
 | **Keystone / Catalog** | services, endpoints, regions | ✅ |
+| **Cinder / Block Storage** | volumes, snapshots, volume types, volume backups | ✅ |
+| **Glance / Image** | images | ✅ |
+| **Nova / Compute** | servers, flavors | ✅ |
 | **Nova / Compute** | keypairs, server groups, availability zones | ✅ |
+| **Neutron / Network** | networks, subnets, ports, routers, floating IPs, security groups | ✅ |
 | **Neutron / Network** | security-group rules | ✅ |
 | **Neutron / Network** | router interfaces | ⬜ |
+
+
+
