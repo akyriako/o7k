@@ -49,6 +49,7 @@ func (r *Resource) Columns() []resource.Column {
 func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
 		{Key: "s", Description: "Show", Default: true},
+		{Key: "shift-i", Description: "Image"},
 	}
 }
 
@@ -94,11 +95,11 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 			flavorName = flavorID
 		}
 
-		image := ""
-		if name, ok := server.Image["name"].(string); ok {
+		imageID, _ := server.Image["id"].(string)
+
+		image := imageID
+		if name, ok := server.Image["name"].(string); ok && name != "" {
 			image = name
-		} else if id, ok := server.Image["id"].(string); ok {
-			image = id
 		}
 
 		rows = append(rows, resource.Row{
@@ -110,6 +111,7 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 				"flavor":    flavorName,
 				"addresses": serverAddresses(server.Addresses),
 				"image":     image,
+				"image_id":  imageID,
 			},
 		})
 	}
@@ -148,6 +150,8 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	switch command.Key {
 	case "s":
 		return r.show(row.ID)
+	case "shift-i":
+		return r.navigateToImage(row)
 	}
 
 	return nil

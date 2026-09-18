@@ -117,3 +117,18 @@ func (c *Context) NetworkV2() (*gophercloud.ServiceClient, error) {
 
 	return client, nil
 }
+
+func (c *Context) ImageV2() (*gophercloud.ServiceClient, error) {
+	if c.Provider == nil {
+		return nil, fmt.Errorf("context %q is not connected", c.Cloud)
+	}
+
+	client, err := openstack.NewImageV2(c.Provider, gophercloud.EndpointOpts{
+		Region: c.Region,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("creating image client: %w", err)
+	}
+
+	return client, nil
+}

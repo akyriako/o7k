@@ -38,7 +38,7 @@ func (r *Resource) Columns() []resource.Column {
 		{Key: "status", Title: "STATUS", MinWidth: 12, Flex: 0},
 		{Key: "admin_state", Title: "ADMIN STATE", MinWidth: 12, Flex: 0},
 		{Key: "distributed", Title: "DISTRIBUTED", MinWidth: 12, Flex: 0},
-		{Key: "project_id", Title: "PROJECT ID", MinWidth: 40, Flex: 0},
+		//{Key: "project_id", Title: "PROJECT ID", MinWidth: 40, Flex: 0},
 	}
 }
 
