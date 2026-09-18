@@ -17,6 +17,8 @@ import (
 	"github.com/akyriako/o7k/internal/resources/networks/networks"
 	"github.com/akyriako/o7k/internal/resources/networks/ports"
 	"github.com/akyriako/o7k/internal/resources/networks/routers"
+	"github.com/akyriako/o7k/internal/resources/networks/securitygrouprules"
+	"github.com/akyriako/o7k/internal/resources/networks/securitygroups"
 	"github.com/akyriako/o7k/internal/resources/networks/subnets"
 	"github.com/akyriako/o7k/internal/resources/projects"
 	"github.com/akyriako/o7k/internal/resources/regions"
@@ -160,6 +162,16 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) {
 
 	if err := r.Register(floatingips.New(openstackContext)); err != nil {
 		fmt.Fprintf(os.Stderr, "error registering floating IPs resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := r.Register(securitygroups.New(openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering security groups resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := r.Register(securitygrouprules.New(openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering security group rules resource: %v\n", err)
 		os.Exit(1)
 	}
 }
