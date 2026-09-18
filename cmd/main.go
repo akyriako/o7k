@@ -8,11 +8,16 @@ import (
 	"github.com/akyriako/o7k/internal/logging"
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
+	"github.com/akyriako/o7k/internal/resources/blockstorage/snapshots"
+	"github.com/akyriako/o7k/internal/resources/blockstorage/volumes"
+	"github.com/akyriako/o7k/internal/resources/blockstorage/volumetypes"
 	"github.com/akyriako/o7k/internal/resources/catalog"
+	"github.com/akyriako/o7k/internal/resources/compute/flavors"
+	"github.com/akyriako/o7k/internal/resources/compute/keypairs"
+	"github.com/akyriako/o7k/internal/resources/compute/servers"
 	"github.com/akyriako/o7k/internal/resources/contexts"
 	"github.com/akyriako/o7k/internal/resources/domains"
 	"github.com/akyriako/o7k/internal/resources/endpoints"
-	"github.com/akyriako/o7k/internal/resources/flavors"
 	"github.com/akyriako/o7k/internal/resources/images"
 	"github.com/akyriako/o7k/internal/resources/networks/floatingips"
 	"github.com/akyriako/o7k/internal/resources/networks/networks"
@@ -24,11 +29,7 @@ import (
 	"github.com/akyriako/o7k/internal/resources/projects"
 	"github.com/akyriako/o7k/internal/resources/regions"
 	"github.com/akyriako/o7k/internal/resources/roles"
-	"github.com/akyriako/o7k/internal/resources/servers"
 	"github.com/akyriako/o7k/internal/resources/services"
-	"github.com/akyriako/o7k/internal/resources/snapshots"
-	"github.com/akyriako/o7k/internal/resources/volumes"
-	"github.com/akyriako/o7k/internal/resources/volumetypes"
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/akyriako/o7k/internal/ui"
@@ -134,16 +135,6 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) {
 		os.Exit(1)
 	}
 
-	if err := r.Register(servers.New(openstackContext)); err != nil {
-		fmt.Fprintf(os.Stderr, "error registering servers resource: %v\n", err)
-		os.Exit(1)
-	}
-
-	if err := r.Register(flavors.New(openstackContext)); err != nil {
-		fmt.Fprintf(os.Stderr, "error registering flavors resource: %v\n", err)
-		os.Exit(1)
-	}
-
 	if err := r.Register(networks.New(openstackContext)); err != nil {
 		fmt.Fprintf(os.Stderr, "error registering networks resource: %v\n", err)
 		os.Exit(1)
@@ -196,6 +187,21 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) {
 
 	if err := r.Register(volumetypes.New(openstackContext)); err != nil {
 		fmt.Fprintf(os.Stderr, "error registering volume types resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := r.Register(servers.New(openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering servers resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := r.Register(flavors.New(openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering flavors resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := r.Register(keypairs.New(openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering keypairs resource: %v\n", err)
 		os.Exit(1)
 	}
 }
