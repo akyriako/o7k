@@ -30,6 +30,12 @@ type clipboardResultMsg struct {
 type navigationEntry struct {
 	resource string
 	id       string
+	filter   *resourceFilter
+}
+
+type resourceFilter struct {
+	field string
+	value string
 }
 
 type autoRefreshMsg struct{}
@@ -95,6 +101,8 @@ func (m *Model) executeResourceCommand(key string) tea.Cmd {
 func (m *Model) switchResource(name string) tea.Cmd {
 	m.navigation = nil
 	m.navigateID = ""
+	m.filter = nil
+
 	m.detailMode = false
 	m.detailID = ""
 	m.detailContent = ""
@@ -137,6 +145,18 @@ func (m *Model) navigateResource(name string) tea.Cmd {
 	return cmd
 }
 
+func (m *Model) navigateFilteredResource(name string) tea.Cmd {
+	navigation := m.navigation
+	filter := m.filter
+
+	cmd := m.switchResource(name)
+
+	m.navigation = navigation
+	m.filter = filter
+
+	return cmd
+}
+
 func (m *Model) navigateBack() tea.Cmd {
 	if len(m.navigation) == 0 {
 		return nil
@@ -147,16 +167,35 @@ func (m *Model) navigateBack() tea.Cmd {
 
 	m.navigation = m.navigation[:last]
 	m.navigateID = entry.id
+	m.filter = entry.filter
 
 	navigation := m.navigation
 	navigateID := m.navigateID
+	filter := m.filter
 
 	cmd := m.switchResource(entry.resource)
 
 	m.navigation = navigation
 	m.navigateID = navigateID
+	m.filter = filter
 
 	return cmd
+}
+
+func filterResourceRows(rows []resource.Row, filter *resourceFilter) []resource.Row {
+	if filter == nil {
+		return rows
+	}
+
+	filtered := make([]resource.Row, 0, len(rows))
+
+	for _, row := range rows {
+		if row.Fields[filter.field] == filter.value {
+			filtered = append(filtered, row)
+		}
+	}
+
+	return filtered
 }
 
 func (m *Model) refreshResource() tea.Cmd {

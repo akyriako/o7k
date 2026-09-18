@@ -41,6 +41,7 @@ type Model struct {
 
 	navigation []navigationEntry
 	navigateID string
+	filter     *resourceFilter
 
 	detailMode    bool
 	detail        viewport.Model
@@ -244,6 +245,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 
+		msg.rows = filterResourceRows(msg.rows, m.filter)
 		columns := m.resource.Columns()
 		rows := make([]table.Row, 0, len(msg.rows))
 
@@ -344,6 +346,25 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.navigateID = msg.ID
 
 		return m, m.navigateResource(msg.Resource)
+
+	case resource.NavigateFilteredMsg:
+		cursor := m.table.Cursor()
+
+		if cursor >= 0 && cursor < len(m.resourceRows) {
+			m.navigation = append(m.navigation, navigationEntry{
+				resource: m.resource.Kind(),
+				id:       m.resourceRows[cursor].ID,
+				filter:   m.filter,
+			})
+		}
+
+		m.navigateID = ""
+		m.filter = &resourceFilter{
+			field: msg.Field,
+			value: msg.Value,
+		}
+
+		return m, m.navigateFilteredResource(msg.Resource)
 
 	case servers.ShowMsg:
 		if msg.Err != nil {
