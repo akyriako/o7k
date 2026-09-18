@@ -84,7 +84,7 @@ Press `Esc` to return to the previous resource and selection.
 
 | Service | Resources | Status |
 |---|---|---|
-| **Local / Auth** | contexts | ✅ |
+| **Local / Auth** | contexts | Partial |
 | **Keystone / Identity** | projects, users, groups, roles, domains | Partial |
 | **Keystone / Catalog** | services, endpoints, regions | ✅ |
 | **Cinder / Block Storage** | volumes, snapshots, volume types, volume backups | ✅ |
