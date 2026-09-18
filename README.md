@@ -83,7 +83,7 @@ Press `Esc` to return to the previous resource and selection.
 ## Currently Supported Resources
 
 | Service | Resources | Status |
-|---|---|---|
+|---|---|:-:|
 | **Local / Auth** | contexts | Partial |
 | **Keystone / Identity** | projects, users, groups, roles, domains | Partial |
 | **Keystone / Catalog** | catalog, services, endpoints, regions | ✅ |
