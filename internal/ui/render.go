@@ -57,7 +57,7 @@ func (m Model) renderHeaderContext(width int) string {
 
 func (m Model) renderHeaderCommands() string {
 	commands := []resource.Command{
-		{Key: "q", Description: "Quit"},
+		{Key: "ctrl+x", Description: "Quit"},
 		{Key: ":", Description: "Resource"},
 		{Key: "r", Description: "Refresh"},
 		{Key: "c", Description: "Copy"},

@@ -6,22 +6,21 @@ import (
 )
 
 var reservedCommandKeys = map[string]struct{}{
-	"q":     {},
-	":":     {},
-	"r":     {},
-	"esc":   {},
-	"enter": {},
+	"ctrl+x": {},
+	":":      {},
+	"r":      {},
+	"c":      {},
+	"esc":    {},
+	"enter":  {},
 }
 
 type Registry struct {
-	resources   map[string]Resource
-	commandKeys map[string]string
+	resources map[string]Resource
 }
 
 func NewRegistry() *Registry {
 	return &Registry{
-		resources:   make(map[string]Resource),
-		commandKeys: make(map[string]string),
+		resources: make(map[string]Resource),
 	}
 }
 
@@ -53,15 +52,12 @@ func (r *Registry) Register(resource Resource) error {
 		r.resources[normalize(name)] = resource
 	}
 
-	for _, command := range resource.Commands() {
-		r.commandKeys[normalize(command.Key)] = resource.Kind()
-	}
-
 	return nil
 }
 
 func (r *Registry) validateCommands(resource Resource) error {
 	defaultCount := 0
+	commandKeys := make(map[string]struct{})
 
 	for _, command := range resource.Commands() {
 		key := normalize(command.Key)
@@ -74,9 +70,11 @@ func (r *Registry) validateCommands(resource Resource) error {
 			return fmt.Errorf("resource %q command key %q is reserved", resource.Kind(), command.Key)
 		}
 
-		if owner, exists := r.commandKeys[key]; exists {
-			return fmt.Errorf("resource %q command key %q already used by resource %q", resource.Kind(), command.Key, owner)
+		if _, exists := commandKeys[key]; exists {
+			return fmt.Errorf("resource %q has duplicate command key %q", resource.Kind(), command.Key)
 		}
+
+		commandKeys[key] = struct{}{}
 
 		if command.Default {
 			defaultCount++
