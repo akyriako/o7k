@@ -13,7 +13,7 @@ configuration files from the following places:
 * `~/.config/openstack`
 * the current working directory
 
-> [!TIP]
+> [!Note]
 > All the discovered files will be automatically loaded as context in `o7k` 
 
 ### Global Controls
