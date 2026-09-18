@@ -1,6 +1,6 @@
 # 07k
 
-`o7k` (pronounced **oooo-sju-k** 🇸🇪) is a terminal UI for OpenStack, inspired by k9s. 
+`o7k` (pronounced **oooo-sju-k** 🇸🇪) is a terminal UI for OpenStack, **heavily** inspired by [k9s](https://github.com/derailed/k9s). 
 
 It provides a fast way to inspect and navigate OpenStack resources directly from the terminal.
 
