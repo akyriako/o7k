@@ -16,3 +16,15 @@ func (r *Resource) navigateToSubnets(row resource.Row) tea.Cmd {
 		}
 	}
 }
+
+func (r *Resource) navigateToPorts(row resource.Row) tea.Cmd {
+	networkID := row.ID
+
+	return func() tea.Msg {
+		return resource.NavigateFilteredMsg{
+			Resource: "ports",
+			Field:    "network_id",
+			Value:    networkID,
+		}
+	}
+}

@@ -17,7 +17,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-const refreshInterval = 10 * time.Second
+const refreshInterval = 30 * time.Second
 
 type Model struct {
 	registry     *resource.Registry

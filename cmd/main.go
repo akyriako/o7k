@@ -14,6 +14,7 @@ import (
 	"github.com/akyriako/o7k/internal/resources/endpoints"
 	"github.com/akyriako/o7k/internal/resources/flavors"
 	"github.com/akyriako/o7k/internal/resources/networks/networks"
+	"github.com/akyriako/o7k/internal/resources/networks/ports"
 	"github.com/akyriako/o7k/internal/resources/networks/subnets"
 	"github.com/akyriako/o7k/internal/resources/projects"
 	"github.com/akyriako/o7k/internal/resources/regions"
@@ -142,6 +143,11 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) {
 
 	if err := r.Register(subnets.New(openstackContext)); err != nil {
 		fmt.Fprintf(os.Stderr, "error registering subnets resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := r.Register(ports.New(openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering ports resource: %v\n", err)
 		os.Exit(1)
 	}
 }
