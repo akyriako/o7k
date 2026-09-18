@@ -16,3 +16,15 @@ func (r *Resource) navigateToRouter(row resource.Row) tea.Cmd {
 		}
 	}
 }
+
+func (r *Resource) navigateToPort(row resource.Row) tea.Cmd {
+	portID := row.Fields["port_id"]
+
+	return func() tea.Msg {
+		return resource.NavigateFilteredMsg{
+			Resource: "ports",
+			Field:    "id",
+			Value:    portID,
+		}
+	}
+}

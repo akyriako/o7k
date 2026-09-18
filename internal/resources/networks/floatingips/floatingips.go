@@ -45,7 +45,8 @@ func (r *Resource) Columns() []resource.Column {
 
 func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
-		{Key: "shift-r", Description: "Router"},
+		{Key: "shift-r", Description: "Router", Default: true},
+		{Key: "shift-p", Description: "Port"},
 	}
 }
 
@@ -90,6 +91,8 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	switch command.Key {
 	case "shift-r":
 		return r.navigateToRouter(row)
+	case "shift-p":
+		return r.navigateToPort(row)
 	}
 
 	return nil
