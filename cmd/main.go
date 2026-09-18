@@ -8,6 +8,7 @@ import (
 	"github.com/akyriako/o7k/internal/logging"
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
+	"github.com/akyriako/o7k/internal/resources/catalog"
 	"github.com/akyriako/o7k/internal/resources/contexts"
 	"github.com/akyriako/o7k/internal/resources/domains"
 	"github.com/akyriako/o7k/internal/resources/endpoints"
@@ -87,6 +88,11 @@ func main() {
 }
 
 func registerAll(r *resource.Registry, openstackContext *openstack.Context) {
+	if err := r.Register(catalog.New(openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering catalog resource: %v\n", err)
+		os.Exit(1)
+	}
+
 	if err := r.Register(services.New(openstackContext)); err != nil {
 		fmt.Fprintf(os.Stderr, "error registering services resource: %v\n", err)
 		os.Exit(1)
