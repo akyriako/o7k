@@ -177,10 +177,14 @@ func (m Model) renderTable() string {
 }
 
 func (m Model) renderDetails() string {
-	title := " server details "
+	title := " details "
 
-	if m.detailID != "" {
-		title = " server " + m.detailID + " "
+	if m.resource != nil {
+		title = " " + m.resource.Kind() + " details "
+	}
+
+	if m.resource != nil && m.detailID != "" {
+		title = " " + m.resource.Kind() + " " + m.detailID + " "
 	}
 
 	innerWidth := max(m.width-2, 1)
