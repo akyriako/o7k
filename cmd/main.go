@@ -12,8 +12,10 @@ import (
 	"github.com/akyriako/o7k/internal/resources/blockstorage/volumes"
 	"github.com/akyriako/o7k/internal/resources/blockstorage/volumetypes"
 	"github.com/akyriako/o7k/internal/resources/catalog"
+	"github.com/akyriako/o7k/internal/resources/compute/availabilityzones"
 	"github.com/akyriako/o7k/internal/resources/compute/flavors"
 	"github.com/akyriako/o7k/internal/resources/compute/keypairs"
+	"github.com/akyriako/o7k/internal/resources/compute/servergroups"
 	"github.com/akyriako/o7k/internal/resources/compute/servers"
 	"github.com/akyriako/o7k/internal/resources/contexts"
 	"github.com/akyriako/o7k/internal/resources/domains"
@@ -202,6 +204,16 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) {
 
 	if err := r.Register(keypairs.New(openstackContext)); err != nil {
 		fmt.Fprintf(os.Stderr, "error registering keypairs resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := r.Register(servergroups.New(openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering server groups resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := r.Register(availabilityzones.New(openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering availability zones resource: %v\n", err)
 		os.Exit(1)
 	}
 }
