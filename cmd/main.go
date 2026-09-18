@@ -13,6 +13,7 @@ import (
 	"github.com/akyriako/o7k/internal/resources/domains"
 	"github.com/akyriako/o7k/internal/resources/endpoints"
 	"github.com/akyriako/o7k/internal/resources/flavors"
+	"github.com/akyriako/o7k/internal/resources/networks/floatingips"
 	"github.com/akyriako/o7k/internal/resources/networks/networks"
 	"github.com/akyriako/o7k/internal/resources/networks/ports"
 	"github.com/akyriako/o7k/internal/resources/networks/routers"
@@ -154,6 +155,11 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) {
 
 	if err := r.Register(routers.New(openstackContext)); err != nil {
 		fmt.Fprintf(os.Stderr, "error registering routers resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := r.Register(floatingips.New(openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering floating IPs resource: %v\n", err)
 		os.Exit(1)
 	}
 }

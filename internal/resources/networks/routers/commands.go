@@ -16,3 +16,15 @@ func (r *Resource) navigateToPorts(row resource.Row) tea.Cmd {
 		}
 	}
 }
+
+func (r *Resource) navigateToFloatingIPs(row resource.Row) tea.Cmd {
+	routerID := row.ID
+
+	return func() tea.Msg {
+		return resource.NavigateFilteredMsg{
+			Resource: "floatingips",
+			Field:    "router_id",
+			Value:    routerID,
+		}
+	}
+}

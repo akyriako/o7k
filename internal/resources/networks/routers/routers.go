@@ -45,6 +45,7 @@ func (r *Resource) Columns() []resource.Column {
 func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
 		{Key: "shift-p", Description: "Ports"},
+		{Key: "shift-f", Description: "Floating IPs"},
 	}
 }
 
@@ -87,6 +88,8 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	switch command.Key {
 	case "shift-p":
 		return r.navigateToPorts(row)
+	case "shift-f":
+		return r.navigateToFloatingIPs(row)
 	}
 
 	return nil
