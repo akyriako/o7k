@@ -86,7 +86,7 @@ Press `Esc` to return to the previous resource and selection.
 |---|---|---|
 | **Local / Auth** | contexts | Partial |
 | **Keystone / Identity** | projects, users, groups, roles, domains | Partial |
-| **Keystone / Catalog** | services, endpoints, regions | ✅ |
+| **Keystone / Catalog** | catalog, services, endpoints, regions | ✅ |
 | **Cinder / Block Storage** | volumes, snapshots, volume types, volume backups | ✅ |
 | **Glance / Image** | images | ✅ |
 | **Nova / Compute** | servers, flavors | ✅ |
