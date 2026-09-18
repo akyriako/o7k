@@ -95,6 +95,7 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 			flavorName = flavorID
 		}
 
+		//fmt.Printf("SERVER IMAGE: server=%q image=%#v\n", server.Name, server.Image)
 		imageID, _ := server.Image["id"].(string)
 
 		image := imageID

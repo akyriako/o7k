@@ -26,7 +26,9 @@ import (
 	"github.com/akyriako/o7k/internal/resources/roles"
 	"github.com/akyriako/o7k/internal/resources/servers"
 	"github.com/akyriako/o7k/internal/resources/services"
+	"github.com/akyriako/o7k/internal/resources/snapshots"
 	"github.com/akyriako/o7k/internal/resources/volumes"
+	"github.com/akyriako/o7k/internal/resources/volumetypes"
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/akyriako/o7k/internal/ui"
@@ -184,6 +186,16 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) {
 
 	if err := r.Register(volumes.New(openstackContext)); err != nil {
 		fmt.Fprintf(os.Stderr, "error registering volumes resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := r.Register(snapshots.New(openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering snapshots resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := r.Register(volumetypes.New(openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering volume types resource: %v\n", err)
 		os.Exit(1)
 	}
 }
