@@ -7,7 +7,7 @@
 | **Glance / Image** | images | Essential | ✅ |
 | **Keystone / Identity** | projects, users, groups, roles, domains | Essential | Partial |
 | **Keystone / Catalog** | services, endpoints, regions | Essential | ✅ |
-| **Nova / Compute** | keypairs, server groups, availability zones | Useful | ⬜ |
+| **Nova / Compute** | keypairs, server groups, availability zones | Useful | ✅ |
 | **Neutron / Network** | security-group rules | Useful | ✅ |
 | **Neutron / Network** | router interfaces | Useful | ✅ |
 | **Cinder / Block Storage** | volume backups | Useful | ⬜ |

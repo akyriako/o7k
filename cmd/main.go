@@ -8,6 +8,7 @@ import (
 	"github.com/akyriako/o7k/internal/logging"
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
+	"github.com/akyriako/o7k/internal/resources/blockstorage/backups"
 	"github.com/akyriako/o7k/internal/resources/blockstorage/snapshots"
 	"github.com/akyriako/o7k/internal/resources/blockstorage/volumes"
 	"github.com/akyriako/o7k/internal/resources/blockstorage/volumetypes"
@@ -214,6 +215,11 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) {
 
 	if err := r.Register(availabilityzones.New(openstackContext)); err != nil {
 		fmt.Fprintf(os.Stderr, "error registering availability zones resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := r.Register(backups.New(openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering volume backups resource: %v\n", err)
 		os.Exit(1)
 	}
 }
