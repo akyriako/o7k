@@ -1,0 +1,57 @@
+version: 2
+
+project_name: o7k
+
+builds:
+  - id: o7k
+    main: ./cmd/main.go
+    binary: o7k
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X github.com/akyriako/o7k/internal/version.Version={{.Version}}
+      - -X github.com/akyriako/o7k/internal/version.Commit={{.ShortCommit}}
+      - -X github.com/akyriako/o7k/internal/version.BuildDate={{.Date}}
+
+archives:
+  - id: o7k
+    ids:
+      - o7k
+    formats:
+      - tar.gz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- .Arch }}
+
+nfpms:
+  - id: o7k
+    ids:
+      - o7k
+    package_name: o7k
+    vendor: akyriako
+    homepage: https://github.com/akyriako/o7k
+    maintainer: akyriako
+    description: Terminal UI for OpenStack
+    license: GPL-3.0
+    bindir: /usr/bin
+    formats:
+      - deb
+      - rpm
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  use: git
+  sort: asc
