@@ -1,10 +1,20 @@
 # o7k
+![Status](https://img.shields.io/badge/status-early%20beta-orange)
 
 `o7k` (pronounced **oooo-sju-k** 🇸🇪) is a terminal UI for OpenStack, **heavily** inspired by [k9s](https://github.com/derailed/k9s) ❣️ 
 
 It provides a fast way to inspect and navigate OpenStack resources directly from the terminal.
 
-<img width="2544" height="1247" alt="Screenshot from 2026-09-18 13-00-06" src="https://github.com/user-attachments/assets/55507289-02e6-4f91-8e5f-92ed6b14ab09" />
+<img width="2544" height="1247" alt="Screenshot from 2026-09-18 13-00-06" src="https://github.com/user-attachments/assets/55507289-02e6-4f91-8e5f-92ed6b14ab09" />  
+
+> [!CAUTION]
+> **`o7k` is early beta and under active development.**
+>
+> Expect bugs, incomplete features, and breaking changes. Behavior and configuration may change without notice.
+>
+> **There is no official release or distribution packages yet.** The first release is planned for the coming weeks, so stay tuned!
+>
+> Use against production OpenStack environments at your own risk.
 
 ## Usage
 
