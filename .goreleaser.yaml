@@ -49,6 +49,18 @@ nfpms:
       - deb
       - rpm
 
+homebrew_casks:
+  - name: o7k
+    ids:
+      - o7k
+    repository:
+      owner: akyriako
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    homepage: https://github.com/akyriako/o7k
+    description: Terminal UI for OpenStack
+    license: GPL-3.0
+
 checksum:
   name_template: checksums.txt
 
