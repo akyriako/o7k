@@ -25,15 +25,23 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      - name: Prepare RPM signing key
+        env:
+          RPM_GPG_PRIVATE_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
+        run: |
+          printf '%s\n' "$RPM_GPG_PRIVATE_KEY" > "${RUNNER_TEMP}/o7k-rpm-signing-key.asc"
+          chmod 600 "${RUNNER_TEMP}/o7k-rpm-signing-key.asc"
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
-          version: v2.15.4
+          version: v2.18.2
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          RPM_SIGNING_KEY_FILE: ${{ runner.temp }}/o7k-rpm-signing-key.asc
 
   apt:
     name: Publish APT Repository

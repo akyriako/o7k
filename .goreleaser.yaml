@@ -48,6 +48,9 @@ nfpms:
     formats:
       - deb
       - rpm
+    rpm:
+      signature:
+        key_file: "{{ .Env.RPM_SIGNING_KEY_FILE }}"
 
 homebrew_casks:
   - name: o7k

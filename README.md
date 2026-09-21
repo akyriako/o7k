@@ -167,7 +167,7 @@ sudo tee /etc/yum.repos.d/o7k.repo >/dev/null <<'EOF'
 name=o7k
 baseurl=https://akyriako.github.io/o7k-rpm/
 enabled=1
-gpgcheck=0
+gpgcheck=1
 repo_gpgcheck=1
 gpgkey=https://akyriako.github.io/o7k-rpm/o7k-rpm-signing-key.asc
 EOF
