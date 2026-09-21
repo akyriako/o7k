@@ -4,6 +4,7 @@ TAG ?= 0.1.0
 ITERATION ?= 1
 TARGET_ENV ?= dev
 VERSION ?= $(TAG)-$(TARGET_ENV).$(ITERATION)
+#VERSION ?= $(TAG)
 
 # Build metadata
 BIN_VERSION ?= $(VERSION)
