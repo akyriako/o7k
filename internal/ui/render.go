@@ -131,9 +131,11 @@ func (m Model) renderTable() string {
 			"┘",
 	)
 
-	body := lipgloss.NewStyle().
-		Width(innerWidth).
-		Render(m.table.View())
+	body := horizontalSlice(
+		m.table.View(),
+		m.tableXOffset,
+		innerWidth,
+	)
 
 	if m.loaded && !m.loading && m.itemCount == 0 {
 		lines := strings.Split(body, "\n")

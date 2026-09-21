@@ -24,8 +24,11 @@ type Model struct {
 	registry     *resource.Registry
 	resource     resource.Resource
 	resourceRows []resource.Row
+
 	table        table.Model
-	err          error
+	tableXOffset int
+
+	err error
 
 	itemCount         int
 	status            string
@@ -220,6 +223,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "enter":
 			return m, m.executeDefaultCommand()
+
+		case "left":
+			m.tableXOffset = max(m.tableXOffset-4, 0)
+			return m, nil
+
+		case "right":
+			m.tableXOffset = min(
+				m.tableXOffset+4,
+				m.maxTableXOffset(),
+			)
+			return m, nil
 		}
 
 		if cmd := m.executeResourceCommand(commandKey(msg)); cmd != nil {
@@ -554,4 +568,9 @@ func (m *Model) Resize() {
 	}
 
 	m.table.SetColumns(columns)
+
+	m.tableXOffset = min(
+		m.tableXOffset,
+		m.maxTableXOffset(),
+	)
 }

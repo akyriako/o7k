@@ -127,6 +127,7 @@ func (m *Model) switchResource(name string) tea.Cmd {
 	m.table.SetRows(nil)
 	m.table.SetCursor(0)
 	m.resourceRows = nil
+	m.tableXOffset = 0
 
 	m.Resize()
 
