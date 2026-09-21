@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestDiscoverCloudsFileExplicitPath(t *testing.T) {
+func TestDiscoverCloudsFilesExplicitPath(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "clouds.yaml")
 
@@ -18,7 +18,7 @@ func TestDiscoverCloudsFileExplicitPath(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got, err := DiscoverCloudsFile(path)
+	got, err := DiscoverCloudsFiles(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -28,11 +28,11 @@ func TestDiscoverCloudsFileExplicitPath(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got != want {
-		t.Fatalf(
-			"DiscoverCloudsFile() = %q, want %q",
-			got,
-			want,
-		)
+	if len(got) != 1 {
+		t.Fatalf("DiscoverCloudsFiles() returned %d paths, want 1", len(got))
+	}
+
+	if got[0] != want {
+		t.Fatalf("DiscoverCloudsFiles()[0] = %q, want %q", got[0], want)
 	}
 }

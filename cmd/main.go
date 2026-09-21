@@ -64,18 +64,19 @@ func main() {
 
 	registry := resource.NewRegistry()
 
-	cloudsPath, err := openstack.DiscoverCloudsFile("")
+	cloudsPaths, err := openstack.DiscoverCloudsFiles("")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error discovering clouds.yaml: %v\n", err)
 		os.Exit(1)
 	}
-	availableClouds, err := openstack.LoadClouds(cloudsPath)
+
+	availableClouds, err := openstack.LoadClouds(cloudsPaths)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error loading clouds.yaml: %v\n", err)
 		os.Exit(1)
 	}
 
-	if err := registry.Register(contexts.New(availableClouds.Path)); err != nil {
+	if err := registry.Register(contexts.New(cloudsPaths)); err != nil {
 		fmt.Fprintf(os.Stderr, "error registering contexts resource: %v\n", err)
 		os.Exit(1)
 	}
@@ -89,9 +90,7 @@ func main() {
 		Identity: cloud.Identity,
 	}
 
-	logger.Info("connected to OpenStack", "cloud", openstackContext.Cloud)
-
-	if err := openstackContext.Connect(context.Background(), cloudsPath); err != nil {
+	if err := openstackContext.Connect(context.Background(), cloud.Path); err != nil {
 		fmt.Fprintf(os.Stderr, "error connecting to OpenStack: %v\n", err)
 		os.Exit(1)
 	}

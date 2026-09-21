@@ -15,11 +15,11 @@ type ActivatedMsg struct {
 }
 
 func (r *Resource) activate(row resource.Row) tea.Cmd {
-	cloudsPath := r.cloudsPath
+	cloudsPaths := r.cloudsPaths
 	cloudName := row.ID
 
 	return func() tea.Msg {
-		clouds, err := openstack.LoadClouds(cloudsPath)
+		clouds, err := openstack.LoadClouds(cloudsPaths)
 		if err != nil {
 			return ActivatedMsg{Err: err}
 		}
@@ -39,7 +39,7 @@ func (r *Resource) activate(row resource.Row) tea.Cmd {
 			Project:  cloud.Project,
 		}
 
-		err = next.Connect(context.Background(), cloudsPath)
+		err = next.Connect(context.Background(), cloud.Path)
 
 		return ActivatedMsg{
 			Context: &next,
