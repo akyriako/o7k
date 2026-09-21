@@ -18,6 +18,7 @@ import (
 	"github.com/akyriako/o7k/internal/resources/compute/servergroups"
 	"github.com/akyriako/o7k/internal/resources/compute/servers"
 	"github.com/akyriako/o7k/internal/resources/contexts"
+	"github.com/akyriako/o7k/internal/resources/database/instances"
 	"github.com/akyriako/o7k/internal/resources/identity/catalog"
 	"github.com/akyriako/o7k/internal/resources/identity/domains"
 	"github.com/akyriako/o7k/internal/resources/identity/endpoints"
@@ -247,6 +248,11 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) {
 
 	if err := r.Register(stacks.New(openstackContext)); err != nil {
 		fmt.Fprintf(os.Stderr, "error registering stacks resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := r.Register(instances.New(openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering database instances resource: %v\n", err)
 		os.Exit(1)
 	}
 }
