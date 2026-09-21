@@ -8,7 +8,7 @@ It provides a fast way to inspect and navigate OpenStack resources directly from
 <img width="2544" height="1247" alt="Screenshot from 2026-09-18 13-00-06" src="https://github.com/user-attachments/assets/55507289-02e6-4f91-8e5f-92ed6b14ab09" />  
 
 > [!CAUTION]
-> ****o7k** is early beta and under active development.**
+> **o7k is early beta and under active development.**
 >
 > Expect bugs, incomplete features, and breaking changes. Behavior and configuration may change without notice.
 >
@@ -195,7 +195,7 @@ o7k --version
 
 ### Adding a New OpenStack Resource
 
-o7k resources are organized by OpenStack service and implement a common resource interface. Adding support for a new resource normally involves four areas:
+**o7k** resources are organized by OpenStack service and implement a common resource interface. Adding support for a new resource normally involves four areas:
 
 1. Add or reuse the OpenStack service client in `openstack.Context`.
 2. Implement the resource under `internal/resources/<service>/`.
@@ -311,7 +311,7 @@ func (r *Resource) Aliases() []string {
 }
 ```
 
-- `Kind()` is the canonical resource name used by o7k.  
+- `Kind()` is the canonical resource name used by **o7k**.  
 - `Aliases()` provides alternative names accepted by the resource command:
 
 ```text
@@ -470,7 +470,7 @@ func (r *Resource) Commands() []resource.Command {
 }
 ```
 
->[!Tip]
+>[!Caution]
 > Keep global **o7k** shortcuts in mind when selecting keys.
 >
 > The following keys are reserved globally:
@@ -516,7 +516,7 @@ The UI handles `resource.DetailsMsg` generically and renders its JSON content in
 
 #### 8. Add navigation to related resources
 
-Relationships between OpenStack resources should use o7k's generic navigation messages rather than implementing navigation directly in the UI.
+Relationships between OpenStack resources should use **o7k**'s generic navigation messages rather than implementing navigation directly in the UI.
 
 To navigate directly to another resource:
 
