@@ -1,14 +1,14 @@
 # o7k
 ![Status](https://img.shields.io/badge/status-early%20beta-orange)
 
-`o7k` (pronounced **oooo-sju-k** 🇸🇪) is a terminal UI for OpenStack, **heavily** inspired by [k9s](https://github.com/derailed/k9s) ❣️ 
+**o7k** (pronounced **oooo-sju-k** 🇸🇪) is a terminal UI for OpenStack, **heavily** inspired by [k9s](https://github.com/derailed/k9s) ❣️ 
 
 It provides a fast way to inspect and navigate OpenStack resources directly from the terminal.
 
 <img width="2544" height="1247" alt="Screenshot from 2026-09-18 13-00-06" src="https://github.com/user-attachments/assets/55507289-02e6-4f91-8e5f-92ed6b14ab09" />  
 
 > [!CAUTION]
-> **`o7k` is early beta and under active development.**
+> ****o7k** is early beta and under active development.**
 >
 > Expect bugs, incomplete features, and breaking changes. Behavior and configuration may change without notice.
 >
@@ -18,7 +18,7 @@ It provides a fast way to inspect and navigate OpenStack resources directly from
 
 ## Usage
 
-`o7k` uses the standard OpenStack `clouds.yaml` configuration and automatically discovers the 
+**o7k** uses the standard OpenStack `clouds.yaml` configuration and automatically discovers the 
 configuration files from the following places:
 
 * `/etc/openstack`
@@ -26,7 +26,7 @@ configuration files from the following places:
 * the current working directory
 
 > [!Note]
-> All the discovered files will be automatically loaded as context in `o7k` 
+> All the discovered files will be automatically loaded as context in **o7k** 
 
 ### Global Controls
 
@@ -40,7 +40,7 @@ configuration files from the following places:
 | `Ctrl+X` | Quit |
 
 > [!TIP] 
-> `o7k` will automatically refresh the current resource every 30s, you don't need to explicitely press `r`.
+> **o7k** will automatically refresh the current resource every 30s, you don't need to explicitely press `r`.
 
 To switch between resources, press `:` and enter a resource name or alias (**exactly** as you are being used to in k9s)
 
@@ -57,7 +57,7 @@ Resource-specific commands are displayed in the _header_ while a resource is act
 
 ## Resource Navigation
 
-`o7k` supports navigation between related OpenStack resources.
+**o7k** supports navigation between related OpenStack resources.
 
 Examples include:
 
@@ -84,7 +84,7 @@ Snapshot            -> Volume
 Backup              -> Volume
 ```
 
-When navigating to a related collection, `o7k` filters the destination resource automatically.
+When navigating to a related collection, **o7k** filters the destination resource automatically.
 
 <img width="2544" height="1247" alt="Screenshot from 2026-09-18 13-01-45" src="https://github.com/user-attachments/assets/10652fed-f76e-4bd7-bdee-bafe20fb39a7" />
 
@@ -109,7 +109,7 @@ Press `Esc` to return to the previous resource and selection.
 
 ### Homebrew
 
-Install `o7k` using the Homebrew tap:
+Install **o7k** using the Homebrew tap:
 
 ```bash
 brew install --cask akyriako/tap/o7k
@@ -123,7 +123,7 @@ brew upgrade --cask o7k
 
 ### Debian / Ubuntu
 
-Add the `o7k` repository signing key:
+Add the **o7k** repository signing key:
 
 ```bash
 curl -fsSL https://akyriako.github.io/o7k-apt/o7k-archive-keyring.gpg \
@@ -137,7 +137,7 @@ echo "deb [signed-by=/usr/share/keyrings/o7k-archive-keyring.gpg] https://akyria
   | sudo tee /etc/apt/sources.list.d/o7k.list
 ```
 
-Install `o7k`:
+Install **o7k**:
 
 ```bash
 sudo apt update
@@ -159,7 +159,7 @@ Import the repository signing key:
 sudo rpm --import https://akyriako.github.io/o7k-rpm/o7k-rpm-signing-key.asc
 ```
 
-Add the `o7k` repository:
+Add the **o7k** repository:
 
 ```bash
 sudo tee /etc/yum.repos.d/o7k.repo >/dev/null <<'EOF'
@@ -173,7 +173,7 @@ gpgkey=https://akyriako.github.io/o7k-rpm/o7k-rpm-signing-key.asc
 EOF
 ```
 
-Install `o7k`:
+Install **o7k**:
 
 ```bash
 sudo dnf install o7k
@@ -271,7 +271,7 @@ internal/resources/
 
 #### 3. Implement the resource interface
 
-Every resource implements the common `o7k` resource contract.
+Every resource implements the common **o7k** resource contract.
 
 A typical resource looks like:
 
@@ -369,7 +369,7 @@ func (r *Resource) Columns() []resource.Column {
 - `Flex` controls how additional terminal width is distributed. Use `Flex: 0` for columns that should remain fixed and a positive value for columns that may expand.
 
 > [!Tip]
-> Do not shrink UUID columns to make a resource fit into a small terminal. `o7k` supports horizontal table scrolling for tables wider than the available terminal.
+> Do not shrink UUID columns to make a resource fit into a small terminal. **o7k** supports horizontal table scrolling for tables wider than the available terminal.
 
 #### 5. Implement `List()`
 
@@ -390,7 +390,7 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 }
 ```
 
-A typical conversion from an OpenStack object to an `o7k` row looks like:
+A typical conversion from an OpenStack object to an **o7k** row looks like:
 
 ```go
 rows := make([]resource.Row, 0, len(items))
@@ -450,7 +450,7 @@ func (r *Resource) Commands() []resource.Command {
 }
 ```
 
-Do not automatically add `Show` to every resource. `Show` support in `o7k` is opt-in.
+Do not automatically add `Show` to every resource. `Show` support in **o7k** is opt-in.
 
 Resources can also expose navigation commands to related resources. For example:
 
@@ -471,7 +471,7 @@ func (r *Resource) Commands() []resource.Command {
 ```
 
 >[!Tip]
-> Keep global `o7k` shortcuts in mind when selecting keys.
+> Keep global **o7k** shortcuts in mind when selecting keys.
 >
 > The following keys are reserved globally:
 > 
@@ -569,7 +569,7 @@ Fields: map[string]string{
 
 #### 9. Register the resource
 
-Creating the package is not enough. The resource must be registered so `o7k` knows it exists.
+Creating the package is not enough. The resource must be registered so **o7k** knows it exists.
 
 Add the resource package to the imports in `cmd/main.go`.
 
@@ -589,7 +589,7 @@ registry.Register(
 )
 ```
 
-Registration makes the canonical resource name and its aliases available through the `o7k` resource command.
+Registration makes the canonical resource name and its aliases available through the **o7k** resource command.
 
 For example:
 
