@@ -73,6 +73,10 @@ func GetBuildInfo() VersionInfo {
 	}
 }
 
+func (v VersionInfo) GetVersion() string {
+	return normalizeSemver(v.Version)
+}
+
 func getBuildInfoSetting(info *debug.BuildInfo, key string) string {
 	for _, setting := range info.Settings {
 		if setting.Key == key {
