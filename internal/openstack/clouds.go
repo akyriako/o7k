@@ -8,6 +8,8 @@ import (
 )
 
 type Cloud struct {
+	Path string
+
 	Name     string
 	Region   string
 	Project  string
@@ -16,7 +18,6 @@ type Cloud struct {
 }
 
 type Clouds struct {
-	Path  string
 	Items []Cloud
 }
 
@@ -35,7 +36,34 @@ type cloudAuth struct {
 	Domain  string `yaml:"domain_name"`
 }
 
-func LoadClouds(path string) (*Clouds, error) {
+func LoadClouds(paths []string) (*Clouds, error) {
+	result := &Clouds{}
+	seen := make(map[string]struct{})
+
+	for _, path := range paths {
+		clouds, err := loadCloudsFile(path)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, cloud := range clouds.Items {
+			if _, exists := seen[cloud.Name]; exists {
+				continue
+			}
+
+			seen[cloud.Name] = struct{}{}
+			result.Items = append(result.Items, cloud)
+		}
+	}
+
+	if len(result.Items) == 0 {
+		return nil, fmt.Errorf("no clouds found")
+	}
+
+	return result, nil
+}
+
+func loadCloudsFile(path string) (*Clouds, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("reading clouds file %q: %w", path, err)
@@ -62,13 +90,9 @@ func LoadClouds(path string) (*Clouds, error) {
 
 	for _, name := range names {
 		config := file.Clouds[name]
-
 		region := config.Region
-		//if region == "" {
-		//	region = "*"
-		//}
-
 		items = append(items, Cloud{
+			Path:     path,
 			Name:     name,
 			Region:   region,
 			Project:  config.Auth.Project,
@@ -78,7 +102,6 @@ func LoadClouds(path string) (*Clouds, error) {
 	}
 
 	return &Clouds{
-		Path:  path,
 		Items: items,
 	}, nil
 }

@@ -9,9 +9,14 @@ import (
 
 const cloudsFileName = "clouds.yaml"
 
-func DiscoverCloudsFile(explicitPath string) (string, error) {
+func DiscoverCloudsFiles(explicitPath string) ([]string, error) {
 	if explicitPath != "" {
-		return validateCloudsFile(explicitPath)
+		path, err := validateCloudsFile(explicitPath)
+		if err != nil {
+			return nil, err
+		}
+
+		return []string{path}, nil
 	}
 
 	paths := []string{
@@ -25,6 +30,8 @@ func DiscoverCloudsFile(explicitPath string) (string, error) {
 
 	paths = append(paths, cloudsFileName)
 
+	discovered := make([]string, 0, len(paths))
+
 	for _, path := range paths {
 		info, err := os.Stat(path)
 
@@ -33,15 +40,25 @@ func DiscoverCloudsFile(explicitPath string) (string, error) {
 				continue
 			}
 
-			return filepath.Abs(path)
+			absolutePath, err := filepath.Abs(path)
+			if err != nil {
+				return nil, fmt.Errorf("resolving clouds file %q: %w", path, err)
+			}
+
+			discovered = append(discovered, absolutePath)
+			continue
 		}
 
 		if !errors.Is(err, os.ErrNotExist) {
-			return "", fmt.Errorf("checking clouds file %q: %w", path, err)
+			return nil, fmt.Errorf("checking clouds file %q: %w", path, err)
 		}
 	}
 
-	return "", fmt.Errorf("clouds.yaml not found")
+	if len(discovered) == 0 {
+		return nil, fmt.Errorf("clouds.yaml not found")
+	}
+
+	return discovered, nil
 }
 
 func validateCloudsFile(path string) (string, error) {
