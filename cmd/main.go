@@ -18,6 +18,8 @@ import (
 	"github.com/akyriako/o7k/internal/resources/compute/servergroups"
 	"github.com/akyriako/o7k/internal/resources/compute/servers"
 	"github.com/akyriako/o7k/internal/resources/contexts"
+	"github.com/akyriako/o7k/internal/resources/dns/recordsets"
+	"github.com/akyriako/o7k/internal/resources/dns/zones"
 	"github.com/akyriako/o7k/internal/resources/identity/catalog"
 	"github.com/akyriako/o7k/internal/resources/identity/domains"
 	"github.com/akyriako/o7k/internal/resources/identity/endpoints"
@@ -247,6 +249,16 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) {
 
 	if err := r.Register(stacks.New(openstackContext)); err != nil {
 		fmt.Fprintf(os.Stderr, "error registering stacks resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := r.Register(zones.New(openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering dns zones resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := r.Register(recordsets.New(openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering dns recordsets resource: %v\n", err)
 		os.Exit(1)
 	}
 }

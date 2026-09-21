@@ -162,3 +162,18 @@ func (c *Context) OrchestrationV1() (*gophercloud.ServiceClient, error) {
 
 	return client, nil
 }
+
+func (c *Context) DNSV2() (*gophercloud.ServiceClient, error) {
+	if c.Provider == nil {
+		return nil, fmt.Errorf("context %q is not connected", c.Cloud)
+	}
+
+	client, err := openstack.NewDNSV2(c.Provider, gophercloud.EndpointOpts{
+		Region: c.Region,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("creating DNS client: %w", err)
+	}
+
+	return client, nil
+}
