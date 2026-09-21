@@ -100,6 +100,9 @@ Press `Esc` to return to the previous resource and selection.
 | **Neutron / Network** | networks, subnets, ports, routers, floating IPs, security groups | ✅ |
 | **Neutron / Network** | security-group rules | ✅ |
 | **Neutron / Network** | router interfaces | ⬜ |
+| **Designate / DNS** | zones, recordsets | ✅ |
+| **Heat / Orchestration** | stacks | Partial |
+| **Trove / Databases** | instances | ⬜ |
 
 ## Installation
 
