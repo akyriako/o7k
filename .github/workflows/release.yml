@@ -1,0 +1,178 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Prepare RPM signing key
+        env:
+          RPM_GPG_PRIVATE_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
+        run: |
+          printf '%s\n' "$RPM_GPG_PRIVATE_KEY" > "${RUNNER_TEMP}/o7k-rpm-signing-key.asc"
+          chmod 600 "${RUNNER_TEMP}/o7k-rpm-signing-key.asc"
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: v2.18.2
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          RPM_SIGNING_KEY_FILE: ${{ runner.temp }}/o7k-rpm-signing-key.asc
+
+  apt:
+    name: Publish APT Repository
+    needs: release
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout o7k
+        uses: actions/checkout@v4
+        with:
+          path: o7k
+          fetch-depth: 0
+
+      - name: Checkout APT repository
+        uses: actions/checkout@v4
+        with:
+          repository: akyriako/o7k-apt
+          token: ${{ secrets.APT_REPO_TOKEN }}
+          path: o7k-apt
+
+      - name: Install APT repository tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev apt-utils gnupg
+
+      - name: Import APT signing key
+        env:
+          APT_GPG_PRIVATE_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
+        run: |
+          printf '%s\n' "$APT_GPG_PRIVATE_KEY" | gpg --batch --import
+
+      - name: Download release packages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p o7k/dist
+          gh release download "${GITHUB_REF_NAME}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --pattern '*.deb' \
+            --dir o7k/dist
+
+      - name: Update APT repository
+        env:
+          APT_GPG_KEY_ID: 69138CAAC1202EE4787B2B32998D3812C5C50DF3
+        run: |
+          ./o7k/scripts/update-apt-repo.sh \
+            ./o7k/dist \
+            ./o7k-apt
+
+      - name: Publish APT repository
+        working-directory: o7k-apt
+        run: |
+          git config user.name "o7k release"
+          git config user.email "o7k@rhynosaur.com"
+
+          git add dists pool
+
+          if git diff --cached --quiet; then
+            echo "No APT repository changes to publish."
+            exit 0
+          fi
+
+          git commit -m "publish ${GITHUB_REF_NAME}"
+          git push
+
+  rpm:
+    name: Publish RPM Repository
+    needs: release
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout o7k
+        uses: actions/checkout@v4
+        with:
+          path: o7k
+          fetch-depth: 0
+
+      - name: Checkout RPM repository
+        uses: actions/checkout@v4
+        with:
+          repository: akyriako/o7k-rpm
+          token: ${{ secrets.RPM_REPO_TOKEN }}
+          path: o7k-rpm
+
+      - name: Install RPM repository tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y createrepo-c gnupg
+
+      - name: Import RPM signing key
+        env:
+          RPM_GPG_PRIVATE_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
+        run: |
+          printf '%s\n' "$RPM_GPG_PRIVATE_KEY" | gpg --batch --import
+
+      - name: Download release packages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p o7k/dist
+          gh release download "${GITHUB_REF_NAME}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --pattern '*.rpm' \
+            --dir o7k/dist
+
+      - name: Update RPM repository
+        env:
+          RPM_GPG_KEY_ID: 69138CAAC1202EE4787B2B32998D3812C5C50DF3
+        run: |
+          ./o7k/scripts/update-rpm-repo.sh \
+            ./o7k/dist \
+            ./o7k-rpm
+
+      - name: Publish RPM repository
+        working-directory: o7k-rpm
+        run: |
+          git config user.name "o7k release"
+          git config user.email "o7k@rhynosaur.com"
+
+          git add packages repodata
+
+          if git diff --cached --quiet; then
+            echo "No RPM repository changes to publish."
+            exit 0
+          fi
+
+          git commit -m "publish ${GITHUB_REF_NAME}"
+          git push

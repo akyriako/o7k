@@ -33,16 +33,24 @@ import (
 	"github.com/akyriako/o7k/internal/resources/networking/securitygrouprules"
 	"github.com/akyriako/o7k/internal/resources/networking/securitygroups"
 	"github.com/akyriako/o7k/internal/resources/networking/subnets"
+	"github.com/akyriako/o7k/internal/version"
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/akyriako/o7k/internal/ui"
 )
 
-func init() {
-
-}
-
 func main() {
+	if len(os.Args) == 2 && os.Args[1] == "--version" {
+		info := version.GetBuildInfo()
+
+		fmt.Printf("o7k %s\n", info.Version)
+		fmt.Printf("commit: %s\n", info.Commit)
+		fmt.Printf("built: %s\n", info.BuildDate)
+		fmt.Printf("go: %s\n", info.GoVersion)
+		fmt.Printf("modified: %s\n", info.Modified)
+		return
+	}
+
 	logger, logFile, err := logging.New()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error initializing logging: %v\n", err)

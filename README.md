@@ -105,5 +105,89 @@ Press `Esc` to return to the previous resource and selection.
 | **Neutron / Network** | security-group rules | ✅ |
 | **Neutron / Network** | router interfaces | ⬜ |
 
+## Installation
 
+### Homebrew
+
+Install `o7k` using the Homebrew tap:
+
+```bash
+brew install --cask akyriako/tap/o7k
+```
+
+Upgrade to the latest release:
+
+```bash
+brew upgrade --cask o7k
+```
+
+### Debian / Ubuntu
+
+Add the `o7k` repository signing key:
+
+```bash
+curl -fsSL https://akyriako.github.io/o7k-apt/o7k-archive-keyring.gpg \
+  | sudo tee /usr/share/keyrings/o7k-archive-keyring.gpg >/dev/null
+```
+
+Add the APT repository:
+
+```bash
+echo "deb [signed-by=/usr/share/keyrings/o7k-archive-keyring.gpg] https://akyriako.github.io/o7k-apt/ stable main" \
+  | sudo tee /etc/apt/sources.list.d/o7k.list
+```
+
+Install `o7k`:
+
+```bash
+sudo apt update
+sudo apt install o7k
+```
+
+Upgrade to the latest release:
+
+```bash
+sudo apt update
+sudo apt upgrade o7k
+```
+
+### Fedora / RHEL / Rocky Linux / AlmaLinux
+
+Import the repository signing key:
+
+```bash
+sudo rpm --import https://akyriako.github.io/o7k-rpm/o7k-rpm-signing-key.asc
+```
+
+Add the `o7k` repository:
+
+```bash
+sudo tee /etc/yum.repos.d/o7k.repo >/dev/null <<'EOF'
+[o7k]
+name=o7k
+baseurl=https://akyriako.github.io/o7k-rpm/
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://akyriako.github.io/o7k-rpm/o7k-rpm-signing-key.asc
+EOF
+```
+
+Install `o7k`:
+
+```bash
+sudo dnf install o7k
+```
+
+Upgrade to the latest release:
+
+```bash
+sudo dnf upgrade o7k
+```
+
+### Verify the installation
+
+```bash
+o7k --version
+```
 
