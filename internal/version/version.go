@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	defaultVersion   = "v0.0.0-dev"
+	defaultVersion   = "v0.0.0-debug"
 	defaultCommit    = "none"
 	defaultBuildDate = "unknown"
 	defaultValue     = "unknown"

@@ -98,7 +98,7 @@ func main() {
 
 	registerAll(registry, &openstackContext)
 
-	ver := info.Version
+	ver := info.GetVersion()
 	update, err := version.CheckForUpdate(context.Background())
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error checking for updates: %v\n", err)
@@ -107,7 +107,7 @@ func main() {
 			if info.Version == "" {
 				info.Version = version.Version
 			}
-			ver = fmt.Sprintf("%s %s", info.GetVersion(), "⚡")
+			ver = fmt.Sprintf("%s → [update available: %s]", info.GetVersion(), update.LatestVersion)
 		}
 	}
 
