@@ -1,4 +1,4 @@
-package endpoints
+package catalog
 
 import (
 	"github.com/akyriako/o7k/internal/resource"
@@ -6,13 +6,13 @@ import (
 )
 
 func (r *Resource) navigateToService(row resource.Row) tea.Cmd {
-	serviceID := row.Fields["service_id"]
+	serviceName := row.Fields["service"]
 
 	return func() tea.Msg {
 		return resource.NavigateFilteredMsg{
 			Resource: "services",
-			Field:    "id",
-			Value:    serviceID,
+			Field:    "name",
+			Value:    serviceName,
 		}
 	}
 }

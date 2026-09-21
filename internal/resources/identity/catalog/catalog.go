@@ -39,9 +39,10 @@ func (r *Resource) Columns() []resource.Column {
 }
 
 func (r *Resource) Commands() []resource.Command {
-	return nil
+	return []resource.Command{
+		{Key: "shift-s", Description: "Service"},
+	}
 }
-
 func (r *Resource) List(_ context.Context) ([]resource.Row, error) {
 	catalog, err := r.context.ServiceCatalog()
 	if err != nil {
@@ -68,6 +69,11 @@ func (r *Resource) List(_ context.Context) ([]resource.Row, error) {
 	return rows, nil
 }
 
-func (r *Resource) Execute(_ resource.Command, _ resource.Row) tea.Cmd {
+func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
+	switch command.Key {
+	case "shift-s":
+		return r.navigateToService(row)
+	}
+
 	return nil
 }

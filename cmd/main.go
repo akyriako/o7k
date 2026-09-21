@@ -33,6 +33,7 @@ import (
 	"github.com/akyriako/o7k/internal/resources/networking/securitygrouprules"
 	"github.com/akyriako/o7k/internal/resources/networking/securitygroups"
 	"github.com/akyriako/o7k/internal/resources/networking/subnets"
+	"github.com/akyriako/o7k/internal/resources/orchestration/stacks"
 	"github.com/akyriako/o7k/internal/version"
 	tea "github.com/charmbracelet/bubbletea"
 
@@ -101,7 +102,10 @@ func main() {
 		fmt.Fprintf(os.Stderr, "error checking for updates: %v\n", err)
 	} else {
 		if update.Available {
-			ver = fmt.Sprintf("%s %s", info.Version, "⚡")
+			if info.Version == "" {
+				info.Version = version.Version
+			}
+			ver = fmt.Sprintf("%s %s", info.GetVersion(), "⚡")
 		}
 	}
 
@@ -238,6 +242,11 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) {
 
 	if err := r.Register(backups.New(openstackContext)); err != nil {
 		fmt.Fprintf(os.Stderr, "error registering volume backups resource: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := r.Register(stacks.New(openstackContext)); err != nil {
+		fmt.Fprintf(os.Stderr, "error registering stacks resource: %v\n", err)
 		os.Exit(1)
 	}
 }
