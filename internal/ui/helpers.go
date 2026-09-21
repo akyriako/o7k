@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/ansi"
 )
 
 func truncate(value string, width int) string {
@@ -85,4 +86,25 @@ func colorizeJSONValue(value string) string {
 	}
 
 	return leading + raw + suffix
+}
+
+func horizontalSlice(content string, offset, width int) string {
+	if width <= 0 {
+		return ""
+	}
+
+	lines := strings.Split(content, "\n")
+
+	for i, line := range lines {
+		lines[i] = ansi.Cut(line, offset, offset+width)
+	}
+
+	return strings.Join(lines, "\n")
+}
+
+func (m Model) maxTableXOffset() int {
+	visibleWidth := max(m.width-2, 1)
+	tableWidth := lipgloss.Width(m.table.View())
+
+	return max(tableWidth-visibleWidth, 0)
 }
