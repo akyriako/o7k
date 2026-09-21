@@ -40,9 +40,8 @@ import (
 )
 
 func main() {
+	info := version.GetBuildInfo()
 	if len(os.Args) == 2 && os.Args[1] == "--version" {
-		info := version.GetBuildInfo()
-
 		fmt.Printf("o7k %s\n", info.Version)
 		fmt.Printf("commit: %s\n", info.Commit)
 		fmt.Printf("built: %s\n", info.BuildDate)
@@ -96,10 +95,21 @@ func main() {
 
 	registerAll(registry, &openstackContext)
 
+	ver := info.Version
+	update, err := version.CheckForUpdate(context.Background())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error checking for updates: %v\n", err)
+	} else {
+		if update.Available {
+			ver = fmt.Sprintf("%s %s", info.Version, "⚡")
+		}
+	}
+
 	p := tea.NewProgram(
 		ui.New(
 			registry,
 			&openstackContext,
+			ver,
 		),
 		tea.WithAltScreen(),
 	)
