@@ -19,6 +19,8 @@ import (
 const refreshInterval = 30 * time.Second
 
 type Model struct {
+	version string
+
 	registry     *resource.Registry
 	resource     resource.Resource
 	resourceRows []resource.Row
@@ -51,10 +53,11 @@ type Model struct {
 	command     textinput.Model
 }
 
-func New(registry *resource.Registry, openstackContext *openstack.Context) Model {
+func New(registry *resource.Registry, openstackContext *openstack.Context, version string) Model {
 	r, ok := registry.Get("contexts")
 	if !ok {
 		return Model{
+			version:  version,
 			registry: registry,
 			context:  openstackContext,
 			err:      fmt.Errorf("contexts resource not registered"),
@@ -86,6 +89,8 @@ func New(registry *resource.Registry, openstackContext *openstack.Context) Model
 	detail.SetHorizontalStep(4)
 
 	return Model{
+		version: version,
+
 		registry: registry,
 		resource: r,
 		table:    t,

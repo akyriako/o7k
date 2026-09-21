@@ -48,10 +48,10 @@ func (m Model) renderHeaderContext(width int) string {
 
 	return strings.Join([]string{
 		field("Cloud:", m.context.Cloud),
-		field("Identity:", m.context.Identity),
 		field("Region:", m.context.Region),
 		field("Domain:", m.context.Domain),
 		field("Project:", m.context.Project),
+		field("Version:", m.version),
 	}, "\n")
 }
 

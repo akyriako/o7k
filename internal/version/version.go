@@ -1,9 +1,19 @@
 package version
 
-import "runtime/debug"
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"runtime/debug"
+	"strings"
+	"time"
+
+	"golang.org/x/mod/semver"
+)
 
 const (
-	defaultVersion   = "dev"
+	defaultVersion   = "v0.0.0-dev"
 	defaultCommit    = "none"
 	defaultBuildDate = "unknown"
 	defaultValue     = "unknown"
@@ -71,4 +81,85 @@ func getBuildInfoSetting(info *debug.BuildInfo, key string) string {
 	}
 
 	return defaultValue
+}
+
+const (
+	githubOwner = "akyriako"
+	githubRepo  = "o7k"
+)
+
+type githubRelease struct {
+	TagName string `json:"tag_name"`
+	HTMLURL string `json:"html_url"`
+}
+
+type UpdateInfo struct {
+	Available      bool
+	CurrentVersion string
+	LatestVersion  string
+	URL            string
+}
+
+func CheckForUpdate(ctx context.Context) (UpdateInfo, error) {
+	current := Version
+
+	//if current == defaultVersion {
+	//	return UpdateInfo{
+	//		CurrentVersion: current,
+	//	}, nil
+	//}
+
+	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", githubOwner, githubRepo)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return UpdateInfo{}, err
+	}
+
+	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("User-Agent", githubRepo)
+
+	client := &http.Client{
+		Timeout: 5 * time.Second,
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return UpdateInfo{}, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return UpdateInfo{}, fmt.Errorf("github returned status %s", resp.Status)
+	}
+
+	var release githubRelease
+	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
+		return UpdateInfo{}, err
+	}
+
+	return UpdateInfo{
+		Available:      compareVersions(current, release.TagName),
+		CurrentVersion: current,
+		LatestVersion:  release.TagName,
+		URL:            release.HTMLURL,
+	}, nil
+}
+
+func compareVersions(current, latest string) bool {
+	current = normalizeSemver(current)
+	latest = normalizeSemver(latest)
+
+	if !semver.IsValid(current) || !semver.IsValid(latest) {
+		return false
+	}
+
+	return semver.Compare(latest, current) > 0
+}
+
+func normalizeSemver(v string) string {
+	v = strings.TrimSpace(v)
+	if !strings.HasPrefix(v, "v") {
+		v = "v" + v
+	}
+	return v
 }
