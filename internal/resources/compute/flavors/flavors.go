@@ -44,9 +44,10 @@ func (r *Resource) Columns() []resource.Column {
 }
 
 func (r *Resource) Commands() []resource.Command {
-	return nil
+	return []resource.Command{
+		{Key: "s", Description: "Show", Default: true},
+	}
 }
-
 func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 	client, err := r.context.ComputeV2()
 	if err != nil {
@@ -83,6 +84,11 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 	return rows, nil
 }
 
-func (r *Resource) Execute(_ resource.Command, _ resource.Row) tea.Cmd {
+func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
+	switch command.Key {
+	case "s":
+		return r.show(row.ID)
+	}
+
 	return nil
 }
