@@ -38,18 +38,19 @@ func (r *Resource) Aliases() []string {
 
 func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
-		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
+		{Key: "id", Title: "ID", MinWidth: 32, Flex: 0},
 		{Key: "name", Title: "NAME", MinWidth: 30, Flex: 1},
 		{Key: "type", Title: "TYPE", MinWidth: 8, Flex: 0},
 		{Key: "records", Title: "RECORDS", MinWidth: 30, Flex: 2},
 		{Key: "ttl", Title: "TTL", MinWidth: 8, Flex: 0},
 		{Key: "status", Title: "STATUS", MinWidth: 12, Flex: 0},
-		{Key: "zone_id", Title: "ZONE ID", MinWidth: 40, Flex: 0},
+		//{Key: "zone_id", Title: "ZONE ID", MinWidth: 40, Flex: 0},
 	}
 }
 
 func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
+		{Key: "s", Description: "Show", Default: true},
 		{Key: "shift-z", Description: "Zone"},
 	}
 }
@@ -95,6 +96,8 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 
 func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	switch command.Key {
+	case "s":
+		return r.show(row.Fields["zone_id"], row.ID)
 	case "shift-z":
 		return r.navigateToZone(row)
 	}
