@@ -50,6 +50,7 @@ func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
 		{Key: "s", Description: "Show", Default: true},
 		{Key: "shift-i", Description: "Image"},
+		{Key: "shift-f", Description: "Flavor"},
 	}
 }
 
@@ -153,6 +154,8 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 		return r.show(row.ID)
 	case "shift-i":
 		return r.navigateToImage(row)
+	case "shift-f":
+		return r.navigateToFlavor(row)
 	}
 
 	return nil

@@ -21,6 +21,18 @@ func (r *Resource) navigateToImage(row resource.Row) tea.Cmd {
 	}
 }
 
+func (r *Resource) navigateToFlavor(row resource.Row) tea.Cmd {
+	flavor := row.Fields["flavor"]
+
+	return func() tea.Msg {
+		return resource.NavigateFilteredMsg{
+			Resource: "flavors",
+			Field:    "id",
+			Value:    flavor,
+		}
+	}
+}
+
 func (r *Resource) show(id string) tea.Cmd {
 	return func() tea.Msg {
 		client, err := r.context.ComputeV2()
