@@ -98,11 +98,45 @@ Press `Esc` to return to the previous resource and selection.
 | **Nova / Compute** | servers, flavors | ✅ |
 | **Nova / Compute** | keypairs, server groups, availability zones | ✅ |
 | **Neutron / Network** | networks, subnets, ports, routers, floating IPs, security groups | ✅ |
-| **Neutron / Network** | security-group rules | ✅ |
+| **Neutron / Network** | security group rules | ✅ |
 | **Neutron / Network** | router interfaces | ⬜ |
 | **Designate / DNS** | zones, recordsets | ✅ |
 | **Heat / Orchestration** | stacks | Partial |
 | **Trove / Databases** | instances | ⬜ |
+
+### Aliases
+
+| Service | Resource | Command | Aliases |
+|---|---|---|---|
+| Local / Auth | Contexts | `contexts` | `context`, `ctx`, `cloud`, `clouds` |
+| Nova / Compute | Servers | `servers` | `server`, `srv` |
+| Nova / Compute | Flavors | `flavors` | `flavor` |
+| Nova / Compute | Keypairs | `keypairs` | `keypair`, `keys`, `key` |
+| Nova / Compute | Server Groups | `servergroups` | `servergroup`, `sgroups`, `sgroup` |
+| Nova / Compute | Availability Zones | `availabilityzones` | `availabilityzone`, `azs`, `az` |
+| Neutron / Network | Networks | `networks` | `network`, `net` |
+| Neutron / Network | Subnets | `subnets` | `subnet` |
+| Neutron / Network | Ports | `ports` | `port` |
+| Neutron / Network | Routers | `routers` | `router` |
+| Neutron / Network | Floating IPs | `floatingips` | `floatingip`, `fips`, `fip` |
+| Neutron / Network | Security Groups | `securitygroups` | `securitygroup`, `secgroups`, `secgroup`, `sg` |
+| Neutron / Network | Security Group Rules | `securitygrouprules` | `securitygrouprule`, `secrules`, `secrule`, `sgr` |
+| Cinder / Block Storage | Volumes | `volumes` | `volume`, `vol` |
+| Cinder / Block Storage | Snapshots | `snapshots` | `snapshot`, `snap` |
+| Cinder / Block Storage | Volume Types | `volumetypes` | `volumetype`, `types`, `type` |
+| Cinder / Block Storage | Volume Backups | `backups` | `backup`, `volume-backups`, `volume-backup` |
+| Glance / Image | Images | `images` | `image`, `img` |
+| Keystone / Identity | Projects | `projects` | `project` |
+| Keystone / Identity | Users | `users` | `user` |
+| Keystone / Identity | Groups | `groups` | `group` |
+| Keystone / Identity | Roles | `roles` | `role` |
+| Keystone / Identity | Domains | `domains` | `domain` |
+| Keystone / Catalog | Services | `services` | `service`, `svc` |
+| Keystone / Catalog | Endpoints | `endpoints` | `endpoint` |
+| Keystone / Catalog | Regions | `regions` | `region` |
+| Heat / Orchestration | Stacks | `stacks` | `stack` |
+| Designate / DNS | Zones | `zones` | `zone`, `dns-zones`, `dns-zone` |
+| Designate / DNS | Recordsets | `recordsets` | `recordset`, `records`, `record` |
 
 ## Installation
 
