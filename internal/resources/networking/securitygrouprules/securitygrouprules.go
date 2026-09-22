@@ -46,7 +46,7 @@ func (r *Resource) Columns() []resource.Column {
 
 func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
-		{Key: "shift-g", Description: "Security Group", Default: true},
+		{Key: "shift-g", Description: "Security Group"},
 	}
 }
 
