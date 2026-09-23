@@ -16,7 +16,12 @@ type resourcesLoadedMsg struct {
 	rows       []resource.Row
 	selectedID string
 	cursor     int
-	err        error
+	//err        error
+}
+
+type errMsg struct {
+	err error
+	op  string
 }
 
 type clearStatusMsg struct {
@@ -24,7 +29,7 @@ type clearStatusMsg struct {
 }
 
 type clipboardResultMsg struct {
-	err error
+	//err error
 }
 
 type navigationEntry struct {
@@ -246,23 +251,26 @@ func (m Model) loadResource() tea.Cmd {
 				loadID:     loadID,
 				selectedID: selectedID,
 				cursor:     cursor,
-				err:        fmt.Errorf("no active resource"),
+				//err:        fmt.Errorf("no active resource"),
 			}
 		}
 
 		rows, err := r.List(context.Background())
+		if err != nil {
+			return errMsg{err: err}
+		}
 
 		return resourcesLoadedMsg{
 			loadID:     loadID,
 			rows:       rows,
 			selectedID: selectedID,
 			cursor:     cursor,
-			err:        err,
+			//err:        err,
 		}
 	}
 }
 
-func (m *Model) copyViewport() tea.Cmd {
+func (m *Model) copyDetailsViewport() tea.Cmd {
 	if !m.detailMode || m.detailContent == "" {
 		return nil
 	}
@@ -271,14 +279,17 @@ func (m *Model) copyViewport() tea.Cmd {
 
 	return func() tea.Msg {
 		if err := clipboard.Init(); err != nil {
-			return clipboardResultMsg{err: err}
+			return errMsg{err: fmt.Errorf("initializing clipboard failed: %v", err)}
 		}
 
-		clipboard.Write(
+		_, err := clipboard.Write(
 			context.Background(),
 			clipboard.FmtText,
 			[]byte(content),
 		)
+		if err != nil {
+			return errMsg{err: fmt.Errorf("writing to clipboard failed: %v", err)}
+		}
 
 		return clipboardResultMsg{}
 	}

@@ -24,23 +24,6 @@ type Command struct {
 	Default     bool
 }
 
-type NavigateMsg struct {
-	Resource string
-	ID       string
-}
-
-type NavigateFilteredMsg struct {
-	Resource string
-	Field    string
-	Value    string
-}
-
-type DetailsMsg struct {
-	ID      string
-	Content any
-	Err     error
-}
-
 type Resource interface {
 	Kind() string
 	Title() string
