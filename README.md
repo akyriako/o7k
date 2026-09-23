@@ -182,7 +182,7 @@ Upgrade to the latest release:
 
 ```bash
 sudo apt update
-sudo apt upgrade o7k
+sudo apt install --only-upgrade o7k
 ```
 
 ### Fedora / RHEL / Rocky Linux / AlmaLinux
