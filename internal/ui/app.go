@@ -229,7 +229,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, m.refreshResource()
 
 		case "c":
-			return m, m.copyDetailsViewport()
+			if m.detailMode {
+
+				return m, m.copyDetailsViewport()
+			}
+
+			return m, m.copyTableViewport()
 
 		case "enter":
 			return m, m.executeDefaultCommand()
@@ -257,12 +262,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		m.loading = false
 		m.showLoading = false
-
-		//if msg.err != nil {
-		//	m.status = msg.err.Error()
-		//	m.autoRefreshPaused = true
-		//	return m, nil
-		//}
 
 		m.loaded = true
 		m.autoRefreshPaused = false
@@ -396,27 +395,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		return m, m.navigateFilteredResource(msg.Resource)
-
-	//case servers.ShowMsg:
-	//	if msg.Err != nil {
-	//		m.status = msg.Err.Error()
-	//		return m, nil
-	//	}
-	//
-	//	data, err := json.MarshalIndent(msg.Server, "", "  ")
-	//	if err != nil {
-	//		m.status = fmt.Sprintf("encoding server details: %v", err)
-	//		return m, nil
-	//	}
-	//
-	//	m.detailMode = true
-	//	m.detailID = msg.Server.ID
-	//	m.detailContent = string(data)
-	//	m.detail.SetContent(colorizeJSON(data))
-	//	m.detail.GotoTop()
-	//	m.Resize()
-	//
-	//	return m, nil
 
 	case resource.DetailsMsg:
 		if msg.Err != nil {
