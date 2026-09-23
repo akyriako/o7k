@@ -31,7 +31,7 @@ configuration files from the following places:
 | `:` | Switch resource |
 | `Enter` | Execute the default action for the selected resource |
 | `r` | Refresh the current resource |
-| `c` | Copy the current detail view |
+| `c` | Copy the current detail-view as JSON or table-view as tab-delimited text |
 | `Esc` | Dismiss / return to the previous view |
 | `Ctrl+X` | Quit |
 
