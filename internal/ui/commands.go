@@ -271,7 +271,7 @@ func (m Model) loadResource() tea.Cmd {
 }
 
 func (m *Model) copyDetailsViewport() tea.Cmd {
-	if !m.detailMode || m.detailContent == "" {
+	if m.detailContent == "" {
 		return nil
 	}
 
@@ -286,6 +286,47 @@ func (m *Model) copyDetailsViewport() tea.Cmd {
 			context.Background(),
 			clipboard.FmtText,
 			[]byte(content),
+		)
+		if err != nil {
+			return errMsg{err: fmt.Errorf("writing to clipboard failed: %v", err)}
+		}
+
+		return clipboardResultMsg{}
+	}
+}
+
+func (m *Model) copyTableViewport() tea.Cmd {
+	if m.detailMode {
+		return nil
+	}
+
+	var content strings.Builder
+	columns := m.table.Columns()
+	headers := make([]string, len(columns))
+
+	for i, column := range columns {
+		headers[i] = column.Title
+	}
+
+	content.WriteString(strings.Join(headers, "\t"))
+	content.WriteByte('\n')
+
+	for _, row := range m.table.Rows() {
+		content.WriteString(strings.Join(row, "\t"))
+		content.WriteByte('\n')
+	}
+
+	data := content.String()
+
+	return func() tea.Msg {
+		if err := clipboard.Init(); err != nil {
+			return errMsg{err: fmt.Errorf("initializing clipboard failed: %v", err)}
+		}
+
+		_, err := clipboard.Write(
+			context.Background(),
+			clipboard.FmtText,
+			[]byte(data),
 		)
 		if err != nil {
 			return errMsg{err: fmt.Errorf("writing to clipboard failed: %v", err)}
