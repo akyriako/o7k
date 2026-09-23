@@ -216,7 +216,7 @@ sudo dnf install o7k
 Upgrade to the latest release:
 
 ```bash
-sudo dnf upgrade -- refresh o7k
+sudo dnf upgrade --refresh o7k
 ```
 
 ### Verify the installation
