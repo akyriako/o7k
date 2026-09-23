@@ -3,6 +3,7 @@ package openstack
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack"
@@ -36,6 +37,8 @@ func (c *Context) Connect(ctx context.Context, cloudsPath string) error {
 	}
 
 	c.Provider = provider
+
+	slog.Info("connected to cloud", "cloud", c.Cloud, "identityEndpoint", provider.IdentityEndpoint)
 
 	return nil
 }

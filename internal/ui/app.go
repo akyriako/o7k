@@ -3,6 +3,7 @@ package ui
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -117,11 +118,20 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case errMsg:
+		m.autoRefreshPaused = true
+		m.loading = false
+		m.showLoading = false
+
+		m.status = msg.err.Error()
+
+		slog.Error(msg.err.Error(), "cloud", m.context.Cloud)
+		return m, nil
 	case clipboardResultMsg:
-		if msg.err != nil {
-			m.status = fmt.Sprintf("clipboard failed: %v", msg.err)
-			return m, nil
-		}
+		//if msg.err != nil {
+		//	m.status = fmt.Sprintf("clipboard failed: %v", msg.err)
+		//	return m, nil
+		//}
 
 		m.status = "copied to clipboard"
 		return m, clearStatus(m.status)
@@ -159,7 +169,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "ctrl+x":
 				return m, tea.Quit
 			case "c":
-				return m, m.copyViewport()
+				return m, m.copyDetailsViewport()
 			}
 		}
 
@@ -219,7 +229,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, m.refreshResource()
 
 		case "c":
-			return m, m.copyViewport()
+			return m, m.copyDetailsViewport()
 
 		case "enter":
 			return m, m.executeDefaultCommand()
@@ -248,11 +258,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.loading = false
 		m.showLoading = false
 
-		if msg.err != nil {
-			m.status = msg.err.Error()
-			m.autoRefreshPaused = true
-			return m, nil
-		}
+		//if msg.err != nil {
+		//	m.status = msg.err.Error()
+		//	m.autoRefreshPaused = true
+		//	return m, nil
+		//}
 
 		m.loaded = true
 		m.autoRefreshPaused = false
@@ -337,7 +347,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case contexts.ActivatedMsg:
 		if msg.Err != nil {
-			m.status = fmt.Sprintf("context activation failed: %v", msg.Err)
+			err := fmt.Errorf("context activation failed: %v", msg.Err)
+
+			slog.Error(err.Error(), "cloud", msg.Context.Cloud)
+			m.status = err.Error()
 			return m, nil
 		}
 
@@ -407,7 +420,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case resource.DetailsMsg:
 		if msg.Err != nil {
-			m.status = msg.Err.Error()
+			err := fmt.Errorf("loading resource details failed: %v", msg.Err)
+
+			slog.Error(err.Error(), "cloud", m.context.Cloud)
+			m.status = err.Error()
 			return m, nil
 		}
 
