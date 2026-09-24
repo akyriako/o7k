@@ -655,3 +655,18 @@ Partial  Partially supported
 
 >[!Warning]
 > A resource should only be marked as supported once its basic listing and intended commands work against an actual OpenStack environment.
+
+### Running a Local OpenStack Cloud
+
+If you want to develop or test o7k against a local OpenStack cloud, a dedicated **DevStack development environment** can be used to run real OpenStack APIs locally, without requiring access to a public or private OpenStack deployment.
+
+The setup guide covers:
+
+* DevStack installation on Debian Trixie
+* KVM and nested virtualization
+* Keystone, Nova, Neutron, Glance, Cinder, and Placement
+* `clouds.yaml` configuration
+* Connecting o7k to the local cloud
+* Troubleshooting and extending the environment with additional OpenStack services
+
+See **[DEVSTACK.md](DEVSTACK.md)** for the complete setup guide.
