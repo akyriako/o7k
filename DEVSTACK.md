@@ -25,13 +25,13 @@ Optional OpenStack services can be added later as DevStack plugins.
 
 A VM with the following resources is recommended:
 
-| Resource       | Minimum            | Recommended                    |
-|----------------|--------------------|--------------------------------|
-| CPU            | 4 vCPU             | 6–8+ vCPU                      |
-| RAM            | 16 GB               | 20–32 GB                       |
-| Disk           | 60 GB              | 90+ GB                         |
-| Virtualization | KVM with nested virtualization               | KVM with nested virtualization |
-| OS             | Debian 13 (Trixie) | Debian 13 (Trixie)             |
+| Resource       | Minimum                        | Recommended                    |
+|----------------|--------------------------------|--------------------------------|
+| CPU            | 4 vCPU                         | 6–8+ vCPU                      |
+| RAM            | 16 GB                          | 20–32 GB                       |
+| Disk           | 60 GB                          | 90+ GB                         |
+| Virtualization | KVM with nested virtualization | KVM with nested virtualization |
+| OS             | Debian 13 (Trixie)             | Debian 13 (Trixie)             |
 
 The instructions above assume Debian 13.
 
