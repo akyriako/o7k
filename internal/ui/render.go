@@ -138,19 +138,24 @@ func (m Model) renderTable() string {
 		innerWidth,
 	)
 
-	if m.loaded && !m.loading && m.itemCount == 0 {
+	if !m.loading && m.itemCount == 0 {
 		lines := strings.Split(body, "\n")
 
 		if len(lines) > 1 {
 			header := lines[0]
 			contentHeight := len(lines) - 1
 
+			emptyMessage := "No resources found"
+			if !m.loaded {
+				emptyMessage = "Failed to load resources"
+			}
+
 			emptyContent := lipgloss.Place(
 				innerWidth,
 				contentHeight,
 				lipgloss.Center,
 				lipgloss.Center,
-				"No resources found",
+				emptyMessage,
 			)
 
 			body = header + "\n" + emptyContent
