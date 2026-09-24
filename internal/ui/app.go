@@ -117,13 +117,27 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	if m.err != nil {
+		if keyMsg, ok := msg.(tea.KeyMsg); ok {
+			switch keyMsg.String() {
+			case "esc", "enter":
+				m.err = nil
+				return m, nil
+			case "ctrl+x":
+				return m, tea.Quit
+			}
+		}
+
+		return m, nil
+	}
+
 	switch msg := msg.(type) {
 	case errMsg:
 		m.autoRefreshPaused = true
 		m.loading = false
 		m.showLoading = false
 
-		m.status = msg.err.Error()
+		m.err = msg.err
 
 		slog.Error(msg.err.Error(), "cloud", m.context.Cloud)
 		return m, nil
@@ -346,10 +360,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case contexts.ActivatedMsg:
 		if msg.Err != nil {
-			err := fmt.Errorf("context activation failed: %v", msg.Err)
-
-			slog.Error(err.Error(), "cloud", msg.Context.Cloud)
-			m.status = err.Error()
+			m.err = fmt.Errorf("context activation failed: %v", msg.Err)
+			slog.Error(m.err.Error(), "cloud", msg.Context.Cloud)
 			return m, nil
 		}
 
@@ -398,16 +410,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case resource.DetailsMsg:
 		if msg.Err != nil {
-			err := fmt.Errorf("loading resource details failed: %v", msg.Err)
-
-			slog.Error(err.Error(), "cloud", m.context.Cloud)
-			m.status = err.Error()
+			m.err = fmt.Errorf("loading resource details failed: %v", msg.Err)
+			slog.Error(m.err.Error(), "cloud", m.context.Cloud)
 			return m, nil
 		}
 
 		data, err := json.MarshalIndent(msg.Content, "", "  ")
 		if err != nil {
-			m.status = fmt.Sprintf("encoding details: %v", err)
+			m.err = fmt.Errorf("encoding details: %v", err)
 			return m, nil
 		}
 
@@ -429,10 +439,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	if m.err != nil {
-		return fmt.Sprintf("Error: %v", m.err)
-	}
-
 	header := m.renderHeader()
 
 	contentView := m.renderTable()
@@ -492,13 +498,21 @@ func (m Model) View() string {
 		commandLine = commandStyle.Render(m.command.View())
 	}
 
-	return header +
+	view := header +
 		"\n\n" +
 		contentView +
 		"\n" +
 		resourceLine +
 		"\n" +
 		commandLine
+
+	if m.err != nil {
+		if m.err != nil {
+			return overlayCenter(view, m.renderErrorModal())
+		}
+	}
+
+	return view
 }
 
 func (m *Model) Resize() {
