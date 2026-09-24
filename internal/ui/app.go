@@ -122,6 +122,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch keyMsg.String() {
 			case "esc", "enter":
 				m.err = nil
+
+				if len(m.navigation) > 0 {
+					return m, m.navigateBack()
+				}
+
 				return m, nil
 			case "ctrl+x":
 				return m, tea.Quit
@@ -141,12 +146,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		slog.Error(msg.err.Error(), "cloud", m.context.Cloud)
 		return m, nil
-	case clipboardResultMsg:
-		//if msg.err != nil {
-		//	m.status = fmt.Sprintf("clipboard failed: %v", msg.err)
-		//	return m, nil
-		//}
 
+	case clipboardResultMsg:
 		m.status = "copied to clipboard"
 		return m, clearStatus(m.status)
 
