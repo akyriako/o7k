@@ -17,7 +17,7 @@ type DetailsMsg struct {
 	Err     error
 }
 
-//type ResErrMsg struct {
-//	Err error
-//	Op  string
-//}
+type NavigateScopedMsg struct {
+	Resource string
+	Scope    map[string]string
+}
