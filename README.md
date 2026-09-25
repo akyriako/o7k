@@ -101,7 +101,7 @@ Press `Esc` to return to the previous resource and selection.
 | **Neutron / Network** | security group rules | ✅ |
 | **Neutron / Network** | router interfaces | ⬜ |
 | **Designate / DNS** | zones, recordsets | ✅ |
-| **Heat / Orchestration** | stacks | Partial |
+| **Heat / Orchestration** | stacks, stack resources | ✅ |
 | **Trove / Databases** | instances | ⬜ |
 
 ### Aliases
@@ -136,6 +136,7 @@ Press `Esc` to return to the previous resource and selection.
 | Cinder / Block Storage | Volume Backups | `backups` | `backup`, `volume-backups`, `volume-backup` |
 | Glance / Image | Images | `images` | `image`, `img` |
 | Heat / Orchestration | Stacks | `stacks` | `stack` |
+| Heat / Orchestration | Stacks | `stack-resources` | `stack-resource` |
 | Designate / DNS | Zones | `zones` | `zone`, `dns-zones`, `dns-zone` |
 | Designate / DNS | Recordsets | `recordsets` | `recordset`, `records`, `record` |
 
