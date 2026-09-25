@@ -30,6 +30,7 @@ import (
 	"github.com/akyriako/o7k/internal/resources/identity/roles"
 	"github.com/akyriako/o7k/internal/resources/identity/services"
 	"github.com/akyriako/o7k/internal/resources/images"
+	"github.com/akyriako/o7k/internal/resources/loadbalancing/healthmonitors"
 	"github.com/akyriako/o7k/internal/resources/loadbalancing/listeners"
 	"github.com/akyriako/o7k/internal/resources/loadbalancing/loadbalancers"
 	"github.com/akyriako/o7k/internal/resources/loadbalancing/members"
@@ -271,6 +272,10 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 
 	if err := r.Register(members.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering members resource: %w", err))
+	}
+
+	if err := r.Register(healthmonitors.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering health monitors resource: %w", err))
 	}
 
 	return errs

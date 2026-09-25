@@ -15,3 +15,13 @@ func (r *Resource) members(row resource.Row) tea.Cmd {
 		}
 	}
 }
+
+func (r *Resource) healthMonitor(row resource.Row) tea.Cmd {
+	return func() tea.Msg {
+		return resource.NavigateFilteredMsg{
+			Resource: "healthmonitors",
+			Field:    "id",
+			Value:    row.Fields["healthmonitor_id"],
+		}
+	}
+}

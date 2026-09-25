@@ -1,13 +1,14 @@
-package pools
+package healthmonitors
 
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/pools"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/monitors"
 )
 
 type Resource struct {
@@ -19,16 +20,18 @@ func New(context *openstack.Context) *Resource {
 }
 
 func (r *Resource) Title() string {
-	return "Pools"
+	return "Health Monitors"
 }
 
 func (r *Resource) Kind() string {
-	return "pools"
+	return "healthmonitors"
 }
 
 func (r *Resource) Aliases() []string {
 	return []string{
-		"pool",
+		"healthmonitor",
+		"monitors",
+		"monitor",
 	}
 }
 
@@ -36,19 +39,17 @@ func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
 		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
-		{Key: "protocol", Title: "PROTOCOL", MinWidth: 12, Flex: 0},
-		{Key: "lb_algorithm", Title: "ALGORITHM", MinWidth: 20, Flex: 0},
+		{Key: "type", Title: "TYPE", MinWidth: 12, Flex: 0},
+		{Key: "delay", Title: "DELAY", MinWidth: 8, Flex: 0},
+		{Key: "timeout", Title: "TIMEOUT", MinWidth: 8, Flex: 0},
+		{Key: "max_retries", Title: "MAX RETRIES", MinWidth: 12, Flex: 0},
 		{Key: "provisioning_status", Title: "PROVISIONING", MinWidth: 20, Flex: 0},
 		{Key: "operating_status", Title: "OPERATING", MinWidth: 16, Flex: 0},
-		{Key: "healthmonitor_id", Title: "HEALTH MONITOR ID", MinWidth: 40, Flex: 0},
 	}
 }
 
 func (r *Resource) Commands() []resource.Command {
-	return []resource.Command{
-		{Key: "shift-m", Description: "Members"},
-		{Key: "shift-h", Description: "Health Monitor"},
-	}
+	return nil
 }
 
 func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
@@ -57,20 +58,14 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 		return nil, err
 	}
 
-	scope := resource.Scope(ctx)
-
-	opts := pools.ListOpts{
-		LoadbalancerID: scope["loadbalancer_id"],
+	pages, err := monitors.List(client, monitors.ListOpts{}).AllPages(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("listing health monitors: %w", err)
 	}
 
-	pages, err := pools.List(client, opts).AllPages(ctx)
+	items, err := monitors.ExtractMonitors(pages)
 	if err != nil {
-		return nil, fmt.Errorf("listing pools: %w", err)
-	}
-
-	items, err := pools.ExtractPools(pages)
-	if err != nil {
-		return nil, fmt.Errorf("extracting pools: %w", err)
+		return nil, fmt.Errorf("extracting health monitors: %w", err)
 	}
 
 	rows := make([]resource.Row, 0, len(items))
@@ -81,11 +76,12 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 			Fields: map[string]string{
 				"id":                  item.ID,
 				"name":                item.Name,
-				"protocol":            item.Protocol,
-				"lb_algorithm":        item.LBMethod,
+				"type":                item.Type,
+				"delay":               strconv.Itoa(item.Delay),
+				"timeout":             strconv.Itoa(item.Timeout),
+				"max_retries":         strconv.Itoa(item.MaxRetries),
 				"provisioning_status": item.ProvisioningStatus,
 				"operating_status":    item.OperatingStatus,
-				"healthmonitor_id":    item.MonitorID,
 			},
 		})
 	}
@@ -94,12 +90,5 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 }
 
 func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
-	switch command.Key {
-	case "shift-m":
-		return r.members(row)
-	case "shift-h":
-		return r.healthMonitor(row)
-	}
-
 	return nil
 }
