@@ -65,7 +65,7 @@ Network             -> Ports
 Subnet              -> Network
 Port                -> Network
 
-Router              -> Ports			-> Network		-> Subnet
+Router              -> Ports			-> Network			-> Subnet
 Router              -> Floating IPs
 Floating IP         -> Router
 Floating IP         -> Port
