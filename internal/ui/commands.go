@@ -20,8 +20,9 @@ type resourcesLoadedMsg struct {
 }
 
 type errMsg struct {
-	err error
-	op  string
+	err    error
+	op     string
+	loadID uint64
 }
 
 type clearStatusMsg struct {
@@ -99,6 +100,7 @@ func (m *Model) executeResourceCommand(key string) tea.Cmd {
 			row := m.resourceRows[cursor]
 
 			if m.resource.Kind() == "contexts" && key == "a" {
+				m.activatingContext = true
 				m.showLoading = true
 				m.loadingLabel = "Connecting to " + row.ID + "..."
 			}
@@ -258,13 +260,15 @@ func (m Model) loadResource() tea.Cmd {
 				loadID:     loadID,
 				selectedID: selectedID,
 				cursor:     cursor,
-				//err:        fmt.Errorf("no active resource"),
 			}
 		}
 
 		rows, err := r.List(context.Background())
 		if err != nil {
-			return errMsg{err: err}
+			return errMsg{
+				err:    err,
+				loadID: loadID,
+			}
 		}
 
 		return resourcesLoadedMsg{
@@ -272,7 +276,6 @@ func (m Model) loadResource() tea.Cmd {
 			rows:       rows,
 			selectedID: selectedID,
 			cursor:     cursor,
-			//err:        err,
 		}
 	}
 }

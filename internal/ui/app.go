@@ -43,7 +43,8 @@ type Model struct {
 	width  int
 	height int
 
-	context *openstack.Context
+	activatingContext bool
+	context           *openstack.Context
 
 	navigation []navigationEntry
 	navigateID string
@@ -140,9 +141,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case errMsg:
+		if msg.loadID != 0 && msg.loadID != m.loadID {
+			return m, nil
+		}
+
 		m.autoRefreshPaused = true
 		m.loading = false
 		m.showLoading = false
+		m.loadingLabel = ""
 
 		m.err = msg.err
 
@@ -230,6 +236,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
+		if m.activatingContext {
+			return m, nil
+		}
+
 		switch msg.String() {
 		case "ctrl+x":
 			return m, tea.Quit
@@ -362,6 +372,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case contexts.ActivatedMsg:
+		m.activatingContext = false
 		m.showLoading = false
 		m.loadingLabel = ""
 
@@ -374,7 +385,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		*m.context = *msg.Context
 		m.status = fmt.Sprintf("connected to %s", m.context.Cloud)
 
-		cmd := m.autoRefreshResource()
+		m.loadingLabel = "Loading..."
+		cmd := m.refreshResource()
 
 		return m, tea.Batch(
 			clearStatus(m.status),
