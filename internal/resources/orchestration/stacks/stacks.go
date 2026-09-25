@@ -45,6 +45,7 @@ func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
 		{Key: "s", Description: "Show", Default: true},
 		{Key: "shift-r", Description: "Resources"},
+		{Key: "shift-e", Description: "Events"},
 	}
 }
 func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
@@ -86,6 +87,9 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 		return r.show(row)
 	case "shift-r":
 		return r.resources(row)
+	case "shift-e":
+		return r.events(row)
+
 	}
 
 	return nil

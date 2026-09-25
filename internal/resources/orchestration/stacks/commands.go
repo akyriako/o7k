@@ -46,3 +46,15 @@ func (r *Resource) resources(row resource.Row) tea.Cmd {
 		}
 	}
 }
+
+func (r *Resource) events(row resource.Row) tea.Cmd {
+	return func() tea.Msg {
+		return resource.NavigateScopedMsg{
+			Resource: "stack-events",
+			Scope: map[string]string{
+				"stack_name": row.Fields["name"],
+				"stack_id":   row.ID,
+			},
+		}
+	}
+}
