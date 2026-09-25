@@ -33,3 +33,14 @@ func (r *Resource) show(row resource.Row) tea.Cmd {
 		}
 	}
 }
+
+func (r *Resource) listeners(row resource.Row) tea.Cmd {
+	return func() tea.Msg {
+		return resource.NavigateScopedMsg{
+			Resource: "listeners",
+			Scope: map[string]string{
+				"loadbalancer_id": row.ID,
+			},
+		}
+	}
+}
