@@ -65,19 +65,20 @@ Network             -> Ports
 Subnet              -> Network
 Port                -> Network
 
-Router              -> Ports
+Router              -> Ports			-> Network		-> Subnet
 Router              -> Floating IPs
 Floating IP         -> Router
 Floating IP         -> Port
 Port                -> Floating IPs
 
-Security Group      -> Security Group Rules
-Security Group Rule -> Security Group
-
 Volume              -> Snapshots
 Volume              -> Backups
 Snapshot            -> Volume
 Backup              -> Volume
+
+
+Security Group      -> Security Group Rules
+Security Group Rule -> Security Group
 ```
 
 When navigating to a related collection, **o7k** filters the destination resource automatically.
