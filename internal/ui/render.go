@@ -7,6 +7,7 @@ import (
 
 	"github.com/akyriako/o7k/internal/resource"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/ansi"
 )
 
 const logo = `  ___   _____  _    
@@ -137,19 +138,24 @@ func (m Model) renderTable() string {
 		innerWidth,
 	)
 
-	if m.loaded && !m.loading && m.itemCount == 0 {
+	if !m.loading && m.itemCount == 0 {
 		lines := strings.Split(body, "\n")
 
 		if len(lines) > 1 {
 			header := lines[0]
 			contentHeight := len(lines) - 1
 
+			emptyMessage := "No resources found"
+			if !m.loaded {
+				emptyMessage = "Failed to load resources"
+			}
+
 			emptyContent := lipgloss.Place(
 				innerWidth,
 				contentHeight,
 				lipgloss.Center,
 				lipgloss.Center,
-				"No resources found",
+				emptyMessage,
 			)
 
 			body = header + "\n" + emptyContent
@@ -235,4 +241,92 @@ func (m Model) renderDetails() string {
 		strings.Join(bodyLines, "\n") +
 		"\n" +
 		bottom
+}
+
+//func (m Model) renderErrorModal() string {
+//	content := errorTitleStyle.Render("Error") +
+//		"\n\n" +
+//		m.err.Error() +
+//		"\n\n" +
+//		lipgloss.NewStyle().
+//			Faint(true).
+//			Render("Press Esc or Enter to dismiss")
+//
+//	modal := errorModalStyle.Render(content)
+//
+//	return lipgloss.Place(
+//		m.width,
+//		m.height,
+//		lipgloss.Center,
+//		lipgloss.Center,
+//		modal,
+//	)
+//}
+
+func overlayCenter(background, foreground string) string {
+	bg := strings.Split(background, "\n")
+	fg := strings.Split(foreground, "\n")
+
+	bgWidth := 0
+	for _, line := range bg {
+		bgWidth = max(bgWidth, ansi.StringWidth(line))
+	}
+
+	fgWidth := 0
+	for _, line := range fg {
+		fgWidth = max(fgWidth, ansi.StringWidth(line))
+	}
+
+	x := max((bgWidth-fgWidth)/2, 0)
+	y := max((len(bg)-len(fg))/2, 0)
+
+	for i, fgLine := range fg {
+		bgIndex := y + i
+		if bgIndex >= len(bg) {
+			break
+		}
+
+		width := ansi.StringWidth(fgLine)
+
+		left := ansi.Cut(bg[bgIndex], 0, x)
+		right := ansi.Cut(bg[bgIndex], x+width, bgWidth)
+
+		bg[bgIndex] = left + fgLine + right
+	}
+
+	return strings.Join(bg, "\n")
+}
+
+//func (m Model) renderErrorModal() string {
+//	content := errorTitleStyle.Render("Error") +
+//		"\n\n" +
+//		m.err.Error() +
+//		"\n\n" +
+//		lipgloss.NewStyle().
+//			Faint(true).
+//			Render("Press Esc or Enter to dismiss")
+//
+//	return errorModalStyle.Render(content)
+//}
+
+func (m Model) renderErrorModal() string {
+	hint := lipgloss.NewStyle().
+		Faint(true).
+		Render("Press ") +
+		modalButtonStyle.Render(" Esc ") +
+		lipgloss.NewStyle().
+			Faint(true).
+			Render(" or ") +
+		modalButtonStyle.Render(" Enter ") +
+		lipgloss.NewStyle().
+			Faint(true).
+			Render(" to dismiss")
+
+	content := errorTitleStyle.Render("Error") +
+		"\n\n" +
+		m.err.Error() +
+		"\n\n" +
+		hint
+
+	return errorModalStyle.Render(content)
 }

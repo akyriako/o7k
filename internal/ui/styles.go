@@ -45,6 +45,11 @@ var (
 			Foreground(lipgloss.Color("#000000")).
 			Background(lipgloss.Color("#00BFFF")).
 			Bold(true)
+
+	modalButtonStyle = lipgloss.NewStyle().
+				Foreground(lipgloss.Color("#000000")).
+				Background(lipgloss.Color("#00BFFF")).
+				Bold(true)
 )
 
 var (
@@ -62,6 +67,19 @@ var (
 
 	jsonNullStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#7F848E"))
+)
+
+var (
+	errorModalStyle = lipgloss.NewStyle().
+			Border(lipgloss.RoundedBorder()).
+			BorderForeground(lipgloss.Color("#ED1944")).
+			Foreground(lipgloss.Color("#FFFFFF")).
+			Padding(1, 2).
+			Width(60)
+
+	errorTitleStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#ED1944")).
+			Bold(true)
 )
 
 func tableStyles() table.Styles {
