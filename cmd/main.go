@@ -30,6 +30,8 @@ import (
 	"github.com/akyriako/o7k/internal/resources/identity/roles"
 	"github.com/akyriako/o7k/internal/resources/identity/services"
 	"github.com/akyriako/o7k/internal/resources/images"
+	"github.com/akyriako/o7k/internal/resources/loadbalancing/listeners"
+	"github.com/akyriako/o7k/internal/resources/loadbalancing/loadbalancers"
 	"github.com/akyriako/o7k/internal/resources/networking/floatingips"
 	"github.com/akyriako/o7k/internal/resources/networking/networks"
 	"github.com/akyriako/o7k/internal/resources/networking/ports"
@@ -251,6 +253,14 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 
 	if err := r.Register(recordsets.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering dns recordsets resource: %w", err))
+	}
+
+	if err := r.Register(loadbalancers.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering load balancers resource: %w", err))
+	}
+
+	if err := r.Register(listeners.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering listeners resource: %w", err))
 	}
 
 	return errs
