@@ -1,4 +1,4 @@
-package listeners
+package l7policies
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/listeners"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/l7policies"
 )
 
 type Resource struct {
@@ -20,16 +20,18 @@ func New(context *openstack.Context) *Resource {
 }
 
 func (r *Resource) Title() string {
-	return "Listeners"
+	return "L7 Policies"
 }
 
 func (r *Resource) Kind() string {
-	return "listeners"
+	return "l7policies"
 }
 
 func (r *Resource) Aliases() []string {
 	return []string{
-		"listener",
+		"l7policy",
+		"l7-policies",
+		"l7-policy",
 	}
 }
 
@@ -37,17 +39,17 @@ func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
 		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
-		{Key: "protocol", Title: "PROTOCOL", MinWidth: 12, Flex: 0},
-		{Key: "protocol_port", Title: "PORT", MinWidth: 8, Flex: 0},
+		{Key: "action", Title: "ACTION", MinWidth: 20, Flex: 0},
+		{Key: "position", Title: "POSITION", MinWidth: 10, Flex: 0},
+		{Key: "listener_id", Title: "LISTENER ID", MinWidth: 40, Flex: 0},
+		{Key: "redirect_pool_id", Title: "REDIRECT POOL ID", MinWidth: 40, Flex: 0},
 		{Key: "provisioning_status", Title: "PROVISIONING", MinWidth: 20, Flex: 0},
-		{Key: "default_pool_id", Title: "DEFAULT POOL ID", MinWidth: 40, Flex: 0},
+		{Key: "operating_status", Title: "OPERATING", MinWidth: 16, Flex: 0},
 	}
 }
 
 func (r *Resource) Commands() []resource.Command {
-	return []resource.Command{
-		{Key: "shift-p", Description: "L7 Policies"},
-	}
+	return nil
 }
 
 func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
@@ -56,14 +58,14 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 		return nil, err
 	}
 
-	pages, err := listeners.List(client, listeners.ListOpts{}).AllPages(ctx)
+	pages, err := l7policies.List(client, l7policies.ListOpts{}).AllPages(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("listing listeners: %w", err)
+		return nil, fmt.Errorf("listing L7 policies: %w", err)
 	}
 
-	items, err := listeners.ExtractListeners(pages)
+	items, err := l7policies.ExtractL7Policies(pages)
 	if err != nil {
-		return nil, fmt.Errorf("extracting listeners: %w", err)
+		return nil, fmt.Errorf("extracting L7 policies: %w", err)
 	}
 
 	rows := make([]resource.Row, 0, len(items))
@@ -74,10 +76,12 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 			Fields: map[string]string{
 				"id":                  item.ID,
 				"name":                item.Name,
-				"protocol":            item.Protocol,
-				"protocol_port":       strconv.Itoa(item.ProtocolPort),
+				"action":              item.Action,
+				"position":            strconv.FormatInt(int64(item.Position), 10),
+				"listener_id":         item.ListenerID,
+				"redirect_pool_id":    item.RedirectPoolID,
 				"provisioning_status": item.ProvisioningStatus,
-				"default_pool_id":     item.DefaultPoolID,
+				"operating_status":    item.OperatingStatus,
 			},
 		})
 	}
@@ -86,10 +90,5 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 }
 
 func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
-	switch command.Key {
-	case "shift-p":
-		return r.l7Policies(row)
-	}
-
 	return nil
 }
