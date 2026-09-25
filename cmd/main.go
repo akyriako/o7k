@@ -37,6 +37,7 @@ import (
 	"github.com/akyriako/o7k/internal/resources/networking/securitygrouprules"
 	"github.com/akyriako/o7k/internal/resources/networking/securitygroups"
 	"github.com/akyriako/o7k/internal/resources/networking/subnets"
+	"github.com/akyriako/o7k/internal/resources/orchestration/stackevents"
 	"github.com/akyriako/o7k/internal/resources/orchestration/stackresources"
 	"github.com/akyriako/o7k/internal/resources/orchestration/stacks"
 	"github.com/akyriako/o7k/internal/version"
@@ -237,6 +238,10 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 	}
 
 	if err := r.Register(stackresources.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering stacks resources: %w", err))
+	}
+
+	if err := r.Register(stackevents.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering stacks resources: %w", err))
 	}
 
