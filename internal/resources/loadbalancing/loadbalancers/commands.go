@@ -44,3 +44,14 @@ func (r *Resource) listeners(row resource.Row) tea.Cmd {
 		}
 	}
 }
+
+func (r *Resource) pools(row resource.Row) tea.Cmd {
+	return func() tea.Msg {
+		return resource.NavigateScopedMsg{
+			Resource: "pools",
+			Scope: map[string]string{
+				"loadbalancer_id": row.ID,
+			},
+		}
+	}
+}

@@ -1,4 +1,4 @@
-package loadbalancers
+package pools
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/loadbalancers"
+	"github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/pools"
 )
 
 type Resource struct {
@@ -19,18 +19,16 @@ func New(context *openstack.Context) *Resource {
 }
 
 func (r *Resource) Title() string {
-	return "Load Balancers"
+	return "Pools"
 }
 
 func (r *Resource) Kind() string {
-	return "loadbalancers"
+	return "pools"
 }
 
 func (r *Resource) Aliases() []string {
 	return []string{
-		"loadbalancer",
-		"lbs",
-		"lb",
+		"pool",
 	}
 }
 
@@ -38,20 +36,16 @@ func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
 		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
+		{Key: "protocol", Title: "PROTOCOL", MinWidth: 12, Flex: 0},
+		{Key: "lb_algorithm", Title: "ALGORITHM", MinWidth: 20, Flex: 0},
 		{Key: "provisioning_status", Title: "PROVISIONING", MinWidth: 20, Flex: 0},
 		{Key: "operating_status", Title: "OPERATING", MinWidth: 16, Flex: 0},
-		{Key: "vip_address", Title: "VIP ADDRESS", MinWidth: 20, Flex: 0},
-		{Key: "vip_network_id", Title: "VIP NETWORK ID", MinWidth: 40, Flex: 0},
-		{Key: "vip_subnet_id", Title: "VIP SUBNET ID", MinWidth: 40, Flex: 0},
+		{Key: "healthmonitor_id", Title: "HEALTH MONITOR ID", MinWidth: 40, Flex: 0},
 	}
 }
 
 func (r *Resource) Commands() []resource.Command {
-	return []resource.Command{
-		{Key: "s", Description: "Show", Default: true},
-		{Key: "shift-l", Description: "Listeners"},
-		{Key: "shift-p", Description: "Pools"},
-	}
+	return nil
 }
 
 func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
@@ -60,14 +54,20 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 		return nil, err
 	}
 
-	pages, err := loadbalancers.List(client, loadbalancers.ListOpts{}).AllPages(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("listing load balancers: %w", err)
+	scope := resource.Scope(ctx)
+
+	opts := pools.ListOpts{
+		LoadbalancerID: scope["loadbalancer_id"],
 	}
 
-	items, err := loadbalancers.ExtractLoadBalancers(pages)
+	pages, err := pools.List(client, opts).AllPages(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("extracting load balancers: %w", err)
+		return nil, fmt.Errorf("listing pools: %w", err)
+	}
+
+	items, err := pools.ExtractPools(pages)
+	if err != nil {
+		return nil, fmt.Errorf("extracting pools: %w", err)
 	}
 
 	rows := make([]resource.Row, 0, len(items))
@@ -78,11 +78,11 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 			Fields: map[string]string{
 				"id":                  item.ID,
 				"name":                item.Name,
+				"protocol":            item.Protocol,
+				"lb_algorithm":        item.LBMethod,
 				"provisioning_status": item.ProvisioningStatus,
 				"operating_status":    item.OperatingStatus,
-				"vip_address":         item.VipAddress,
-				"vip_network_id":      item.VipNetworkID,
-				"vip_subnet_id":       item.VipSubnetID,
+				"healthmonitor_id":    item.MonitorID,
 			},
 		})
 	}
@@ -91,14 +91,5 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 }
 
 func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
-	switch command.Key {
-	case "s":
-		return r.show(row)
-	case "shift-l":
-		return r.listeners(row)
-	case "shift-p":
-		return r.pools(row)
-	}
-
 	return nil
 }

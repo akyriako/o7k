@@ -2,6 +2,7 @@
   <dictionary name="project">
     <words>
       <w>keypairs</w>
+      <w>loadbalancer</w>
       <w>recordsets</w>
     </words>
   </dictionary>
