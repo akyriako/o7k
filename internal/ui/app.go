@@ -427,6 +427,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, m.navigateFilteredResource(msg.Resource)
 
 	case resource.DetailsMsg:
+		m.showLoading = false
+		m.loadingLabel = ""
+
 		if msg.Err != nil {
 			m.err = fmt.Errorf("loading resource details failed: %v", msg.Err)
 			slog.Error(m.err.Error(), "cloud", m.context.Cloud)

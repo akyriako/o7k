@@ -105,6 +105,11 @@ func (m *Model) executeResourceCommand(key string) tea.Cmd {
 				m.loadingLabel = "Connecting to " + row.ID + "..."
 			}
 
+			if key == "s" {
+				m.showLoading = true
+				m.loadingLabel = "Loading..."
+			}
+
 			return m.resource.Execute(command, row)
 		}
 	}
@@ -134,6 +139,7 @@ func (m *Model) switchResource(name string) tea.Cmd {
 
 	m.loading = true
 	m.showLoading = true
+	m.loadingLabel = "Loading..."
 	m.loaded = false
 	m.itemCount = 0
 	m.loadID++
@@ -223,6 +229,7 @@ func (m *Model) refreshResource() tea.Cmd {
 
 	m.loading = true
 	m.showLoading = true
+	m.loadingLabel = "Loading..."
 	m.loadID++
 
 	return m.loadResource()
@@ -237,7 +244,8 @@ func (m *Model) autoRefreshResource() tea.Cmd {
 	}
 
 	m.loading = true
-	m.showLoading = false
+	m.showLoading = true
+	m.loadingLabel = "Refreshing..."
 	m.loadID++
 
 	return m.loadResource()
