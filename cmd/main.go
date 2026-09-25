@@ -32,6 +32,7 @@ import (
 	"github.com/akyriako/o7k/internal/resources/images"
 	"github.com/akyriako/o7k/internal/resources/loadbalancing/listeners"
 	"github.com/akyriako/o7k/internal/resources/loadbalancing/loadbalancers"
+	"github.com/akyriako/o7k/internal/resources/loadbalancing/members"
 	"github.com/akyriako/o7k/internal/resources/loadbalancing/pools"
 	"github.com/akyriako/o7k/internal/resources/networking/floatingips"
 	"github.com/akyriako/o7k/internal/resources/networking/networks"
@@ -266,6 +267,10 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 
 	if err := r.Register(pools.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering pools resource: %w", err))
+	}
+
+	if err := r.Register(members.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering members resource: %w", err))
 	}
 
 	return errs

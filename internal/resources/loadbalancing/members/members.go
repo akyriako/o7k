@@ -1,8 +1,9 @@
-package pools
+package members
 
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
@@ -19,16 +20,16 @@ func New(context *openstack.Context) *Resource {
 }
 
 func (r *Resource) Title() string {
-	return "Pools"
+	return "Members"
 }
 
 func (r *Resource) Kind() string {
-	return "pools"
+	return "members"
 }
 
 func (r *Resource) Aliases() []string {
 	return []string{
-		"pool",
+		"member",
 	}
 }
 
@@ -36,40 +37,39 @@ func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
 		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
-		{Key: "protocol", Title: "PROTOCOL", MinWidth: 12, Flex: 0},
-		{Key: "lb_algorithm", Title: "ALGORITHM", MinWidth: 20, Flex: 0},
+		{Key: "address", Title: "ADDRESS", MinWidth: 20, Flex: 0},
+		{Key: "protocol_port", Title: "PORT", MinWidth: 8, Flex: 0},
 		{Key: "provisioning_status", Title: "PROVISIONING", MinWidth: 20, Flex: 0},
 		{Key: "operating_status", Title: "OPERATING", MinWidth: 16, Flex: 0},
-		{Key: "healthmonitor_id", Title: "HEALTH MONITOR ID", MinWidth: 40, Flex: 0},
+		{Key: "subnet_id", Title: "SUBNET ID", MinWidth: 40, Flex: 0},
 	}
 }
 
 func (r *Resource) Commands() []resource.Command {
-	return []resource.Command{
-		{Key: "shift-m", Description: "Members"},
-	}
+	return nil
 }
 
 func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
+	scope := resource.Scope(ctx)
+	poolID := scope["pool_id"]
+
+	if poolID == "" {
+		return nil, fmt.Errorf("member requires pool_id")
+	}
+
 	client, err := r.context.LoadBalancerV2()
 	if err != nil {
 		return nil, err
 	}
 
-	scope := resource.Scope(ctx)
-
-	opts := pools.ListOpts{
-		LoadbalancerID: scope["loadbalancer_id"],
+	pages, err := pools.ListMembers(client, poolID, pools.ListMembersOpts{}).AllPages(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("listing pool members: %w", err)
 	}
 
-	pages, err := pools.List(client, opts).AllPages(ctx)
+	items, err := pools.ExtractMembers(pages)
 	if err != nil {
-		return nil, fmt.Errorf("listing pools: %w", err)
-	}
-
-	items, err := pools.ExtractPools(pages)
-	if err != nil {
-		return nil, fmt.Errorf("extracting pools: %w", err)
+		return nil, fmt.Errorf("extracting pool members: %w", err)
 	}
 
 	rows := make([]resource.Row, 0, len(items))
@@ -80,11 +80,12 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 			Fields: map[string]string{
 				"id":                  item.ID,
 				"name":                item.Name,
-				"protocol":            item.Protocol,
-				"lb_algorithm":        item.LBMethod,
+				"address":             item.Address,
+				"protocol_port":       strconv.Itoa(item.ProtocolPort),
 				"provisioning_status": item.ProvisioningStatus,
 				"operating_status":    item.OperatingStatus,
-				"healthmonitor_id":    item.MonitorID,
+				"subnet_id":           item.SubnetID,
+				"pool_id":             poolID,
 			},
 		})
 	}
@@ -93,10 +94,5 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 }
 
 func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
-	switch command.Key {
-	case "shift-m":
-		return r.members(row)
-	}
-
 	return nil
 }
