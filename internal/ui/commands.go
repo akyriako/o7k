@@ -33,10 +33,13 @@ type clipboardResultMsg struct {
 	//err error
 }
 
+type resourceScope map[string]string
+
 type navigationEntry struct {
 	resource string
 	id       string
 	filter   *resourceFilter
+	scope    resourceScope
 }
 
 type resourceFilter struct {
@@ -112,10 +115,11 @@ func (m *Model) executeResourceCommand(key string) tea.Cmd {
 	return nil
 }
 
-func (m *Model) switchResource(name string) tea.Cmd {
+func (m *Model) switchResource(name string, scope resourceScope) tea.Cmd {
 	m.navigation = nil
 	m.navigateID = ""
 	m.filter = nil
+	m.scope = scope
 
 	m.detailMode = false
 	m.detailID = ""
@@ -152,7 +156,7 @@ func (m *Model) navigateResource(name string) tea.Cmd {
 	navigation := m.navigation
 	navigateID := m.navigateID
 
-	cmd := m.switchResource(name)
+	cmd := m.switchResource(name, nil)
 
 	m.navigation = navigation
 	m.navigateID = navigateID
@@ -164,13 +168,39 @@ func (m *Model) navigateFilteredResource(name string) tea.Cmd {
 	navigation := m.navigation
 	filter := m.filter
 
-	cmd := m.switchResource(name)
+	cmd := m.switchResource(name, nil)
 
 	m.navigation = navigation
 	m.filter = filter
 
 	return cmd
 }
+
+func (m *Model) navigateScopedResource(name string) tea.Cmd {
+	navigation := m.navigation
+	scope := m.scope
+
+	cmd := m.switchResource(name, scope)
+
+	m.navigation = navigation
+	m.scope = scope
+
+	return cmd
+}
+
+//func (m *Model) navigateScopedResource(name string) tea.Cmd {
+//	navigation := m.navigation
+//	scope := m.scope
+//
+//	m.scope = scope
+//
+//	cmd := m.switchResource(name, nil)
+//
+//	m.navigation = navigation
+//	m.scope = scope
+//
+//	return cmd
+//}
 
 func (m *Model) navigateBack() tea.Cmd {
 	if len(m.navigation) == 0 {
@@ -183,16 +213,19 @@ func (m *Model) navigateBack() tea.Cmd {
 	m.navigation = m.navigation[:last]
 	m.navigateID = entry.id
 	m.filter = entry.filter
+	m.scope = entry.scope
 
 	navigation := m.navigation
 	navigateID := m.navigateID
 	filter := m.filter
+	scope := m.scope
 
-	cmd := m.switchResource(entry.resource)
+	cmd := m.switchResource(entry.resource, entry.scope)
 
 	m.navigation = navigation
 	m.navigateID = navigateID
 	m.filter = filter
+	m.scope = scope
 
 	return cmd
 }
@@ -263,7 +296,11 @@ func (m Model) loadResource() tea.Cmd {
 			}
 		}
 
-		rows, err := r.List(context.Background())
+		ctx := context.Background()
+		if m.scope != nil {
+			ctx = resource.WithScope(ctx, m.scope)
+		}
+		rows, err := r.List(ctx)
 		if err != nil {
 			return errMsg{
 				err:    err,

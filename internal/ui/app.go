@@ -49,6 +49,7 @@ type Model struct {
 	navigation []navigationEntry
 	navigateID string
 	filter     *resourceFilter
+	scope      resourceScope
 
 	detailMode    bool
 	detail        viewport.Model
@@ -224,7 +225,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.command.Blur()
 				m.command.SetValue("")
 
-				return m, m.switchResource(command)
+				return m, m.switchResource(command, nil)
 			}
 		}
 
@@ -425,6 +426,24 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		return m, m.navigateFilteredResource(msg.Resource)
+
+	case resource.NavigateScopedMsg:
+		cursor := m.table.Cursor()
+
+		if cursor >= 0 && cursor < len(m.resourceRows) {
+			m.navigation = append(m.navigation, navigationEntry{
+				resource: m.resource.Kind(),
+				id:       m.resourceRows[cursor].ID,
+				filter:   m.filter,
+				scope:    m.scope,
+			})
+		}
+
+		m.navigateID = ""
+		m.filter = nil
+		m.scope = msg.Scope
+
+		return m, m.navigateScopedResource(msg.Resource)
 
 	case resource.DetailsMsg:
 		if msg.Err != nil {

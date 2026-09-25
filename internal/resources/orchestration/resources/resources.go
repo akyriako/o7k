@@ -1,4 +1,4 @@
-package stacks
+package resources
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
 	tea "github.com/charmbracelet/bubbletea"
-	orchestrationstacks "github.com/gophercloud/gophercloud/v2/openstack/orchestration/v1/stacks"
+	"github.com/gophercloud/gophercloud/v2/openstack/orchestration/v1/stackresources"
 )
 
 type Resource struct {
@@ -19,60 +19,69 @@ func New(context *openstack.Context) *Resource {
 }
 
 func (r *Resource) Title() string {
-	return "Stacks"
+	return "Stack Resources"
 }
 
 func (r *Resource) Kind() string {
-	return "stacks"
+	return "stack-resources"
 }
 
 func (r *Resource) Aliases() []string {
 	return []string{
-		"stack",
+		"stack-resource",
 	}
 }
 
 func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
-		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
 		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
+		{Key: "type", Title: "TYPE", MinWidth: 30, Flex: 1},
 		{Key: "status", Title: "STATUS", MinWidth: 20, Flex: 0},
-		{Key: "description", Title: "DESCRIPTION", MinWidth: 30, Flex: 2},
+		{Key: "physical_id", Title: "PHYSICAL ID", MinWidth: 40, Flex: 1},
+		{Key: "stack_id", Title: "STACK ID", MinWidth: 40, Flex: 0},
 	}
 }
 
 func (r *Resource) Commands() []resource.Command {
-	return []resource.Command{
-		{Key: "s", Description: "Show", Default: true},
-		{Key: "shift-r", Description: "Resources"},
-	}
+	return nil
 }
+
 func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
+	scope := resource.Scope(ctx)
+
+	stackName := scope["stack_name"]
+	stackID := scope["stack_id"]
+
+	if stackName == "" || stackID == "" {
+		return nil, fmt.Errorf("stack resource requires stack_name and stack_id")
+	}
+
 	client, err := r.context.OrchestrationV1()
 	if err != nil {
 		return nil, err
 	}
 
-	pages, err := orchestrationstacks.List(client, orchestrationstacks.ListOpts{}).AllPages(ctx)
+	pages, err := stackresources.List(client, stackName, stackID, nil).AllPages(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("listing stacks: %w", err)
+		return nil, fmt.Errorf("listing stack resources: %w", err)
 	}
 
-	items, err := orchestrationstacks.ExtractStacks(pages)
+	items, err := stackresources.ExtractResources(pages)
 	if err != nil {
-		return nil, fmt.Errorf("extracting stacks: %w", err)
+		return nil, fmt.Errorf("extracting stack resources: %w", err)
 	}
 
 	rows := make([]resource.Row, 0, len(items))
 
-	for _, stack := range items {
+	for _, item := range items {
 		rows = append(rows, resource.Row{
-			ID: stack.ID,
+			ID: item.Name,
 			Fields: map[string]string{
-				"id":          stack.ID,
-				"name":        stack.Name,
-				"status":      stack.Status,
-				"description": stack.Description,
+				"name":        item.Name,
+				"type":        item.Type,
+				"status":      item.Status,
+				"physical_id": item.PhysicalID,
+				"stack_id":    stackID,
 			},
 		})
 	}
@@ -81,12 +90,5 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 }
 
 func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
-	switch command.Key {
-	case "s":
-		return r.show(row)
-	case "shift-r":
-		return r.resources(row)
-	}
-
 	return nil
 }

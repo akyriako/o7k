@@ -33,3 +33,14 @@ type Resource interface {
 	List(ctx context.Context) ([]Row, error)
 	Execute(command Command, row Row) tea.Cmd
 }
+
+type scopeContextKey struct{}
+
+func WithScope(ctx context.Context, scope map[string]string) context.Context {
+	return context.WithValue(ctx, scopeContextKey{}, scope)
+}
+
+func Scope(ctx context.Context) map[string]string {
+	scope, _ := ctx.Value(scopeContextKey{}).(map[string]string)
+	return scope
+}

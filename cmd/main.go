@@ -37,6 +37,7 @@ import (
 	"github.com/akyriako/o7k/internal/resources/networking/securitygrouprules"
 	"github.com/akyriako/o7k/internal/resources/networking/securitygroups"
 	"github.com/akyriako/o7k/internal/resources/networking/subnets"
+	"github.com/akyriako/o7k/internal/resources/orchestration/resources"
 	"github.com/akyriako/o7k/internal/resources/orchestration/stacks"
 	"github.com/akyriako/o7k/internal/version"
 	tea "github.com/charmbracelet/bubbletea"
@@ -233,6 +234,10 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 
 	if err := r.Register(stacks.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering stacks resource: %w", err))
+	}
+
+	if err := r.Register(resources.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering stacks resources: %w", err))
 	}
 
 	if err := r.Register(zones.New(openstackContext)); err != nil {
