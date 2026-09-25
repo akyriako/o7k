@@ -41,13 +41,7 @@ func (r *Resource) Columns() []resource.Column {
 }
 
 func (r *Resource) Commands() []resource.Command {
-	return []resource.Command{
-		{
-			Key:         "a",
-			Description: "Activate",
-			Default:     true,
-		},
-	}
+	return []resource.Command{{Key: "a", Description: "Activate", Default: true}}
 }
 
 func (r *Resource) List(_ context.Context) ([]resource.Row, error) {

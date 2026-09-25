@@ -34,6 +34,7 @@ type Model struct {
 	itemCount         int
 	status            string
 	loading           bool
+	loadingLabel      string
 	showLoading       bool
 	loaded            bool
 	loadID            uint64
@@ -42,7 +43,8 @@ type Model struct {
 	width  int
 	height int
 
-	context *openstack.Context
+	activatingContext bool
+	context           *openstack.Context
 
 	navigation []navigationEntry
 	navigateID string
@@ -102,10 +104,11 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, versi
 		context:  openstackContext,
 		detail:   detail,
 
-		loading:     true,
-		showLoading: true,
-		loaded:      false,
-		loadID:      1,
+		loading:      true,
+		showLoading:  true,
+		loadingLabel: "Loading...",
+		loaded:       false,
+		loadID:       1,
 	}
 }
 
@@ -138,9 +141,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case errMsg:
+		if msg.loadID != 0 && msg.loadID != m.loadID {
+			return m, nil
+		}
+
 		m.autoRefreshPaused = true
 		m.loading = false
 		m.showLoading = false
+		m.loadingLabel = ""
 
 		m.err = msg.err
 
@@ -228,6 +236,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
+		if m.activatingContext {
+			return m, nil
+		}
+
 		switch msg.String() {
 		case "ctrl+x":
 			return m, tea.Quit
@@ -360,6 +372,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case contexts.ActivatedMsg:
+		m.activatingContext = false
+		m.showLoading = false
+		m.loadingLabel = ""
+
 		if msg.Err != nil {
 			m.err = fmt.Errorf("context activation failed: %v", msg.Err)
 			slog.Error(m.err.Error(), "cloud", msg.Context.Cloud)
@@ -369,7 +385,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		*m.context = *msg.Context
 		m.status = fmt.Sprintf("connected to %s", m.context.Cloud)
 
-		cmd := m.autoRefreshResource()
+		m.loadingLabel = "Loading..."
+		cmd := m.refreshResource()
 
 		return m, tea.Batch(
 			clearStatus(m.status),
@@ -475,7 +492,7 @@ func (m Model) View() string {
 		loadingTag := ""
 
 		if m.showLoading {
-			loadingTag = loadingStyle.Render(" Loading... ")
+			loadingTag = loadingStyle.Render(fmt.Sprintf(" %s ", m.loadingLabel))
 		}
 
 		resourceLine = lipgloss.JoinHorizontal(
