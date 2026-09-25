@@ -3,7 +3,6 @@ package ui
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/akyriako/o7k/internal/resource"
 	"github.com/charmbracelet/lipgloss"
@@ -100,10 +99,9 @@ func (m Model) renderTable() string {
 
 	if m.resource != nil {
 		title = fmt.Sprintf(
-			" %s[%d] | last update: %s ",
+			" %s[%d] ",
 			m.resource.Kind(),
 			m.itemCount,
-			time.Now().Format("02.01.2006 15:04:05"),
 		)
 	}
 
@@ -188,11 +186,11 @@ func (m Model) renderDetails() string {
 	title := " details "
 
 	if m.resource != nil {
-		title = " " + m.resource.Kind() + " details "
+		title = fmt.Sprintf(" %s details ", m.resource.Kind())
 	}
 
 	if m.resource != nil && m.detailID != "" {
-		title = " " + m.resource.Kind() + " " + m.detailID + " "
+		title = fmt.Sprintf(" %s %s ", m.resource.Kind(), m.detailID)
 	}
 
 	innerWidth := max(m.width-2, 1)
@@ -242,26 +240,6 @@ func (m Model) renderDetails() string {
 		"\n" +
 		bottom
 }
-
-//func (m Model) renderErrorModal() string {
-//	content := errorTitleStyle.Render("Error") +
-//		"\n\n" +
-//		m.err.Error() +
-//		"\n\n" +
-//		lipgloss.NewStyle().
-//			Faint(true).
-//			Render("Press Esc or Enter to dismiss")
-//
-//	modal := errorModalStyle.Render(content)
-//
-//	return lipgloss.Place(
-//		m.width,
-//		m.height,
-//		lipgloss.Center,
-//		lipgloss.Center,
-//		modal,
-//	)
-//}
 
 func overlayCenter(background, foreground string) string {
 	bg := strings.Split(background, "\n")
