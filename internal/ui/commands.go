@@ -96,7 +96,14 @@ func (m *Model) executeResourceCommand(key string) tea.Cmd {
 
 	for _, command := range m.resource.Commands() {
 		if command.Key == key {
-			return m.resource.Execute(command, m.resourceRows[cursor])
+			row := m.resourceRows[cursor]
+
+			if m.resource.Kind() == "contexts" && key == "a" {
+				m.showLoading = true
+				m.loadingLabel = "Connecting to " + row.ID + "..."
+			}
+
+			return m.resource.Execute(command, row)
 		}
 	}
 

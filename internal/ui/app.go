@@ -34,6 +34,7 @@ type Model struct {
 	itemCount         int
 	status            string
 	loading           bool
+	loadingLabel      string
 	showLoading       bool
 	loaded            bool
 	loadID            uint64
@@ -102,10 +103,11 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, versi
 		context:  openstackContext,
 		detail:   detail,
 
-		loading:     true,
-		showLoading: true,
-		loaded:      false,
-		loadID:      1,
+		loading:      true,
+		showLoading:  true,
+		loadingLabel: "Loading...",
+		loaded:       false,
+		loadID:       1,
 	}
 }
 
@@ -360,6 +362,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case contexts.ActivatedMsg:
+		m.showLoading = false
+		m.loadingLabel = ""
+
 		if msg.Err != nil {
 			m.err = fmt.Errorf("context activation failed: %v", msg.Err)
 			slog.Error(m.err.Error(), "cloud", msg.Context.Cloud)
@@ -475,7 +480,7 @@ func (m Model) View() string {
 		loadingTag := ""
 
 		if m.showLoading {
-			loadingTag = loadingStyle.Render(" Loading... ")
+			loadingTag = loadingStyle.Render(fmt.Sprintf(" %s ", m.loadingLabel))
 		}
 
 		resourceLine = lipgloss.JoinHorizontal(

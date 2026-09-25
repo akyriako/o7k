@@ -84,7 +84,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	availableClouds, err := openstack.LoadClouds(cloudsPaths)
+	_, err = openstack.LoadClouds(cloudsPaths)
 	if err != nil {
 		fmt.Fprintf(stderr, "error loading clouds.yaml: %v\n", err)
 		os.Exit(1)
@@ -95,31 +95,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	var openstackContext openstack.Context
-	connected := false
-	for _, cloud := range availableClouds.Items {
-		openstackContext = openstack.Context{
-			Cloud:    cloud.Name,
-			Region:   cloud.Region,
-			Project:  cloud.Project,
-			Domain:   cloud.Domain,
-			Identity: cloud.Identity,
-		}
-
-		if err := openstackContext.Connect(context.Background(), cloud.Path); err != nil {
-			slog.Error(fmt.Sprintf("connection failed: %v", err))
-			continue
-		}
-
-		connected = true
-		break
-	}
-
-	if !connected {
-		fmt.Fprintf(stderr, "failed to connect to any clouds: %v\n", err)
-		os.Exit(1)
-	}
-
+	openstackContext := openstack.Context{}
 	err = registerAll(registry, &openstackContext)
 	if err != nil {
 		if joined, ok := err.(interface{ Unwrap() []error }); ok {
