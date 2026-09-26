@@ -31,14 +31,16 @@ type Model struct {
 
 	err error
 
-	itemCount         int
-	status            string
-	loading           bool
-	loadingLabel      string
-	showLoading       bool
-	loaded            bool
-	loadID            uint64
-	autoRefreshPaused bool
+	itemCount    int
+	status       string
+	loading      bool
+	loadingLabel string
+	showLoading  bool
+	loaded       bool
+	loadID       uint64
+
+	autoRefreshTimestamp *time.Time
+	autoRefreshPaused    bool
 
 	width  int
 	height int
@@ -360,10 +362,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.table.MoveDown(cursor)
 		}
 
+		t := time.Now()
+		m.autoRefreshTimestamp = &t
+
 		return m, nil
 
 	case autoRefreshMsg:
 		cmd := m.autoRefreshResource()
+
+		t := time.Now()
+		m.autoRefreshTimestamp = &t
 
 		return m, tea.Batch(
 			cmd,
@@ -517,18 +525,28 @@ func (m Model) View() string {
 			)
 		}
 
-		loadingTag := ""
+		rightTag := loadingStyle.Render(" AutoRefresh ")
+		autoRefreshMsgState := autoRefreshStateOnStyle.Render(" ON ")
+		if m.autoRefreshPaused {
+			autoRefreshMsgState = autoRefreshStateOffStyle.Render(" OFF ")
+		}
+		timeTag := ""
+		if m.autoRefreshTimestamp != nil {
+			timeTag = loadingStyle.Render(fmt.Sprintf(" %s ", m.autoRefreshTimestamp.Format(time.RFC3339)))
+		}
+		rightTag = lipgloss.JoinHorizontal(lipgloss.Left, rightTag, autoRefreshMsgState, timeTag)
 
 		if m.showLoading {
-			loadingTag = loadingStyle.Render(fmt.Sprintf(" %s ", m.loadingLabel))
+			loadingTag := loadingStyle.Render(fmt.Sprintf(" %s ", m.loadingLabel)) + " "
+			rightTag = lipgloss.JoinHorizontal(lipgloss.Left, loadingTag, rightTag)
 		}
 
 		resourceLine = lipgloss.JoinHorizontal(
 			lipgloss.Top,
 			lipgloss.NewStyle().
-				Width(max(m.width-lipgloss.Width(loadingTag), 1)).
+				Width(max(m.width-lipgloss.Width(rightTag), 1)).
 				Render(resourceTags.String()),
-			loadingTag,
+			rightTag,
 		)
 	}
 
