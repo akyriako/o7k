@@ -1,6 +1,6 @@
 # Configuration variables
 APP ?= o7k
-TAG ?= 0.1.0
+TAG ?= 0.6.0
 ITERATION ?= 1
 TARGET_ENV ?= dev
 VERSION ?= $(TAG)-$(TARGET_ENV).$(ITERATION)

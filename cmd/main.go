@@ -299,8 +299,8 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 
 	if err := r.RegisterNavigationOnly(swiftobjects.New(openstackContext)); err != nil {
 		return fmt.Errorf("registering objects resource: %w", err)
-  }
-  
+	}
+
 	if err := r.Register(secrets.New(openstackContext)); err != nil {
 		return fmt.Errorf("registering secrets resource: %w", err)
 	}
