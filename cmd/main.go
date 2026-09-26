@@ -32,6 +32,7 @@ import (
 	"github.com/akyriako/o7k/internal/resources/images"
 	"github.com/akyriako/o7k/internal/resources/loadbalancing/healthmonitors"
 	"github.com/akyriako/o7k/internal/resources/loadbalancing/l7policies"
+	"github.com/akyriako/o7k/internal/resources/loadbalancing/l7rules"
 	"github.com/akyriako/o7k/internal/resources/loadbalancing/listeners"
 	"github.com/akyriako/o7k/internal/resources/loadbalancing/loadbalancers"
 	"github.com/akyriako/o7k/internal/resources/loadbalancing/members"
@@ -281,6 +282,10 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 
 	if err := r.Register(l7policies.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering L7 policies resource: %w", err))
+	}
+
+	if err := r.Register(l7rules.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering L7 rules resource: %w", err))
 	}
 
 	return errs
