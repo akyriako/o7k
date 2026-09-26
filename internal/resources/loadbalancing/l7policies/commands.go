@@ -15,3 +15,13 @@ func (r *Resource) rules(row resource.Row) tea.Cmd {
 		}
 	}
 }
+
+func (r *Resource) listener(row resource.Row) tea.Cmd {
+	return func() tea.Msg {
+		return resource.NavigateFilteredMsg{
+			Resource: "listeners",
+			Field:    "id",
+			Value:    row.Fields["listener_id"],
+		}
+	}
+}
