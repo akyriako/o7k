@@ -723,7 +723,7 @@ A navigation-only resource:
 - can be resolved by generic navigation
 - can have canonical names and aliases
 - can receive scope through NavigateScopedMsg
-- **cannot be opened** directly through :<resource>
+- **cannot be opened** directly through `:<resource>`
 
 For instance in Octavia, the following is valid because the selected pool supplies `pool_id`:
 
