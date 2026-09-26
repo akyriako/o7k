@@ -15,12 +15,14 @@ var reservedCommandKeys = map[string]struct{}{
 }
 
 type Registry struct {
-	resources map[string]Resource
+	resources      map[string]Resource
+	navigationOnly map[string]struct{}
 }
 
 func NewRegistry() *Registry {
 	return &Registry{
-		resources: make(map[string]Resource),
+		resources:      make(map[string]Resource),
+		navigationOnly: make(map[string]struct{}),
 	}
 }
 
@@ -53,6 +55,25 @@ func (r *Registry) Register(resource Resource) error {
 	}
 
 	return nil
+}
+
+func (r *Registry) RegisterNavigationOnly(resource Resource) error {
+	if err := r.Register(resource); err != nil {
+		return err
+	}
+
+	r.navigationOnly[normalize(resource.Kind())] = struct{}{}
+	return nil
+}
+
+func (r *Registry) IsNavigationOnly(name string) bool {
+	resource, ok := r.Get(name)
+	if !ok {
+		return false
+	}
+
+	_, ok = r.navigationOnly[normalize(resource.Kind())]
+	return ok
 }
 
 func (r *Registry) validateCommands(resource Resource) error {

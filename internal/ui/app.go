@@ -225,6 +225,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.command.Blur()
 				m.command.SetValue("")
 
+				if m.registry.IsNavigationOnly(command) {
+					res, _ := m.registry.Get(command)
+					m.status = fmt.Sprintf("resource '%s' is accessible only through its parents", res.Kind())
+					return m, nil
+				}
+
 				return m, m.switchResource(command, nil)
 			}
 		}
