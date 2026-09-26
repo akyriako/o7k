@@ -31,6 +31,8 @@ func (c *Context) Connect(ctx context.Context, cloudsPath string) error {
 		return fmt.Errorf("parsing cloud %q: %w", c.Cloud, err)
 	}
 
+	authOpts.AllowReauth = true
+
 	provider, err := config.NewProviderClient(ctx, authOpts, config.WithTLSConfig(tlsConfig))
 	if err != nil {
 		return fmt.Errorf("authenticating cloud %q: %w", c.Cloud, err)

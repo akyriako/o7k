@@ -129,7 +129,7 @@ func main() {
 			if info.Version == "" {
 				info.Version = version.Version
 			}
-			ver = fmt.Sprintf("%s → [update available: %s]", info.GetVersion(), update.LatestVersion)
+			ver = fmt.Sprintf("%s → [%s]", info.GetVersion(), update.LatestVersion)
 		}
 	}
 

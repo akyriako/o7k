@@ -17,7 +17,7 @@ const logo = `  ___   _____  _
 
 func (m Model) renderHeader() string {
 	const (
-		contextWidth = 60
+		contextWidth = 55
 		logoWidth    = 23
 	)
 
