@@ -46,6 +46,16 @@ var (
 			Background(lipgloss.Color("#00BFFF")).
 			Bold(true)
 
+	autoRefreshStateOnStyle = lipgloss.NewStyle().
+				Foreground(lipgloss.Color("#000000")).
+				Background(lipgloss.Color("#008000")).
+				Bold(true)
+
+	autoRefreshStateOffStyle = lipgloss.NewStyle().
+					Foreground(lipgloss.Color("#000000")).
+					Background(lipgloss.Color("#FF0000")).
+					Bold(true)
+
 	modalButtonStyle = lipgloss.NewStyle().
 				Foreground(lipgloss.Color("#000000")).
 				Background(lipgloss.Color("#00BFFF")).
@@ -80,6 +90,11 @@ var (
 	errorTitleStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#ED1944")).
 			Bold(true)
+)
+
+var (
+	tableTitleStyle = lipgloss.NewStyle().
+		Foreground(lipgloss.Color("#FFFFFF")).Bold(true)
 )
 
 func tableStyles() table.Styles {
