@@ -30,6 +30,9 @@ import (
 	"github.com/akyriako/o7k/internal/resources/identity/roles"
 	"github.com/akyriako/o7k/internal/resources/identity/services"
 	"github.com/akyriako/o7k/internal/resources/images"
+	"github.com/akyriako/o7k/internal/resources/keymanager/containers"
+	"github.com/akyriako/o7k/internal/resources/keymanager/orders"
+	"github.com/akyriako/o7k/internal/resources/keymanager/secrets"
 	"github.com/akyriako/o7k/internal/resources/loadbalancing/healthmonitors"
 	"github.com/akyriako/o7k/internal/resources/loadbalancing/l7policies"
 	"github.com/akyriako/o7k/internal/resources/loadbalancing/l7rules"
@@ -296,6 +299,18 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 
 	if err := r.RegisterNavigationOnly(swiftobjects.New(openstackContext)); err != nil {
 		return fmt.Errorf("registering objects resource: %w", err)
+  }
+  
+	if err := r.Register(secrets.New(openstackContext)); err != nil {
+		return fmt.Errorf("registering secrets resource: %w", err)
+	}
+
+	if err := r.Register(containers.New(openstackContext)); err != nil {
+		return fmt.Errorf("registering secret containers resource: %w", err)
+	}
+
+	if err := r.Register(orders.New(openstackContext)); err != nil {
+		return fmt.Errorf("registering orders resource: %w", err)
 	}
 
 	return errs

@@ -196,6 +196,21 @@ func (c *Context) LoadBalancerV2() (*gophercloud.ServiceClient, error) {
 	return client, nil
 }
 
+func (c *Context) KeyManagerV1() (*gophercloud.ServiceClient, error) {
+	if c.Provider == nil {
+		return nil, fmt.Errorf("context %q is not connected", c.Cloud)
+	}
+
+	client, err := openstack.NewKeyManagerV1(c.Provider, gophercloud.EndpointOpts{
+		Region: c.Region,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("creating key manager client: %w", err)
+	}
+
+	return client, nil
+}
+
 func (c *Context) ObjectStorageV1() (*gophercloud.ServiceClient, error) {
 	if c.Provider == nil {
 		return nil, fmt.Errorf("context %q is not connected", c.Cloud)
