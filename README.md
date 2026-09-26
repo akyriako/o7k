@@ -102,6 +102,8 @@ Press `Esc` to return to the previous resource and selection.
 | **Neutron / Network** | router interfaces | ⬜ |
 | **Designate / DNS** | zones, recordsets | ✅ |
 | **Heat / Orchestration** | stacks, stack resources | ✅ |
+| **Octavia / Load Balancing** | load balancers, listeners, pools, members | ✅ |
+| **Octavia / Load Balancing** | health monitors, L7 policies, L7 rules | ✅ |
 | **Trove / Databases** | instances | ⬜ |
 
 ### Aliases
@@ -136,7 +138,15 @@ Press `Esc` to return to the previous resource and selection.
 | Cinder / Block Storage | Volume Backups | `backups` | `backup`, `volume-backups`, `volume-backup` |
 | Glance / Image | Images | `images` | `image`, `img` |
 | Heat / Orchestration | Stacks | `stacks` | `stack` |
-| Heat / Orchestration | Stacks | `stack-resources` | `stack-resource` |
+| Heat / Orchestration | Stack Resources | `stack-resources` | `stack-resource` |
+| Heat / Orchestration | Stack Events | `stack-events` | `stack-event` |
+| Octavia / Load Balancing | Load Balancers | `loadbalancers` | `loadbalancer`, `lbs`, `lb` |
+| Octavia / Load Balancing | Listeners | `listeners` | `listener` |
+| Octavia / Load Balancing | Pools | `pools` | `pool` |
+| Octavia / Load Balancing | Members | `members` | `member` |
+| Octavia / Load Balancing | Health Monitors | `healthmonitors` | `healthmonitor`, `monitors`, `monitor` |
+| Octavia / Load Balancing | L7 Policies | `l7policies` | `l7policy`, `l7-policies`, `l7-policy` |
+| Octavia / Load Balancing | L7 Rules | `l7rules` | `l7rule`, `l7-rules`, `l7-rule` |
 | Designate / DNS | Zones | `zones` | `zone`, `dns-zones`, `dns-zone` |
 | Designate / DNS | Recordsets | `recordsets` | `recordset`, `records`, `record` |
 
@@ -602,6 +612,62 @@ Fields: map[string]string{
 > - Do not add special-case navigation logic to the UI for a particular OpenStack resource.
 > - Prefer `NavigateFilteredMsg` over `NavigateMsg`, as it's visually more intuitive for the users.
 
+##### Scoped navigation
+
+Some OpenStack APIs cannot list a child resource without information about its parent. In these cases, use scoped navigation instead of client-side filtered navigation.
+
+For example, listing members of an Octavia pool requires the pool ID:
+
+```go
+return func() tea.Msg {
+	return resource.NavigateScopedMsg{
+		Resource: "members",
+		Scope: map[string]string{
+			"pool_id": row.ID,
+		},
+	}
+}
+```
+
+The destination resource retrieves the scope from the context in `List()`:
+
+```go
+func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
+	scope := resource.Scope(ctx)
+	poolID := scope["pool_id"]
+
+	if poolID == "" {
+		return nil, fmt.Errorf("member requires pool_id")
+	}
+}
+```
+
+Scope can contain multiple values when required by the API. Heat stack resources, for example, require both the stack name and stack ID:
+
+```go
+Scope: map[string]string{
+	"stack_name": row.Fields["name"],
+	"stack_id":   row.ID,
+}
+```
+
+Scoped navigation is also appropriate when the OpenStack API supports an optional server-side filter. In that case the resource may still support normal unscoped listing:
+
+```go
+scope := resource.Scope(ctx)
+
+opts := listeners.ListOpts{
+	LoadbalancerID: scope["loadbalancer_id"],
+}
+```
+
+With no scope, the resource lists globally. When reached through scoped navigation, the relationship is filtered by the OpenStack API.
+
+> [!Important]
+> Scope belongs to the navigation state. The UI preserves it across refreshes and restores the previous scope when navigating back with `Esc`.
+>
+> Do not encode list-valued relationships into scalar fields merely to make `NavigateFilteredMsg` work. Use the navigation mechanism that matches the OpenStack API and relationship.
+
 #### 9. Register the resource
 
 Creating the package is not enough. The resource must be registered so **o7k** knows it exists.
@@ -635,6 +701,53 @@ For example:
 ```
 
 Keep resource registration in a logical service/resource order rather than adding new resources at arbitrary positions.
+
+##### Navigation-only resources
+
+Not every resource can be listed independently. Some OpenStack APIs require parent information before a child collection 
+can be queried. Examples include Octavia members, which require a pool ID, and L7 rules, which require an L7 policy ID. 
+These resources must still be registered so generic navigation can resolve them, but they should not be exposed as 
+standalone `:<resource>` commands.
+
+Register them with:
+
+```go
+registry.RegisterNavigationOnly(
+	members.New(openstackContext),
+)
+```
+
+A navigation-only resource:
+
+- is registered in the resource registry
+- can be resolved by generic navigation
+- can have canonical names and aliases
+- can receive scope through NavigateScopedMsg
+- **cannot be opened** directly through :<resource>
+
+For instance in Octavia, the following is valid because the selected pool supplies `pool_id`:
+
+```text
+:pools -> members
+```
+
+but accessing `members` directly is not valid because there is no parent pool from which to obtain the required scope.
+
+Use normal registration, `registry.Registry`,  when a resource can list independently:
+
+```go
+registry.Register(
+	listeners.New(openstackContext),
+)
+```
+
+A resource may support both global listing and optional scoped navigation. Octavia listeners are an example: `:listeners` 
+can list all listeners, while Load Balancer → Listeners can pass `loadbalancer_id` for server-side filtering. Such resources 
+use normal `Register` and **not** `RegisterNavigationOnly`.
+
+> [!Warning]
+> Use `RegisterNavigationOnly` only when the resource fundamentally requires parent context to perform its list operation. 
+**Do not make a resource navigation-only merely because it participates in a parent/child relationship.**
 
 #### 10. Update the support matrix
 
