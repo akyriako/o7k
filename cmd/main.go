@@ -44,6 +44,8 @@ import (
 	"github.com/akyriako/o7k/internal/resources/networking/securitygrouprules"
 	"github.com/akyriako/o7k/internal/resources/networking/securitygroups"
 	"github.com/akyriako/o7k/internal/resources/networking/subnets"
+	swiftcontainers "github.com/akyriako/o7k/internal/resources/objectstorage/containers"
+	swiftobjects "github.com/akyriako/o7k/internal/resources/objectstorage/objects"
 	"github.com/akyriako/o7k/internal/resources/orchestration/stackevents"
 	"github.com/akyriako/o7k/internal/resources/orchestration/stackresources"
 	"github.com/akyriako/o7k/internal/resources/orchestration/stacks"
@@ -286,6 +288,14 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 
 	if err := r.RegisterNavigationOnly(l7rules.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering L7 rules resource: %w", err))
+	}
+
+	if err := r.Register(swiftcontainers.New(openstackContext)); err != nil {
+		return fmt.Errorf("registering object containers resource: %w", err)
+	}
+
+	if err := r.RegisterNavigationOnly(swiftobjects.New(openstackContext)); err != nil {
+		return fmt.Errorf("registering objects resource: %w", err)
 	}
 
 	return errs

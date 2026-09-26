@@ -96,6 +96,7 @@ Press `Esc` to return to the previous resource and selection.
 | **Keystone / Catalog** | catalog, services, endpoints, regions | ✅ |
 | **Cinder / Block Storage** | volumes, snapshots, volume types, volume backups | ✅ |
 | **Glance / Image** | images | ✅ |
+| **Swift / Object Storage** | swift containers, swift objects | ✅ |
 | **Nova / Compute** | servers, flavors | ✅ |
 | **Nova / Compute** | keypairs, server groups, availability zones | ✅ |
 | **Neutron / Network** | networks, subnets, ports, routers, floating IPs, security groups | ✅ |
@@ -105,6 +106,7 @@ Press `Esc` to return to the previous resource and selection.
 | **Heat / Orchestration** | stacks, stack resources, stack events | ✅ |
 | **Octavia / Load Balancing** | load balancers, listeners, pools, members | ✅ |
 | **Octavia / Load Balancing** | health monitors, L7 policies, L7 rules | ✅ |
+| **Barbican / Key Manager** | secrets, secret containers, orders | ✅ |
 | **Trove / Databases** | instances | ⬜ |
 
 ### Aliases
@@ -138,6 +140,8 @@ Press `Esc` to return to the previous resource and selection.
 | Cinder / Block Storage | Volume Types | `volumetypes` | `volumetype` |
 | Cinder / Block Storage | Volume Backups | `backups` | `backup`, `volume-backups`, `volume-backup` |
 | Glance / Image | Images | `images` | `image`, `img` |
+| Swift / Object Storage | Swift Containers | `swift-containers` | `swift-container` |
+| Swift / Object Storage | Swift Objects | `swift-objects` | `swift-object` |
 | Heat / Orchestration | Stacks | `stacks` | `stack` |
 | Heat / Orchestration | Stack Resources | `stack-resources` | `stack-resource` |
 | Heat / Orchestration | Stack Events | `stack-events` | `stack-event` |
@@ -148,6 +152,9 @@ Press `Esc` to return to the previous resource and selection.
 | Octavia / Load Balancing | Health Monitors | `healthmonitors` | `healthmonitor`, `monitors`, `monitor` |
 | Octavia / Load Balancing | L7 Policies | `l7policies` | `l7policy`, `l7-policies`, `l7-policy` |
 | Octavia / Load Balancing | L7 Rules | `l7rules` | `l7rule`, `l7-rules`, `l7-rule` |
+| Barbican / Key Manager | Secrets | `secrets` | `secret` |
+| Barbican / Key Manager | Secret Containers | `secret-containers` | `secret-container` |
+| Barbican / Key Manager | Orders | `orders` | `order` |
 | Designate / DNS | Zones | `zones` | `zone`, `dns-zones`, `dns-zone` |
 | Designate / DNS | Recordsets | `recordsets` | `recordset`, `records`, `record` |
 
