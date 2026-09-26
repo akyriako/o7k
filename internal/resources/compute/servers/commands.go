@@ -9,7 +9,7 @@ import (
 	computeservers "github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
 )
 
-func (r *Resource) navigateToImage(row resource.Row) tea.Cmd {
+func (r *Resource) image(row resource.Row) tea.Cmd {
 	imageID := row.Fields["image_id"]
 
 	return func() tea.Msg {
@@ -21,13 +21,13 @@ func (r *Resource) navigateToImage(row resource.Row) tea.Cmd {
 	}
 }
 
-func (r *Resource) navigateToFlavor(row resource.Row) tea.Cmd {
+func (r *Resource) flavor(row resource.Row) tea.Cmd {
 	flavor := row.Fields["flavor"]
 
 	return func() tea.Msg {
 		return resource.NavigateFilteredMsg{
 			Resource: "flavors",
-			Field:    "id",
+			Field:    "name",
 			Value:    flavor,
 		}
 	}

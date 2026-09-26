@@ -153,9 +153,9 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	case "s":
 		return r.show(row.ID)
 	case "shift-i":
-		return r.navigateToImage(row)
+		return r.image(row)
 	case "shift-f":
-		return r.navigateToFlavor(row)
+		return r.flavor(row)
 	}
 
 	return nil
