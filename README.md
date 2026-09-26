@@ -65,19 +65,20 @@ Network             -> Ports
 Subnet              -> Network
 Port                -> Network
 
-Router              -> Ports
+Router              -> Ports			-> Networks			-> Subnets
 Router              -> Floating IPs
 Floating IP         -> Router
 Floating IP         -> Port
 Port                -> Floating IPs
 
-Security Group      -> Security Group Rules
-Security Group Rule -> Security Group
-
 Volume              -> Snapshots
 Volume              -> Backups
 Snapshot            -> Volume
 Backup              -> Volume
+
+
+Security Group      -> Security Group Rules
+Security Group Rule -> Security Group
 ```
 
 When navigating to a related collection, **o7k** filters the destination resource automatically.
@@ -101,7 +102,7 @@ Press `Esc` to return to the previous resource and selection.
 | **Neutron / Network** | security group rules | ✅ |
 | **Neutron / Network** | router interfaces | ⬜ |
 | **Designate / DNS** | zones, recordsets | ✅ |
-| **Heat / Orchestration** | stacks, stack resources | ✅ |
+| **Heat / Orchestration** | stacks, stack resources, stack events | ✅ |
 | **Octavia / Load Balancing** | load balancers, listeners, pools, members | ✅ |
 | **Octavia / Load Balancing** | health monitors, L7 policies, L7 rules | ✅ |
 | **Trove / Databases** | instances | ⬜ |
