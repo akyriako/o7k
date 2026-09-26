@@ -194,20 +194,6 @@ func (m *Model) navigateScopedResource(name string) tea.Cmd {
 	return cmd
 }
 
-//func (m *Model) navigateScopedResource(name string) tea.Cmd {
-//	navigation := m.navigation
-//	scope := m.scope
-//
-//	m.scope = scope
-//
-//	cmd := m.switchResource(name, nil)
-//
-//	m.navigation = navigation
-//	m.scope = scope
-//
-//	return cmd
-//}
-
 func (m *Model) navigateBack() tea.Cmd {
 	if len(m.navigation) == 0 {
 		return nil

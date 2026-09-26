@@ -244,11 +244,11 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 		errs = errors.Join(errs, fmt.Errorf("registering stacks resource: %w", err))
 	}
 
-	if err := r.Register(stackresources.New(openstackContext)); err != nil {
+	if err := r.RegisterNavigationOnly(stackresources.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering stacks resources: %w", err))
 	}
 
-	if err := r.Register(stackevents.New(openstackContext)); err != nil {
+	if err := r.RegisterNavigationOnly(stackevents.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering stacks resources: %w", err))
 	}
 
@@ -272,7 +272,7 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 		errs = errors.Join(errs, fmt.Errorf("registering pools resource: %w", err))
 	}
 
-	if err := r.Register(members.New(openstackContext)); err != nil {
+	if err := r.RegisterNavigationOnly(members.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering members resource: %w", err))
 	}
 
@@ -284,7 +284,7 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 		errs = errors.Join(errs, fmt.Errorf("registering L7 policies resource: %w", err))
 	}
 
-	if err := r.Register(l7rules.New(openstackContext)); err != nil {
+	if err := r.RegisterNavigationOnly(l7rules.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering L7 rules resource: %w", err))
 	}
 
