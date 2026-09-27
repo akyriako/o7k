@@ -72,6 +72,7 @@ type Details struct {
 
 type Navigate struct {
 	Resource string
+	ID       string
 	Field    string
 	Value    string
 	Scope    map[string]string

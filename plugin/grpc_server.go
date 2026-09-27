@@ -131,6 +131,7 @@ func (s *grpcServer) Execute(ctx context.Context, request *pb.ExecuteRequest) (*
 	if result.Navigate != nil {
 		response.Navigate = &pb.Navigate{
 			Resource: result.Navigate.Resource,
+			Id:       result.Navigate.ID,
 			Field:    result.Navigate.Field,
 			Value:    result.Navigate.Value,
 			Scope:    result.Navigate.Scope,

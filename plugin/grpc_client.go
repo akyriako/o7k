@@ -139,6 +139,7 @@ func (r *grpcResource) Execute(ctx context.Context, command Command, row Row) (R
 	if response.Result.Navigate != nil {
 		result.Navigate = &Navigate{
 			Resource: response.Result.Navigate.Resource,
+			ID:       response.Result.Navigate.Id,
 			Field:    response.Result.Navigate.Field,
 			Value:    response.Result.Navigate.Value,
 			Scope:    response.Result.Navigate.Scope,

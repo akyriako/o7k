@@ -95,7 +95,8 @@ message Details {
 
 message Navigate {
   string resource = 1;
-  string field = 2;
-  string value = 3;
-  map<string, string> scope = 4;
+  string id = 2;
+  string field = 3;
+  string value = 4;
+  map<string, string> scope = 5;
 }

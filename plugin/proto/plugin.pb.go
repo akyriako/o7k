@@ -828,9 +828,10 @@ func (x *Details) GetContent() []byte {
 type Navigate struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Resource      string                 `protobuf:"bytes,1,opt,name=resource,proto3" json:"resource,omitempty"`
-	Field         string                 `protobuf:"bytes,2,opt,name=field,proto3" json:"field,omitempty"`
-	Value         string                 `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`
-	Scope         map[string]string      `protobuf:"bytes,4,rep,name=scope,proto3" json:"scope,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Id            string                 `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	Field         string                 `protobuf:"bytes,3,opt,name=field,proto3" json:"field,omitempty"`
+	Value         string                 `protobuf:"bytes,4,opt,name=value,proto3" json:"value,omitempty"`
+	Scope         map[string]string      `protobuf:"bytes,5,rep,name=scope,proto3" json:"scope,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -868,6 +869,13 @@ func (*Navigate) Descriptor() ([]byte, []int) {
 func (x *Navigate) GetResource() string {
 	if x != nil {
 		return x.Resource
+	}
+	return ""
+}
+
+func (x *Navigate) GetId() string {
+	if x != nil {
+		return x.Id
 	}
 	return ""
 }
@@ -951,12 +959,13 @@ const file_proto_plugin_proto_rawDesc = "" +
 	"\bnavigate\x18\x02 \x01(\v2\x17.o7k.plugin.v1.NavigateR\bnavigate\"3\n" +
 	"\aDetails\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
-	"\acontent\x18\x02 \x01(\fR\acontent\"\xc6\x01\n" +
+	"\acontent\x18\x02 \x01(\fR\acontent\"\xd6\x01\n" +
 	"\bNavigate\x12\x1a\n" +
-	"\bresource\x18\x01 \x01(\tR\bresource\x12\x14\n" +
-	"\x05field\x18\x02 \x01(\tR\x05field\x12\x14\n" +
-	"\x05value\x18\x03 \x01(\tR\x05value\x128\n" +
-	"\x05scope\x18\x04 \x03(\v2\".o7k.plugin.v1.Navigate.ScopeEntryR\x05scope\x1a8\n" +
+	"\bresource\x18\x01 \x01(\tR\bresource\x12\x0e\n" +
+	"\x02id\x18\x02 \x01(\tR\x02id\x12\x14\n" +
+	"\x05field\x18\x03 \x01(\tR\x05field\x12\x14\n" +
+	"\x05value\x18\x04 \x01(\tR\x05value\x128\n" +
+	"\x05scope\x18\x05 \x03(\v2\".o7k.plugin.v1.Navigate.ScopeEntryR\x05scope\x1a8\n" +
 	"\n" +
 	"ScopeEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +

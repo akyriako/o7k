@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 
+	"github.com/akyriako/o7k/internal/resource"
 	hplugin "github.com/hashicorp/go-plugin"
 
 	plugin "github.com/akyriako/o7k/plugin"
@@ -58,4 +59,15 @@ func (c *Client) Plugin() plugin.Client {
 
 func (c *Client) Close() {
 	c.client.Kill()
+}
+
+func (c *Client) Resources() []resource.Resource {
+	resources := c.plugin.Resources()
+	result := make([]resource.Resource, 0, len(resources))
+
+	for _, r := range resources {
+		result = append(result, newResource(r))
+	}
+
+	return result
 }
