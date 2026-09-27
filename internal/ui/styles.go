@@ -43,6 +43,11 @@ var (
 
 	loadingStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#000000")).
+			Background(lipgloss.Color("#FFA500")).
+			Bold(true)
+
+	infoStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#000000")).
 			Background(lipgloss.Color("#00BFFF")).
 			Bold(true)
 
