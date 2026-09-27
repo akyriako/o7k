@@ -47,7 +47,7 @@ func (r *Resource) Columns() []resource.Column {
 
 func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
-		{Key: "shift-s", Description: "Subnets", Default: true},
+		{Key: "shift-s", Description: "Subnets"},
 		{Key: "shift-p", Description: "Ports"},
 	}
 }
