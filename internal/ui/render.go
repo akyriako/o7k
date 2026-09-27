@@ -80,6 +80,9 @@ func (m Model) renderHeaderCommands() string {
 		for _, command := range commands[start:end] {
 			key := headerCommandKeyStyle.Width(10).Render("<" + command.Key + ">")
 			text := headerCommandTextStyle.Render(command.Description)
+			if command.Default {
+				text = headerCommandTextStyle.Render(command.Description + " (Default)")
+			}
 			lines = append(lines, key+text)
 		}
 
