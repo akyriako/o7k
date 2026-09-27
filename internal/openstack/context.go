@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"sync"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack"
@@ -19,7 +20,8 @@ type Context struct {
 	Domain   string
 	Identity string
 
-	Provider *gophercloud.ProviderClient
+	Provider       *gophercloud.ProviderClient
+	serviceClients sync.Map
 }
 
 func (c *Context) Connect(ctx context.Context, cloudsPath string) error {
@@ -81,149 +83,61 @@ func (c *Context) ServiceCatalog() (*identitytokens.ServiceCatalog, error) {
 }
 
 func (c *Context) IdentityV3() (*gophercloud.ServiceClient, error) {
-	if c.Provider == nil {
-		return nil, fmt.Errorf("context %q is not connected", c.Cloud)
-	}
-
-	client, err := openstack.NewIdentityV3(c.Provider, gophercloud.EndpointOpts{})
-	if err != nil {
-		return nil, fmt.Errorf("creating identity client: %w", err)
-	}
-
-	return client, nil
+	return c.getClientService("identity", gophercloud.EndpointOpts{}, openstack.NewIdentityV3)
 }
 
 func (c *Context) ComputeV2() (*gophercloud.ServiceClient, error) {
-	if c.Provider == nil {
-		return nil, fmt.Errorf("context %q is not connected", c.Cloud)
-	}
-
-	client, err := openstack.NewComputeV2(c.Provider, gophercloud.EndpointOpts{
-		Region: c.Region,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("creating compute client: %w", err)
-	}
-
-	return client, nil
+	return c.getClientService("compute", gophercloud.EndpointOpts{Region: c.Region}, openstack.NewComputeV2)
 }
 
 func (c *Context) NetworkV2() (*gophercloud.ServiceClient, error) {
-	if c.Provider == nil {
-		return nil, fmt.Errorf("context %q is not connected", c.Cloud)
-	}
-
-	client, err := openstack.NewNetworkV2(c.Provider, gophercloud.EndpointOpts{
-		Region: c.Region,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("creating network client: %w", err)
-	}
-
-	return client, nil
+	return c.getClientService("network", gophercloud.EndpointOpts{Region: c.Region}, openstack.NewNetworkV2)
 }
 
 func (c *Context) ImageV2() (*gophercloud.ServiceClient, error) {
-	if c.Provider == nil {
-		return nil, fmt.Errorf("context %q is not connected", c.Cloud)
-	}
-
-	client, err := openstack.NewImageV2(c.Provider, gophercloud.EndpointOpts{
-		Region: c.Region,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("creating image client: %w", err)
-	}
-
-	return client, nil
+	return c.getClientService("image", gophercloud.EndpointOpts{Region: c.Region}, openstack.NewImageV2)
 }
 
 func (c *Context) BlockStorageV3() (*gophercloud.ServiceClient, error) {
-	if c.Provider == nil {
-		return nil, fmt.Errorf("context %q is not connected", c.Cloud)
-	}
-
-	client, err := openstack.NewBlockStorageV3(c.Provider, gophercloud.EndpointOpts{
-		Region: c.Region,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("creating block storage client: %w", err)
-	}
-
-	return client, nil
+	return c.getClientService("block-storage", gophercloud.EndpointOpts{Region: c.Region}, openstack.NewBlockStorageV3)
 }
 
 func (c *Context) OrchestrationV1() (*gophercloud.ServiceClient, error) {
-	if c.Provider == nil {
-		return nil, fmt.Errorf("context %q is not connected", c.Cloud)
-	}
-
-	client, err := openstack.NewOrchestrationV1(c.Provider, gophercloud.EndpointOpts{
-		Region: c.Region,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("creating orchestration client: %w", err)
-	}
-
-	return client, nil
+	return c.getClientService("orchestration", gophercloud.EndpointOpts{Region: c.Region}, openstack.NewOrchestrationV1)
 }
 
 func (c *Context) DNSV2() (*gophercloud.ServiceClient, error) {
-	if c.Provider == nil {
-		return nil, fmt.Errorf("context %q is not connected", c.Cloud)
-	}
-
-	client, err := openstack.NewDNSV2(c.Provider, gophercloud.EndpointOpts{
-		Region: c.Region,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("creating DNS client: %w", err)
-	}
-
-	return client, nil
+	return c.getClientService("dns", gophercloud.EndpointOpts{Region: c.Region}, openstack.NewDNSV2)
 }
 
 func (c *Context) LoadBalancerV2() (*gophercloud.ServiceClient, error) {
-	if c.Provider == nil {
-		return nil, fmt.Errorf("context %q is not connected", c.Cloud)
-	}
-
-	client, err := openstack.NewLoadBalancerV2(c.Provider, gophercloud.EndpointOpts{
-		Region: c.Region,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("creating load balancer client: %w", err)
-	}
-
-	return client, nil
+	return c.getClientService("load-balancer", gophercloud.EndpointOpts{Region: c.Region}, openstack.NewLoadBalancerV2)
 }
 
 func (c *Context) KeyManagerV1() (*gophercloud.ServiceClient, error) {
-	if c.Provider == nil {
-		return nil, fmt.Errorf("context %q is not connected", c.Cloud)
-	}
-
-	client, err := openstack.NewKeyManagerV1(c.Provider, gophercloud.EndpointOpts{
-		Region: c.Region,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("creating key manager client: %w", err)
-	}
-
-	return client, nil
+	return c.getClientService("key-manager", gophercloud.EndpointOpts{Region: c.Region}, openstack.NewKeyManagerV1)
 }
 
 func (c *Context) ObjectStorageV1() (*gophercloud.ServiceClient, error) {
+	return c.getClientService("object-storage", gophercloud.EndpointOpts{Region: c.Region}, openstack.NewObjectStorageV1)
+}
+
+type clientServiceBuilder func(*gophercloud.ProviderClient, gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error)
+
+func (c *Context) getClientService(key string, opts gophercloud.EndpointOpts, builder clientServiceBuilder) (*gophercloud.ServiceClient, error) {
 	if c.Provider == nil {
 		return nil, fmt.Errorf("context %q is not connected", c.Cloud)
 	}
 
-	client, err := openstack.NewObjectStorageV1(c.Provider, gophercloud.EndpointOpts{
-		Region: c.Region,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("creating object storage client: %w", err)
+	if client, ok := c.serviceClients.Load(key); ok {
+		return client.(*gophercloud.ServiceClient), nil
 	}
 
-	return client, nil
+	client, err := builder(c.Provider, opts)
+	if err != nil {
+		return nil, fmt.Errorf("creating %s client: %w", key, err)
+	}
+
+	actual, _ := c.serviceClients.LoadOrStore(key, client)
+	return actual.(*gophercloud.ServiceClient), nil
 }
