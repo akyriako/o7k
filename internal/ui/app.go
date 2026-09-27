@@ -525,14 +525,14 @@ func (m Model) View() string {
 			)
 		}
 
-		rightTag := loadingStyle.Render(" AutoRefresh ")
+		rightTag := infoStyle.Render(" AutoRefresh ")
 		autoRefreshMsgState := autoRefreshStateOnStyle.Render(" ON ")
 		if m.autoRefreshPaused {
 			autoRefreshMsgState = autoRefreshStateOffStyle.Render(" OFF ")
 		}
 		timeTag := ""
 		if m.autoRefreshTimestamp != nil {
-			timeTag = loadingStyle.Render(fmt.Sprintf(" %s ", m.autoRefreshTimestamp.Format(time.RFC3339)))
+			timeTag = infoStyle.Render(fmt.Sprintf(" %s ", m.autoRefreshTimestamp.Format(time.RFC3339)))
 		}
 		rightTag = lipgloss.JoinHorizontal(lipgloss.Left, rightTag, autoRefreshMsgState, timeTag)
 
