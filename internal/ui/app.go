@@ -218,6 +218,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	if m.commandMode {
 		switch msg := msg.(type) {
+		case autoRefreshMsg:
+			return m, autoRefresh()
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "enter":
@@ -537,7 +539,7 @@ func (m Model) View() string {
 		rightTag = lipgloss.JoinHorizontal(lipgloss.Left, rightTag, autoRefreshMsgState, timeTag)
 
 		if m.showLoading {
-			loadingTag := loadingStyle.Render(fmt.Sprintf(" %s ", m.loadingLabel)) + " "
+			loadingTag := loadingStyle.Render(fmt.Sprintf(" %s ", m.loadingLabel))
 			rightTag = lipgloss.JoinHorizontal(lipgloss.Left, loadingTag, rightTag)
 		}
 
