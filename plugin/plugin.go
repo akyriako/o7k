@@ -5,9 +5,13 @@ import (
 	"encoding/json"
 )
 
-type Plugin interface {
+type Client interface {
 	Metadata() Metadata
 	Resources() []Resource
+}
+
+type Plugin interface {
+	Client
 	SetHost(Host)
 }
 

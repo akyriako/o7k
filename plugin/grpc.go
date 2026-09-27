@@ -53,5 +53,5 @@ func (p *GRPCPlugin) GRPCClient(ctx context.Context, broker *hplugin.GRPCBroker,
 		return nil, err
 	}
 
-	return grpcClient, nil
+	return Client(grpcClient), nil
 }
