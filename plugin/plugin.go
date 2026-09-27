@@ -1,10 +1,14 @@
 package plugin
 
-import "context"
+import (
+	"context"
+	"encoding/json"
+)
 
 type Plugin interface {
 	Metadata() Metadata
 	Resources() []Resource
+	SetHost(Host)
 }
 
 type Metadata struct {
@@ -59,7 +63,7 @@ type Result struct {
 
 type Details struct {
 	ID      string
-	Content any
+	Content json.RawMessage
 }
 
 type Navigate struct {
