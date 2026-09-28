@@ -2,6 +2,7 @@ package plugins
 
 import (
 	"context"
+	"fmt"
 
 	pluginmanager "github.com/akyriako/o7k/internal/plugins"
 	"github.com/akyriako/o7k/internal/resource"
@@ -40,7 +41,9 @@ func (r *Resource) Columns() []resource.Column {
 }
 
 func (r *Resource) Commands() []resource.Command {
-	return nil
+	return []resource.Command{
+		{Key: "d", Description: "Details", Default: true},
+	}
 }
 
 func (r *Resource) List(context.Context) ([]resource.Row, error) {
@@ -72,6 +75,33 @@ func (r *Resource) List(context.Context) ([]resource.Row, error) {
 	return rows, nil
 }
 
-func (r *Resource) Execute(resource.Command, resource.Row) tea.Cmd {
-	return nil
+func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
+	return func() tea.Msg {
+		for _, plugin := range r.manager.Plugins() {
+			if plugin.Path != row.ID {
+				continue
+			}
+
+			content := map[string]any{
+				"name":    plugin.Name,
+				"version": plugin.Version,
+				"status":  plugin.Status,
+				"path":    plugin.Path,
+			}
+
+			if plugin.Err != nil {
+				content["error"] = plugin.Err.Error()
+			}
+
+			return resource.DetailsMsg{
+				ID:      row.ID,
+				Content: content,
+			}
+		}
+
+		return resource.DetailsMsg{
+			ID:  row.ID,
+			Err: fmt.Errorf("plugin %q not found", row.ID),
+		}
+	}
 }
