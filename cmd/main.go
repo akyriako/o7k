@@ -70,29 +70,33 @@ var (
 
 func main() {
 	info := version.GetBuildInfo()
-	if len(os.Args) == 2 && os.Args[1] == "--version" {
-		fmt.Printf("o7k %s\n", info.Version)
-		fmt.Printf("commit: %s\n", info.Commit)
-		fmt.Printf("built: %s\n", info.BuildDate)
-		fmt.Printf("go: %s\n", info.GoVersion)
-		fmt.Printf("modified: %s\n", info.Modified)
-		return
-	}
 
-	if len(os.Args) == 4 && os.Args[1] == "plugin" && os.Args[2] == "install" {
-		if err := plugins.Install(context.Background(), os.Args[3]); err != nil {
-			fmt.Fprintf(os.Stderr, "error installing plugin: %v\n", err)
+	if len(os.Args) > 1 {
+		switch os.Args[1] {
+		case "--version":
+			if len(os.Args) != 2 {
+				printUsage()
+				os.Exit(1)
+			}
+
+			fmt.Printf("o7k %s\n", info.Version)
+			fmt.Printf("commit: %s\n", info.Commit)
+			fmt.Printf("built: %s\n", info.BuildDate)
+			fmt.Printf("go: %s\n", info.GoVersion)
+			fmt.Printf("modified: %s\n", info.Modified)
+			return
+
+		case "plugin":
+			if err := pluginCommand(os.Args[2:]); err != nil {
+				fmt.Fprintf(os.Stderr, "%v\n", err)
+				os.Exit(1)
+			}
+			return
+
+		default:
+			printUsage()
 			os.Exit(1)
 		}
-		return
-	}
-
-	if len(os.Args) == 4 && os.Args[1] == "plugin" && os.Args[2] == "remove" {
-		if err := plugins.Remove(os.Args[3]); err != nil {
-			fmt.Fprintf(os.Stderr, "error removing plugin: %v\n", err)
-			os.Exit(1)
-		}
-		return
 	}
 
 	var err error
@@ -188,6 +192,52 @@ func main() {
 		fmt.Fprintf(stderr, "error running o7k: %v\n", err)
 		os.Exit(1)
 	}
+}
+
+func pluginCommand(args []string) error {
+	if len(args) == 1 && (args[0] == "--help" || args[0] == "-h") {
+		printPluginUsage()
+		return nil
+	}
+
+	if len(args) != 2 {
+		printPluginUsage()
+		return fmt.Errorf("invalid plugin command")
+	}
+
+	switch args[0] {
+	case "install":
+		if err := plugins.Install(context.Background(), args[1]); err != nil {
+			return fmt.Errorf("error installing plugin: %w", err)
+		}
+	case "remove":
+		if err := plugins.Remove(args[1]); err != nil {
+			return fmt.Errorf("error removing plugin: %w", err)
+		}
+	default:
+		printPluginUsage()
+		return fmt.Errorf("unknown plugin command %q", args[0])
+	}
+
+	return nil
+}
+
+func printUsage() {
+	fmt.Fprintln(os.Stderr, "Usage:")
+	fmt.Fprintln(os.Stderr, "  o7k")
+	fmt.Fprintln(os.Stderr, "  o7k --version")
+	fmt.Fprintln(os.Stderr, "  o7k plugin install <source>")
+	fmt.Fprintln(os.Stderr, "  o7k plugin remove <name>")
+}
+
+func printPluginUsage() {
+	fmt.Fprintln(os.Stderr, "Usage:")
+	fmt.Fprintln(os.Stderr, "  o7k plugin install <source>")
+	fmt.Fprintln(os.Stderr, "  o7k plugin remove <name>")
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Commands:")
+	fmt.Fprintln(os.Stderr, "  install    Install a plugin from a local path or HTTP(S) URL")
+	fmt.Fprintln(os.Stderr, "  remove     Remove an installed plugin")
 }
 
 func registerAll(r *resource.Registry, openstackContext *openstack.Context) (errs error) {
