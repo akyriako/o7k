@@ -246,7 +246,7 @@ o7k --version
 
 ## Development
 
-### Adding a New OpenStack Resource
+### Adding a new OpenStack Resource
 
 **o7k** resources are organized by OpenStack service and implement a common resource interface. Adding support for a new resource normally involves four areas:
 
@@ -777,3 +777,633 @@ Partial  Partially supported
 
 >[!Warning]
 > A resource should only be marked as supported once its basic listing and intended commands work against an actual OpenStack environment.
+
+### Add a Plugin for an OpenStack-based Provider
+
+**o7k** can be extended with plugins that provide resources specific to an OpenStack-based provider without adding provider-specific code to the **o7k** codebase.
+
+A **plugin** is a standalone executable that communicates with **o7k** through the public `pluginsdk` module. A single plugin can expose multiple resources across one or more OpenStack services.
+
+Plugins run as separate processes and therefore do not share the authenticated OpenStack client used internally by **o7k**. Instead, a plugin receives information about the currently active **o7k** context and authenticates independently using the same `clouds.yaml` configuration.
+
+The examples below use a fictional provider called `example` and a plugin named `o7k-plugin-example`.
+
+#### 1. Create the plugin module
+
+Create a separate Go module/project for the plugin and follow the same structure as the example plugin: e.g.:
+
+```text
+o7k-plugin-example/
+├── go.mod
+├── main.go
+└── internal/
+    └── plugin/
+        ├── client.go
+        ├── plugin.go
+        └── resources/
+            ├── compute/
+            │   ├── commands.go
+            │   └── servers.go
+            └── blockstorage/
+                ├── commands.go
+                └── volumes.go
+```
+
+
+Initialize the module and add the **o7k** plugin SDK:
+
+```bash
+go mod init example.com/o7k-plugin-example
+go get github.com/akyriako/o7k/pluginsdk
+```
+
+Add the **OpenStack SDK used by the provider** as a dependency as well.
+
+The plugin is an independent Go application and must not import packages from `github.com/akyriako/o7k/internal/xxx` 
+Communication between the plugin and o7k happens over gRPC, using [HashiCorp's go-plugin](https://github.com/hashicorp/go-plugin),
+to manage the plugin subprocess and RPC connection. The public `github.com/akyriako/o7k/pluginsdk` module defines the 
+interfaces and gRPC protocol shared by o7k and the plugin(s).
+
+The examples in `/examples/plugins/demo` uses two T Cloud Public (formerly known as Open Telekom Cloud) resources:
+
+```text
+Compute       -> ecs-servers
+Block Storage -> ecs-volumes
+```
+
+#### 2. Implement the plugin
+
+Create `internal/plugin/plugin.go`.
+
+The plugin owns the host connection, the authenticated provider client and the resources it exposes:
+
+```go
+package plugin
+
+import (
+	"github.com/akyriako/o7k/pluginsdk"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+)
+
+type Plugin struct {
+	host      pluginsdk.Host
+	provider  *pluginsdk.ClientProvider[*golangsdk.ProviderClient]
+	resources []pluginsdk.Resource
+}
+
+func New() *Plugin {
+	return &Plugin{}
+}
+
+func (p *Plugin) SetHost(host pluginsdk.Host) {
+	p.host = host
+	p.provider = newClient(host)
+}
+
+func (p *Plugin) Register(resources ...pluginsdk.Resource) {
+	p.resources = append(p.resources, resources...)
+}
+
+func (p *Plugin) Metadata() pluginsdk.Metadata {
+	return pluginsdk.Metadata{
+		Name:    "example",
+		Version: "0.1.0",
+		Color:   "#E20074",
+	}
+}
+
+func (p *Plugin) Resources() []pluginsdk.Resource {
+	return p.resources
+}
+
+func (p *Plugin) Host() pluginsdk.Host {
+	return p.host
+}
+
+func (p *Plugin) Provider() *pluginsdk.ClientProvider[*gophercloud.ProviderClient] {
+	return p.provider
+}
+```
+
+`Metadata()` identifies the plugin to **o7k**:
+
+- `Name` is the provider/plugin name displayed by **o7k**.
+- `Version` is the plugin version.
+- `Color` is used by **o7k** when rendering resources belonging to the plugin.
+
+`Register()` collects the resources exposed by the plugin. A single provider plugin can register resources from multiple OpenStack services.
+
+`SetHost()` is called by **o7k** when the plugin process is initialized. It stores the host connection and creates the provider client manager.
+
+> [!Important]
+> 1. Fill in the `Metadata()` and leave the rest intact.
+> 2. Create the `pluginsdk.ClientProvider` that corresponds to the target cloud provider.
+
+#### 3. Create the provider client
+
+Plugins run in a separate process from **o7k** and therefore cannot reuse the authenticated provider client owned by **o7k**. 
+Instead, the plugin authenticates independently using the active context supplied by the host.
+
+Create `internal/plugin/client.go`:
+
+```go
+package plugin
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/akyriako/o7k/pluginsdk"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack"
+	"gopkg.in/yaml.v3"
+)
+
+func newClient(host pluginsdk.Host) *pluginsdk.ClientProvider[*golangsdk.ProviderClient] {
+	return pluginsdk.NewClientProvider(host, connectClient)
+}
+
+func connectClient(ctx context.Context, current pluginsdk.Context) (*golangsdk.ProviderClient, error) {
+	authOpts, _, tlsConfig, err := clouds.Parse(
+		clouds.WithLocations(current.CloudsPath),
+		clouds.WithCloudName(current.Cloud),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("parsing cloud %q: %w", current.Cloud, err)
+	}
+
+	authOpts.AllowReauth = true
+
+	provider, err := config.NewProviderClient(ctx, authOpts, config.WithTLSConfig(tlsConfig))
+	if err != nil {
+		return nil, fmt.Errorf("authenticating cloud %q: %w", current.Cloud, err)
+	}
+
+	return provider, nil
+}
+```
+
+> [!Important]
+> The exact authentication implementation depends on the OpenStack SDK used by the target provider. The example above 
+uses Open Telekom Cloud Golang SDK. A provider plugin using another SDK should implement `connectClient` using that SDK's `clouds.yaml` and authentication support.
+
+The `pluginsdk.Context` supplied to `connectClient` contains the active **o7k** context:
+
+```go
+type Context struct {
+	Generation uint64
+	Cloud      string
+	CloudsPath string
+	Region     string
+}
+```
+
+> [!Note]
+> Always use both `Cloud` and `CloudsPath`. `CloudsPath` identifies the exact `clouds.yaml` file from which **o7k** loaded the active cloud.
+>
+> `pluginsdk.ClientProvider` caches the authenticated provider client for the current context generation. When the user activates another **o7k** context, the generation changes and the provider client is recreated automatically.
+> 
+> Plugin resources should, as we will see later, obtain the provider through:
+>
+>```go
+>provider, err := r.plugin.Provider().Client(ctx)
+>if err != nil {
+>	return nil, fmt.Errorf("getting provider: %w", err)
+>}
+>```
+>
+>rather than maintaining their own authenticated provider clients.
+
+#### 4. Add OpenStack service clients
+
+Resources should obtain service clients from the plugin rather than creating a new service client every time `List()` or a command is executed. 
+Add a helper for each OpenStack service used by the plugin in `internal/plugin/plugin.go`:
+
+```go
+func (p *Plugin) ComputeV2(ctx context.Context) (*golangsdk.ServiceClient, error) {
+	return pluginsdk.GetServiceClient(ctx, p.host, p.provider, &p.serviceClients, "compute", func(provider *golangsdk.ProviderClient, current pluginsdk.Context) (*golangsdk.ServiceClient, error) {
+		return openstack.NewComputeV2(provider, gophercloud.EndpointOpts{Region: current.Region})
+	})
+}
+
+func (p *Plugin) BlockStorageV3(ctx context.Context) (*golangsdk.ServiceClient, error) {
+	return pluginsdk.GetServiceClient(ctx, p.host, p.provider, &p.serviceClients, "block-storage", func(provider *golangsdk.ProviderClient, current pluginsdk.Context) (*golangsdk.ServiceClient, error) {
+		return openstack.NewBlockStorageV3(provider, gophercloud.EndpointOpts{Region: current.Region})
+	})
+}
+```
+
+> [!Note]
+> Use the service constructor provided by the OpenStack SDK used by the provider.
+> A resource can then simply request the client it needs:
+>
+>```go
+>client, err := r.plugin.ComputeV2(ctx)
+>if err != nil {
+>	return nil, fmt.Errorf("getting compute client: %w", err)
+>}
+>```
+>
+>`GetServiceClient` keeps service clients associated with the active **o7k** context generation, just like `ClientProvider` does for the provider client.
+
+#### 5. Create a resource package
+
+Resources are better organized below `internal/plugin/resources/` by service.
+
+For example:
+
+```text
+internal/plugin/resources/
+├── compute/
+│   ├── commands.go
+│   └── servers.go
+└── blockstorage/
+    ├── commands.go
+    └── volumes.go
+```
+
+Keep the resource definition and listing logic in the resource file. Put command implementations in `commands.go`.
+
+For example, create `internal/plugin/resources/compute/servers.go`:
+
+```go
+package compute
+
+import (
+	"context"
+	"fmt"
+
+	"example.com/o7k-plugin-example/internal/plugin"
+	"github.com/akyriako/o7k/pluginsdk"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
+)
+
+type ExampleServers struct {
+	plugin *plugin.Plugin
+}
+
+func NewServers(p *plugin.Plugin) *ExampleServers {
+	return &ExampleServers{
+		plugin: p,
+	}
+}
+
+func (r *ExampleServers) Service() string {
+	return "example-compute"
+}
+
+func (r *ExampleServers) Kind() string {
+	return "example-servers"
+}
+
+func (r *ExampleServers) Title() string {
+	return "Example Servers"
+}
+
+func (r *ExampleServers) Aliases() []string {
+	return nil
+}
+```
+
+`Service()` identifies the provider service the resource belongs to.
+
+`Kind()` is the canonical resource name used by **o7k**:
+
+```text
+:example-servers
+```
+
+`Title()` is the human-readable resource name shown in the UI.
+
+`Aliases()` can provide additional names accepted by the resource command:
+
+```go
+func (r *ExampleServers) Aliases() []string {
+	return []string{
+		"example-server",
+	}
+}
+```
+
+#### 6. Define the table columns
+
+Plugin resources use `pluginsdk.Column` to describe their table view:
+
+```go
+func (r *ExampleServers) Columns() []pluginsdk.Column {
+	return []pluginsdk.Column{
+		{Key: "id", Title: "ID", MinWidth: 36},
+		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
+		{Key: "status", Title: "STATUS", MinWidth: 12},
+	}
+}
+```
+
+Each column key maps to a field returned by `List()`.
+
+`MinWidth` specifies the minimum width of the column. `Flex` controls how additional terminal width is distributed.
+
+Fields do not have to be visible columns. A resource may add additional values to `Row.Fields` for navigation or relationships between resources.
+
+#### 7. Implement `List()`
+
+`List()` obtains the service client from the plugin, retrieves the provider resources and converts them to `pluginsdk.Row` values:
+
+```go
+func (r *ExampleServers) List(ctx context.Context) ([]pluginsdk.Row, error) {
+	client, err := r.plugin.ComputeV2(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("getting compute client: %w", err)
+	}
+
+	pages, err := servers.List(client, servers.ListOpts{}).AllPages()
+	if err != nil {
+		return nil, fmt.Errorf("listing servers: %w", err)
+	}
+
+	allServers, err := servers.ExtractServers(pages)
+	if err != nil {
+		return nil, fmt.Errorf("extracting servers: %w", err)
+	}
+
+	rows := make([]pluginsdk.Row, 0, len(allServers))
+
+	for _, server := range allServers {
+		rows = append(rows, pluginsdk.Row{
+			ID: server.ID,
+			Fields: map[string]string{
+				"id":     server.ID,
+				"name":   server.Name,
+				"status": server.Status,
+			},
+		})
+	}
+
+	return rows, nil
+}
+```
+
+`Row.ID` must contain the canonical identifier used by commands and navigation.
+
+Every field referenced by `Columns()` must be present in `Fields`.
+
+Additional fields may be included without defining a column. For example, a volume resource can expose the attached server ID for navigation without displaying it:
+
+```go
+Fields: map[string]string{
+	"id":        volume.ID,
+	"name":      volume.Name,
+	"status":    volume.Status,
+	"size":      strconv.Itoa(volume.Size),
+	"server_id": serverID,
+}
+```
+
+#### 8. Add resource commands
+
+Commands are declared using `pluginsdk.Command`:
+
+```go
+func (r *ExampleServers) Commands() []pluginsdk.Command {
+	return []pluginsdk.Command{
+		{Key: "s", Description: "Show", Default: true},
+	}
+}
+```
+
+`Default: true` makes the command the default action for the resource, which is executed by pressing `Enter`.
+
+Command execution is handled by `Execute()`:
+
+```go
+func (r *ExampleServers) Execute(ctx context.Context, command pluginsdk.Command, row pluginsdk.Row) (pluginsdk.Result, error) {
+	switch command.Key {
+	case "s":
+		return r.show(ctx, row.ID)
+	}
+
+	return pluginsdk.Result{}, nil
+}
+```
+
+Keep the implementation of individual commands in `commands.go`.
+
+#### 9. Return resource details
+
+A `Show` command retrieves the complete provider object, serializes it as JSON and returns `pluginsdk.Details`.
+
+For example, in `internal/plugin/resources/compute/commands.go`:
+
+```go
+package compute
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+
+	"github.com/akyriako/o7k/pluginsdk"
+	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
+)
+
+func (r *ExampleServers) show(ctx context.Context, id string) (pluginsdk.Result, error) {
+	client, err := r.plugin.ComputeV2(ctx)
+	if err != nil {
+		return pluginsdk.Result{}, fmt.Errorf("getting compute client: %w", err)
+	}
+
+	server, err := servers.Get(ctx, client, id).Extract()
+	if err != nil {
+		return pluginsdk.Result{}, fmt.Errorf("getting server %q: %w", id, err)
+	}
+
+	content, err := json.Marshal(server)
+	if err != nil {
+		return pluginsdk.Result{}, fmt.Errorf("encoding server %q: %w", id, err)
+	}
+
+	return pluginsdk.Result{
+		Details: &pluginsdk.Details{
+			ID:      server.ID,
+			Content: content,
+		},
+	}, nil
+}
+```
+
+The JSON is transported back to **o7k** and rendered by the normal details view. The plugin does not implement any UI-related functionality.
+
+#### 10. Navigate between plugin resources
+
+Plugin resources can use `pluginsdk.Navigate` to participate in normal **o7k** resource navigation.
+
+For example, a compute server can expose a command that opens only the volumes attached to that server:
+
+```go
+func (r *ExampleServers) Commands() []pluginsdk.Command {
+	return []pluginsdk.Command{
+		{Key: "s", Description: "Show", Default: true},
+		{Key: "shift-v", Description: "Volumes"},
+	}
+}
+```
+
+Handle the command in `Execute()`:
+
+```go
+func (r *ExampleServers) Execute(ctx context.Context, command pluginsdk.Command, row pluginsdk.Row) (pluginsdk.Result, error) {
+	switch command.Key {
+	case "s":
+		return r.show(ctx, row.ID)
+	case "shift-v":
+		return r.volumes(row)
+	}
+
+	return pluginsdk.Result{}, nil
+}
+```
+
+The navigation command can then return:
+
+```go
+func (r *ExampleServers) volumes(row pluginsdk.Row) (pluginsdk.Result, error) {
+	return pluginsdk.Result{
+		Navigate: &pluginsdk.Navigate{
+			Resource: "example-volumes",
+			Field:    "server_id",
+			Value:    row.ID,
+		},
+	}, nil
+}
+```
+
+The destination resource exposes `server_id` in its row fields:
+
+```go
+Fields: map[string]string{
+	"id":        volume.ID,
+	"name":      volume.Name,
+	"status":    volume.Status,
+	"server_id": serverID,
+}
+```
+
+**o7k** then opens `example-volumes` and filters the rows using:
+
+```text
+row.Fields["server_id"] == selectedServer.ID
+```
+
+`pluginsdk.Navigate` also supports direct navigation by ID:
+
+```go
+Navigate: &pluginsdk.Navigate{
+	Resource: "example-servers",
+	ID:       serverID,
+}
+```
+
+and scoped navigation for APIs that require parent information:
+
+```go
+Navigate: &pluginsdk.Navigate{
+	Resource: "example-resource",
+	Scope: map[string]string{
+		"parent_id": row.ID,
+	},
+}
+```
+
+Use the navigation form that matches the relationship exposed by the provider API.
+
+#### 11. Register the resources
+
+Creating a resource does not automatically expose it to **o7k**.
+
+Register the resources when constructing the plugin in `main.go`:
+
+```go
+package main
+
+import (
+	"example.com/o7k-plugin-example/internal/plugin"
+	"example.com/o7k-plugin-example/internal/plugin/resources/blockstorage"
+	"example.com/o7k-plugin-example/internal/plugin/resources/compute"
+	"github.com/akyriako/o7k/pluginsdk"
+)
+
+func main() {
+	p := plugin.New()
+
+	p.Register(
+		compute.NewServers(p),
+		blockstorage.NewVolumes(p),
+	)
+
+	pluginsdk.Serve(p)
+}
+```
+
+A single call to `Register()` may contain resources from multiple OpenStack services.
+
+`pluginsdk.Serve()` starts the plugin process protocol used by **o7k**. No additional RPC or transport code is required 
+in the provider plugin.
+
+#### 12. Build and install the plugin locally
+
+Build the plugin as a normal Go executable:
+
+```bash
+go build -o o7k-plugin-example .
+```
+
+Install the locally built executable:
+
+```bash
+o7k plugin install ./o7k-plugin-example
+```
+
+Start **o7k** and open the built-in plugin resource:
+
+```text
+:plugins
+```
+
+The plugin should be listed with its name, version and loading status.
+
+Its registered resources are then available through the normal resource command:
+
+```text
+:example-servers
+:example-volumes
+```
+
+If the plugin fails to initialize, inspect its error through `:plugins`.
+
+When rebuilding the plugin during development, install the new executable again and **restart** **o7k**.
+
+#### 13. Distribute the plugin
+
+Provider plugins are distributed independently of **o7k**.
+
+The provider project is responsible for building and publishing the plugin executable for the platforms it supports. 
+A release asset, public object-storage URL or any other directly downloadable HTTP(S) location can be used.
+
+Users install the published executable directly:
+
+```bash
+o7k plugin install https://example.com/releases/o7k-plugin-example
+```
+
+The downloaded executable is copied into the **o7k** plugin directory and is loaded the next time **o7k** starts.
+
+To remove an installed plugin:
+
+```bash
+o7k plugin remove o7k-plugin-example
+```
+
+**Restart** **o7k** after removing the plugin.
+
+> [!Caution]
+> Plugins are executable programs running on the user's machine. Only install plugins from sources you trust.
