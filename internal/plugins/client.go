@@ -60,19 +60,28 @@ func (c *Client) Close() {
 	c.client.Kill()
 }
 
-func (c *Client) Resources() []resource.Resource {
-	resources := c.plugin.Resources()
+func (c *Client) Resources() ([]resource.Resource, error) {
+	resources, err := c.plugin.Resources()
+	if err != nil {
+		return nil, fmt.Errorf("getting plugin resources: %w", err)
+	}
+
 	result := make([]resource.Resource, 0, len(resources))
 
 	for _, r := range resources {
 		result = append(result, newResource(r))
 	}
 
-	return result
+	return result, nil
 }
 
 func (c *Client) Register(registry *resource.Registry) error {
-	if err := registry.RegisterAll(c.Resources()); err != nil {
+	resources, err := c.Resources()
+	if err != nil {
+		return err
+	}
+
+	if err := registry.RegisterAll(resources); err != nil {
 		return fmt.Errorf("registering plugin resources: %w", err)
 	}
 

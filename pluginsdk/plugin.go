@@ -6,12 +6,13 @@ import (
 )
 
 type Client interface {
-	Metadata() Metadata
-	Resources() []Resource
+	Metadata() (Metadata, error)
+	Resources() ([]Resource, error)
 }
 
 type Plugin interface {
-	Client
+	Metadata() Metadata
+	Resources() []Resource
 	SetHost(Host)
 }
 

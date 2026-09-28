@@ -10,22 +10,22 @@ type grpcClient struct {
 	client pb.PluginClient
 }
 
-func (c *grpcClient) Metadata() Metadata {
+func (c *grpcClient) Metadata() (Metadata, error) {
 	response, err := c.client.GetMetadata(context.Background(), &pb.Empty{})
 	if err != nil {
-		return Metadata{}
+		return Metadata{}, err
 	}
 
 	return Metadata{
 		Name:    response.Name,
 		Version: response.Version,
-	}
+	}, nil
 }
 
-func (c *grpcClient) Resources() []Resource {
+func (c *grpcClient) Resources() ([]Resource, error) {
 	response, err := c.client.GetResources(context.Background(), &pb.Empty{})
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	resources := make([]Resource, 0, len(response.Resources))
@@ -37,7 +37,7 @@ func (c *grpcClient) Resources() []Resource {
 		})
 	}
 
-	return resources
+	return resources, nil
 }
 
 type grpcResource struct {
@@ -125,6 +125,10 @@ func (r *grpcResource) Execute(ctx context.Context, command Command, row Row) (R
 	})
 	if err != nil {
 		return Result{}, err
+	}
+
+	if response.Result == nil {
+		return Result{}, nil
 	}
 
 	result := Result{}

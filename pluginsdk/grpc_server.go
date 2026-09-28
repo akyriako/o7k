@@ -102,6 +102,14 @@ func (s *grpcServer) List(ctx context.Context, request *pb.ListRequest) (*pb.Lis
 }
 
 func (s *grpcServer) Execute(ctx context.Context, request *pb.ExecuteRequest) (*pb.ExecuteResponse, error) {
+	if request.Command == nil {
+		return nil, fmt.Errorf("command is required")
+	}
+
+	if request.Row == nil {
+		return nil, fmt.Errorf("row is required")
+	}
+
 	resource, err := s.resource(request.Resource)
 	if err != nil {
 		return nil, err
@@ -117,6 +125,10 @@ func (s *grpcServer) Execute(ctx context.Context, request *pb.ExecuteRequest) (*
 	})
 	if err != nil {
 		return nil, err
+	}
+
+	if result.Details != nil && result.Navigate != nil {
+		return nil, fmt.Errorf("plugin result cannot contain both details and navigation")
 	}
 
 	response := &pb.Result{}

@@ -404,7 +404,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		m.context.Activate(msg.Context)
-		m.pluginHost.ContextChanged()
+		m.pluginHost.ContextChanged(m.context)
 		m.status = fmt.Sprintf("connected to %s", m.context.Cloud)
 
 		m.loadingLabel = "Loading..."
