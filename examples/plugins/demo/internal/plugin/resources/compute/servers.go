@@ -6,8 +6,6 @@ import (
 
 	"github.com/akyriako/o7k/examples/plugins/demo/internal/plugin"
 	"github.com/akyriako/o7k/pluginsdk"
-	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
 )
 
@@ -48,25 +46,14 @@ func (r *EcsServers) Columns() []pluginsdk.Column {
 func (r *EcsServers) Commands() []pluginsdk.Command {
 	return []pluginsdk.Command{
 		{Key: "s", Description: "Show", Default: true},
+		{Key: "shift-v", Description: "Volumes"},
 	}
 }
 
 func (r *EcsServers) List(ctx context.Context) ([]pluginsdk.Row, error) {
-	current, err := r.plugin.Host().Context(ctx)
+	client, err := r.plugin.ComputeV2(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("getting context: %w", err)
-	}
-
-	provider, err := r.plugin.Provider().Client(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("getting provider: %w", err)
-	}
-
-	client, err := openstack.NewComputeV2(provider, golangsdk.EndpointOpts{
-		Region: current.Region,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("creating compute client: %w", err)
+		return nil, fmt.Errorf("getting compute client: %w", err)
 	}
 
 	pages, err := servers.List(client, servers.ListOpts{}).AllPages()
@@ -99,6 +86,8 @@ func (r *EcsServers) Execute(ctx context.Context, command pluginsdk.Command, row
 	switch command.Key {
 	case "s":
 		return r.show(ctx, row.ID)
+	case "shift-v":
+		return r.volumes(row)
 	}
 
 	return pluginsdk.Result{}, nil

@@ -32,3 +32,13 @@ func (r *EcsServers) show(ctx context.Context, id string) (pluginsdk.Result, err
 		},
 	}, nil
 }
+
+func (r *EcsServers) volumes(row pluginsdk.Row) (pluginsdk.Result, error) {
+	return pluginsdk.Result{
+		Navigate: &pluginsdk.Navigate{
+			Resource: "evs-volumes",
+			Field:    "server_id",
+			Value:    row.ID,
+		},
+	}, nil
+}
