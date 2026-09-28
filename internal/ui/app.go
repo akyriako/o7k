@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/akyriako/o7k/internal/openstack"
+	"github.com/akyriako/o7k/internal/plugins"
 	"github.com/akyriako/o7k/internal/resource"
 	"github.com/akyriako/o7k/internal/resources/contexts"
 	"github.com/charmbracelet/bubbles/table"
@@ -47,6 +48,7 @@ type Model struct {
 
 	activatingContext bool
 	context           *openstack.Context
+	pluginHost        *plugins.Host
 
 	navigation []navigationEntry
 	navigateID string
@@ -62,14 +64,15 @@ type Model struct {
 	command     textinput.Model
 }
 
-func New(registry *resource.Registry, openstackContext *openstack.Context, version string) Model {
+func New(registry *resource.Registry, openstackContext *openstack.Context, pluginHost *plugins.Host, version string) Model {
 	r, ok := registry.Get("contexts")
 	if !ok {
 		return Model{
-			version:  version,
-			registry: registry,
-			context:  openstackContext,
-			err:      fmt.Errorf("contexts resource not registered"),
+			version:    version,
+			registry:   registry,
+			context:    openstackContext,
+			pluginHost: pluginHost,
+			err:        fmt.Errorf("contexts resource not registered"),
 		}
 	}
 
@@ -104,8 +107,11 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, versi
 		resource: r,
 		table:    t,
 		command:  command,
-		context:  openstackContext,
-		detail:   detail,
+
+		context:    openstackContext,
+		pluginHost: pluginHost,
+
+		detail: detail,
 
 		loading:      true,
 		showLoading:  true,
@@ -397,7 +403,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 
-		*m.context = *msg.Context
+		m.context.Activate(msg.Context)
+		m.pluginHost.ContextChanged()
 		m.status = fmt.Sprintf("connected to %s", m.context.Cloud)
 
 		m.loadingLabel = "Loading..."

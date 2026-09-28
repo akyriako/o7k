@@ -56,8 +56,7 @@ func (r *Resource) List(_ context.Context) ([]resource.Row, error) {
 		rows = append(rows, resource.Row{
 			ID: cloud.Name,
 			Fields: map[string]string{
-				"name": cloud.Name,
-				//"identity":   cloud.Identity,
+				"name":       cloud.Name,
 				"region":     cloud.Region,
 				"domain":     cloud.Domain,
 				"project":    cloud.Project,

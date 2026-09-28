@@ -9,6 +9,7 @@ import (
 
 	"github.com/akyriako/o7k/internal/logging"
 	"github.com/akyriako/o7k/internal/openstack"
+	"github.com/akyriako/o7k/internal/plugins"
 	"github.com/akyriako/o7k/internal/resource"
 	"github.com/akyriako/o7k/internal/resources/blockstorage/backups"
 	"github.com/akyriako/o7k/internal/resources/blockstorage/snapshots"
@@ -120,6 +121,24 @@ func main() {
 		os.Exit(1)
 	}
 
+	pluginHost := plugins.NewHost(&openstackContext)
+	pluginManager := plugins.NewManager(pluginHost, registry)
+	defer pluginManager.Close()
+
+	pluginPaths, err := plugins.Discover()
+	if err != nil {
+		logger.Error("discovering plugins", "error", err)
+	} else {
+		for _, path := range pluginPaths {
+			if err := pluginManager.Load(path); err != nil {
+				logger.Error("loading plugin", "path", path, "error", err)
+				continue
+			}
+
+			logger.Info("loaded plugin", "path", path)
+		}
+	}
+
 	ver := info.GetVersion()
 	update, err := version.CheckForUpdate(context.Background())
 	if err != nil {
@@ -137,6 +156,7 @@ func main() {
 		ui.New(
 			registry,
 			&openstackContext,
+			pluginHost,
 			ver,
 		),
 		tea.WithAltScreen(),

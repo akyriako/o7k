@@ -71,3 +71,13 @@ func (c *Client) Resources() []resource.Resource {
 
 	return result
 }
+
+func (c *Client) Register(registry *resource.Registry) error {
+	for _, r := range c.Resources() {
+		if err := registry.Register(r); err != nil {
+			return fmt.Errorf("registering plugin resource %q: %w", r.Kind(), err)
+		}
+	}
+
+	return nil
+}
