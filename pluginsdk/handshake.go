@@ -1,4 +1,4 @@
-package plugin
+package pluginsdk
 
 import hplugin "github.com/hashicorp/go-plugin"
 

@@ -979,7 +979,7 @@ const file_proto_plugin_proto_rawDesc = "" +
 	"\aExecute\x12\x1d.o7k.plugin.v1.ExecuteRequest\x1a\x1e.o7k.plugin.v1.ExecuteResponse2B\n" +
 	"\x04Host\x12:\n" +
 	"\n" +
-	"GetContext\x12\x14.o7k.plugin.v1.Empty\x1a\x16.o7k.plugin.v1.ContextB,Z*github.com/akyriako/o7k/plugin/proto;protob\x06proto3"
+	"GetContext\x12\x14.o7k.plugin.v1.Empty\x1a\x16.o7k.plugin.v1.ContextB/Z-github.com/akyriako/o7k/pluginsdk/proto;protob\x06proto3"
 
 var (
 	file_proto_plugin_proto_rawDescOnce sync.Once

@@ -1,10 +1,10 @@
-package plugin
+package pluginsdk
 
 import (
 	"context"
 	"fmt"
 
-	pb "github.com/akyriako/o7k/plugin/proto"
+	pb "github.com/akyriako/o7k/pluginsdk/proto"
 	hplugin "github.com/hashicorp/go-plugin"
 )
 

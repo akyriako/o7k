@@ -5,21 +5,20 @@ import (
 	"os/exec"
 
 	"github.com/akyriako/o7k/internal/resource"
+	"github.com/akyriako/o7k/pluginsdk"
 	hplugin "github.com/hashicorp/go-plugin"
-
-	plugin "github.com/akyriako/o7k/plugin"
 )
 
 type Client struct {
 	client *hplugin.Client
-	plugin plugin.Client
+	plugin pluginsdk.Client
 }
 
-func NewClient(path string, host plugin.Host) (*Client, error) {
+func NewClient(path string, host pluginsdk.Host) (*Client, error) {
 	client := hplugin.NewClient(&hplugin.ClientConfig{
-		HandshakeConfig: plugin.HandshakeConfig,
+		HandshakeConfig: pluginsdk.HandshakeConfig,
 		Plugins: map[string]hplugin.Plugin{
-			plugin.PluginName: &plugin.GRPCPlugin{
+			pluginsdk.PluginName: &pluginsdk.GRPCPlugin{
 				Host: host,
 			},
 		},
@@ -35,13 +34,13 @@ func NewClient(path string, host plugin.Host) (*Client, error) {
 		return nil, fmt.Errorf("starting plugin %q: %w", path, err)
 	}
 
-	instance, err := rpcClient.Dispense(plugin.PluginName)
+	instance, err := rpcClient.Dispense(pluginsdk.PluginName)
 	if err != nil {
 		client.Kill()
 		return nil, fmt.Errorf("dispensing plugin %q: %w", path, err)
 	}
 
-	remote, ok := instance.(plugin.Client)
+	remote, ok := instance.(pluginsdk.Client)
 	if !ok {
 		client.Kill()
 		return nil, fmt.Errorf("plugin %q returned unexpected client type %T", path, instance)
@@ -53,7 +52,7 @@ func NewClient(path string, host plugin.Host) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) Plugin() plugin.Client {
+func (c *Client) Plugin() pluginsdk.Client {
 	return c.plugin
 }
 

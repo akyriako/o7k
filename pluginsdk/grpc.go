@@ -1,4 +1,4 @@
-package plugin
+package pluginsdk
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	hplugin "github.com/hashicorp/go-plugin"
 	"google.golang.org/grpc"
 
-	pb "github.com/akyriako/o7k/plugin/proto"
+	pb "github.com/akyriako/o7k/pluginsdk/proto"
 )
 
 const PluginName = "o7k"

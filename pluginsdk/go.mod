@@ -1,4 +1,4 @@
-module github.com/akyriako/o7k/plugin
+module github.com/akyriako/o7k/pluginsdk
 
 go 1.26.7
 

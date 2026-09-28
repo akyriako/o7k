@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 
 	"github.com/akyriako/o7k/internal/openstack"
-	plugin "github.com/akyriako/o7k/plugin"
+	"github.com/akyriako/o7k/pluginsdk"
 )
 
 type Host struct {
@@ -23,8 +23,8 @@ func NewHost(openstackContext *openstack.Context) *Host {
 	return host
 }
 
-func (h *Host) Context(context.Context) (plugin.Context, error) {
-	return plugin.Context{
+func (h *Host) Context(context.Context) (pluginsdk.Context, error) {
+	return pluginsdk.Context{
 		Generation: h.generation.Load(),
 		Cloud:      h.context.Cloud,
 		CloudsPath: h.context.CloudsPath,

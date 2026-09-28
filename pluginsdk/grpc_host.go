@@ -1,9 +1,9 @@
-package plugin
+package pluginsdk
 
 import (
 	"context"
 
-	pb "github.com/akyriako/o7k/plugin/proto"
+	pb "github.com/akyriako/o7k/pluginsdk/proto"
 )
 
 type grpcHostClient struct {

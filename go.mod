@@ -3,7 +3,7 @@ module github.com/akyriako/o7k
 go 1.26.7
 
 require (
-	github.com/akyriako/o7k/plugin v0.0.0-00010101000000-000000000000
+	github.com/akyriako/o7k/pluginsdk v0.0.0-00010101000000-000000000000
 	github.com/charmbracelet/bubbles v1.0.0
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/lipgloss v1.1.0
@@ -15,7 +15,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-replace github.com/akyriako/o7k/plugin => ./plugin
+replace github.com/akyriako/o7k/pluginsdk => ./pluginsdk
 
 require (
 	github.com/atotto/clipboard v0.1.4 // indirect

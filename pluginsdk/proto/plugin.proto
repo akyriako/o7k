@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package o7k.plugin.v1;
 
-option go_package = "github.com/akyriako/o7k/plugin/proto;proto";
+option go_package = "github.com/akyriako/o7k/pluginsdk/proto;proto";
 
 service Plugin {
   rpc Initialize(InitializeRequest) returns (Empty);

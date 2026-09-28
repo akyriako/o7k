@@ -6,15 +6,15 @@ import (
 	"fmt"
 
 	"github.com/akyriako/o7k/internal/resource"
-	plugin "github.com/akyriako/o7k/plugin"
+	"github.com/akyriako/o7k/pluginsdk"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type pluginResource struct {
-	resource plugin.Resource
+	resource pluginsdk.Resource
 }
 
-func newResource(r plugin.Resource) resource.Resource {
+func newResource(r pluginsdk.Resource) resource.Resource {
 	return &pluginResource{resource: r}
 }
 
@@ -81,11 +81,11 @@ func (r *pluginResource) List(ctx context.Context) ([]resource.Row, error) {
 
 func (r *pluginResource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	return func() tea.Msg {
-		result, err := r.resource.Execute(context.Background(), plugin.Command{
+		result, err := r.resource.Execute(context.Background(), pluginsdk.Command{
 			Key:         command.Key,
 			Description: command.Description,
 			Default:     command.Default,
-		}, plugin.Row{
+		}, pluginsdk.Row{
 			ID:     row.ID,
 			Fields: row.Fields,
 		})
