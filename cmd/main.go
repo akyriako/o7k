@@ -53,6 +53,7 @@ import (
 	"github.com/akyriako/o7k/internal/resources/orchestration/stackevents"
 	"github.com/akyriako/o7k/internal/resources/orchestration/stackresources"
 	"github.com/akyriako/o7k/internal/resources/orchestration/stacks"
+	pluginresource "github.com/akyriako/o7k/internal/resources/plugins"
 	"github.com/akyriako/o7k/internal/version"
 	tea "github.com/charmbracelet/bubbletea"
 
@@ -124,6 +125,11 @@ func main() {
 	pluginHost := plugins.NewHost(&openstackContext)
 	pluginManager := plugins.NewManager(pluginHost, registry)
 	defer pluginManager.Close()
+
+	if err := registry.Register(pluginresource.New(pluginManager)); err != nil {
+		fmt.Fprintf(stderr, "error registering plugins resource: %v\n", err)
+		os.Exit(1)
+	}
 
 	pluginPaths, err := plugins.Discover()
 	if err != nil {
