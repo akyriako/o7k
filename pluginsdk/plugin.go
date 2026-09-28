@@ -19,6 +19,7 @@ type Plugin interface {
 type Metadata struct {
 	Name    string
 	Version string
+	Color   string
 }
 
 type Context struct {

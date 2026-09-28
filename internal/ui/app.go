@@ -519,16 +519,21 @@ func (m Model) View() string {
 			)
 		}
 
+		activeResourceStyle := resourceTagStyle
+		if color := plugins.ResourceColor(m.resource); color != "" {
+			activeResourceStyle = activeResourceStyle.Background(lipgloss.Color(color))
+		}
+
 		if m.detailMode {
 			resourceTags.WriteString(
 				navigationTagStyle.Render(" <"+m.resource.Kind()+"> ") + " ",
 			)
 			resourceTags.WriteString(
-				resourceTagStyle.Render(" <show> "),
+				activeResourceStyle.Render(" <show> "),
 			)
 		} else {
 			resourceTags.WriteString(
-				resourceTagStyle.Render(" <" + m.resource.Kind() + "> "),
+				activeResourceStyle.Render(" <" + m.resource.Kind() + "> "),
 			)
 		}
 

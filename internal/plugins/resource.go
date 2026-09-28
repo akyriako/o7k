@@ -12,10 +12,11 @@ import (
 
 type pluginResource struct {
 	resource pluginsdk.Resource
+	metadata pluginsdk.Metadata
 }
 
-func newResource(r pluginsdk.Resource) resource.Resource {
-	return &pluginResource{resource: r}
+func newResource(r pluginsdk.Resource, metadata pluginsdk.Metadata) resource.Resource {
+	return &pluginResource{resource: r, metadata: metadata}
 }
 
 func (r *pluginResource) Kind() string {
@@ -44,6 +45,10 @@ func (r *pluginResource) Columns() []resource.Column {
 	}
 
 	return result
+}
+
+func (r *pluginResource) Color() string {
+	return r.metadata.Color
 }
 
 func (r *pluginResource) Commands() []resource.Command {
@@ -132,4 +137,12 @@ func (r *pluginResource) Execute(command resource.Command, row resource.Row) tea
 
 		return nil
 	}
+}
+
+func ResourceColor(r resource.Resource) string {
+	if r, ok := r.(*pluginResource); ok {
+		return r.metadata.Color
+	}
+
+	return ""
 }

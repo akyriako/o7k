@@ -25,6 +25,7 @@ message InitializeRequest {
 message Metadata {
   string name = 1;
   string version = 2;
+  string color = 3;
 }
 
 message Context {

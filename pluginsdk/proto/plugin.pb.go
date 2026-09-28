@@ -105,6 +105,7 @@ type Metadata struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Version       string                 `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
+	Color         string                 `protobuf:"bytes,3,opt,name=color,proto3" json:"color,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -149,6 +150,13 @@ func (x *Metadata) GetName() string {
 func (x *Metadata) GetVersion() string {
 	if x != nil {
 		return x.Version
+	}
+	return ""
+}
+
+func (x *Metadata) GetColor() string {
+	if x != nil {
+		return x.Color
 	}
 	return ""
 }
@@ -908,10 +916,11 @@ const file_proto_plugin_proto_rawDesc = "" +
 	"\x12proto/plugin.proto\x12\ro7k.plugin.v1\"\a\n" +
 	"\x05Empty\"9\n" +
 	"\x11InitializeRequest\x12$\n" +
-	"\x0ehost_broker_id\x18\x01 \x01(\rR\fhostBrokerId\"8\n" +
+	"\x0ehost_broker_id\x18\x01 \x01(\rR\fhostBrokerId\"N\n" +
 	"\bMetadata\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
-	"\aversion\x18\x02 \x01(\tR\aversion\"x\n" +
+	"\aversion\x18\x02 \x01(\tR\aversion\x12\x14\n" +
+	"\x05color\x18\x03 \x01(\tR\x05color\"x\n" +
 	"\aContext\x12\x1e\n" +
 	"\n" +
 	"generation\x18\x01 \x01(\x04R\n" +

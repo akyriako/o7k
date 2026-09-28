@@ -59,7 +59,7 @@ func (m *Manager) Load(path string) error {
 		return fmt.Errorf("getting plugin metadata %q: %w", path, err)
 	}
 
-	if err := client.Register(m.registry); err != nil {
+	if err := client.Register(m.registry, metadata); err != nil {
 		client.Close()
 
 		m.plugins = append(m.plugins, Info{

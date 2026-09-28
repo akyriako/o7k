@@ -34,6 +34,7 @@ func (s *grpcServer) GetMetadata(context.Context, *pb.Empty) (*pb.Metadata, erro
 	return &pb.Metadata{
 		Name:    metadata.Name,
 		Version: metadata.Version,
+		Color:   metadata.Color,
 	}, nil
 }
 

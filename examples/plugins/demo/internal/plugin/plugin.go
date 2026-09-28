@@ -31,6 +31,7 @@ func (p *Plugin) Metadata() pluginsdk.Metadata {
 	return pluginsdk.Metadata{
 		Name:    "demo",
 		Version: "0.1.0",
+		Color:   "#E20074",
 	}
 }
 
