@@ -39,9 +39,9 @@ func (r *EvsVolumes) Aliases() []string {
 func (r *EvsVolumes) Columns() []pluginsdk.Column {
 	return []pluginsdk.Column{
 		{Key: "id", Title: "ID", MinWidth: 36},
-		{Key: "name", Title: "Name", MinWidth: 24, Flex: 1},
-		{Key: "status", Title: "Status", MinWidth: 12},
-		{Key: "size", Title: "Size", MinWidth: 10},
+		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
+		{Key: "status", Title: "STATUS", MinWidth: 12},
+		{Key: "size", Title: "SIZE", MinWidth: 10},
 	}
 }
 
@@ -50,25 +50,6 @@ func (r *EvsVolumes) Commands() []pluginsdk.Command {
 		{Key: "s", Description: "Show", Default: true},
 	}
 }
-
-//func (r *EvsVolumes) List(ctx context.Context) ([]pluginsdk.Row, error) {
-//	client, err := r.plugin.BlockStorageV3(ctx)
-//	if err != nil {
-//		return nil, fmt.Errorf("getting block storage client: %w", err)
-//	}
-//
-//	// Try direct call without pagination
-//	result, err := volumes.List(client, volumes.ListOpts{})
-//	if err != nil {
-//		return nil, fmt.Errorf("listing volumes: %w", err)
-//	}
-//
-//	// Check what result actually is and what methods it has
-//	// You might need: result.Extract(), result.Body, or something else
-//
-//	rows := make([]pluginsdk.Row, 0)
-//	return rows, nil
-//}
 
 func (r *EvsVolumes) List(ctx context.Context) ([]pluginsdk.Row, error) {
 	client, err := r.plugin.BlockStorageV3(ctx)

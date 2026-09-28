@@ -38,8 +38,8 @@ func (r *EcsServers) Aliases() []string {
 func (r *EcsServers) Columns() []pluginsdk.Column {
 	return []pluginsdk.Column{
 		{Key: "id", Title: "ID", MinWidth: 36},
-		{Key: "name", Title: "Name", MinWidth: 24, Flex: 1},
-		{Key: "status", Title: "Status", MinWidth: 12},
+		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
+		{Key: "status", Title: "STATUS", MinWidth: 12},
 	}
 }
 

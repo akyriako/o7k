@@ -79,6 +79,22 @@ func main() {
 		return
 	}
 
+	if len(os.Args) == 4 && os.Args[1] == "plugin" && os.Args[2] == "install" {
+		if err := plugins.Install(context.Background(), os.Args[3]); err != nil {
+			fmt.Fprintf(os.Stderr, "error installing plugin: %v\n", err)
+			os.Exit(1)
+		}
+		return
+	}
+
+	if len(os.Args) == 4 && os.Args[1] == "plugin" && os.Args[2] == "remove" {
+		if err := plugins.Remove(os.Args[3]); err != nil {
+			fmt.Fprintf(os.Stderr, "error removing plugin: %v\n", err)
+			os.Exit(1)
+		}
+		return
+	}
+
 	var err error
 
 	logger, stderr, logFile, err = logging.New()

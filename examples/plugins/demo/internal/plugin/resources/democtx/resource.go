@@ -36,9 +36,9 @@ func (r *DemoCtx) Aliases() []string {
 
 func (r *DemoCtx) Columns() []pluginsdk.Column {
 	return []pluginsdk.Column{
-		{Key: "cloud", Title: "Cloud", MinWidth: 20, Flex: 1},
-		{Key: "region", Title: "Region", MinWidth: 20, Flex: 1},
-		{Key: "generation", Title: "Generation", MinWidth: 10},
+		{Key: "cloud", Title: "CLOUD", MinWidth: 20, Flex: 1},
+		{Key: "region", Title: "REGION", MinWidth: 20, Flex: 1},
+		{Key: "generation", Title: "GENERATION", MinWidth: 10},
 	}
 }
 
