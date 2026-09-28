@@ -1,0 +1,103 @@
+syntax = "proto3";
+
+package o7k.plugin.v1;
+
+option go_package = "github.com/akyriako/o7k/pluginsdk/proto;proto";
+
+service Plugin {
+  rpc Initialize(InitializeRequest) returns (Empty);
+  rpc GetMetadata(Empty) returns (Metadata);
+  rpc GetResources(Empty) returns (Resources);
+  rpc List(ListRequest) returns (ListResponse);
+  rpc Execute(ExecuteRequest) returns (ExecuteResponse);
+}
+
+service Host {
+  rpc GetContext(Empty) returns (Context);
+}
+
+message Empty {}
+
+message InitializeRequest {
+  uint32 host_broker_id = 1;
+}
+
+message Metadata {
+  string name = 1;
+  string version = 2;
+  string color = 3;
+}
+
+message Context {
+  uint64 generation = 1;
+  string cloud = 2;
+  string clouds_path = 3;
+  string region = 4;
+}
+
+message Resources {
+  repeated Resource resources = 1;
+}
+
+message Resource {
+  string service = 1;
+  string kind = 2;
+  string title = 3;
+  repeated string aliases = 4;
+  repeated Column columns = 5;
+  repeated Command commands = 6;
+}
+
+message Column {
+  string key = 1;
+  string title = 2;
+  int32 min_width = 3;
+  int32 flex = 4;
+}
+
+message Command {
+  string key = 1;
+  string description = 2;
+  bool default = 3;
+}
+
+message Row {
+  string id = 1;
+  map<string, string> fields = 2;
+}
+
+message ListRequest {
+  string resource = 1;
+}
+
+message ListResponse {
+  repeated Row rows = 1;
+}
+
+message ExecuteRequest {
+  string resource = 1;
+  Command command = 2;
+  Row row = 3;
+}
+
+message ExecuteResponse {
+  Result result = 1;
+}
+
+message Result {
+  Details details = 1;
+  Navigate navigate = 2;
+}
+
+message Details {
+  string id = 1;
+  bytes content = 2;
+}
+
+message Navigate {
+  string resource = 1;
+  string id = 2;
+  string field = 3;
+  string value = 4;
+  map<string, string> scope = 5;
+}

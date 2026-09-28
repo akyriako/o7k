@@ -14,6 +14,8 @@ import (
 )
 
 type Context struct {
+	CloudsPath string
+
 	Cloud    string
 	Region   string
 	Project  string
@@ -41,10 +43,22 @@ func (c *Context) Connect(ctx context.Context, cloudsPath string) error {
 	}
 
 	c.Provider = provider
+	c.CloudsPath = cloudsPath
 
 	slog.Info("connected to cloud", "cloud", c.Cloud, "identityEndpoint", provider.IdentityEndpoint)
 
 	return nil
+}
+
+func (c *Context) Activate(other *Context) {
+	c.Cloud = other.Cloud
+	c.CloudsPath = other.CloudsPath
+	c.Region = other.Region
+	c.Project = other.Project
+	c.Domain = other.Domain
+	c.Identity = other.Identity
+	c.Provider = other.Provider
+	c.serviceClients = sync.Map{}
 }
 
 func (c *Context) ServiceCatalog() (*identitytokens.ServiceCatalog, error) {
