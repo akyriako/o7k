@@ -1,8 +1,11 @@
 package plugin
 
 import (
+	"context"
+
 	pluginsdk "github.com/akyriako/o7k/pluginsdk"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack"
 )
 
 type Plugin struct {
@@ -41,4 +44,10 @@ func (p *Plugin) Host() pluginsdk.Host {
 
 func (p *Plugin) Provider() *pluginsdk.ClientProvider[*golangsdk.ProviderClient] {
 	return p.provider
+}
+
+func (p *Plugin) ComputeV2(ctx context.Context) (*golangsdk.ServiceClient, error) {
+	return pluginsdk.GetServiceClient(ctx, p.provider, "compute", func(provider *golangsdk.ProviderClient, current pluginsdk.Context) (*golangsdk.ServiceClient, error) {
+		return openstack.NewComputeV2(provider, golangsdk.EndpointOpts{Region: current.Region})
+	})
 }

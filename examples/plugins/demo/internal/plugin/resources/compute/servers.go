@@ -46,7 +46,9 @@ func (r *EcsServers) Columns() []pluginsdk.Column {
 }
 
 func (r *EcsServers) Commands() []pluginsdk.Command {
-	return nil
+	return []pluginsdk.Command{
+		{Key: "s", Description: "Show", Default: true},
+	}
 }
 
 func (r *EcsServers) List(ctx context.Context) ([]pluginsdk.Row, error) {
@@ -93,6 +95,11 @@ func (r *EcsServers) List(ctx context.Context) ([]pluginsdk.Row, error) {
 	return rows, nil
 }
 
-func (r *EcsServers) Execute(context.Context, pluginsdk.Command, pluginsdk.Row) (pluginsdk.Result, error) {
+func (r *EcsServers) Execute(ctx context.Context, command pluginsdk.Command, row pluginsdk.Row) (pluginsdk.Result, error) {
+	switch command.Key {
+	case "s":
+		return r.show(ctx, row.ID)
+	}
+
 	return pluginsdk.Result{}, nil
 }
