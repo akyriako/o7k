@@ -31,27 +31,71 @@ func (r *Registry) Get(name string) (Resource, bool) {
 	return resource, ok
 }
 
+//func (r *Registry) Register(resource Resource) error {
+//	if err := r.validateCommands(resource); err != nil {
+//		return err
+//	}
+//
+//	names := append([]string{resource.Kind()}, resource.Aliases()...)
+//
+//	for _, name := range names {
+//		name = normalize(name)
+//
+//		if name == "" {
+//			return fmt.Errorf("resource name cannot be empty")
+//		}
+//
+//		if _, exists := r.resources[name]; exists {
+//			return fmt.Errorf("resource name %q already registered", name)
+//		}
+//	}
+//
+//	for _, name := range names {
+//		r.resources[normalize(name)] = resource
+//	}
+//
+//	return nil
+//}
+
 func (r *Registry) Register(resource Resource) error {
-	if err := r.validateCommands(resource); err != nil {
-		return err
-	}
+	return r.RegisterAll([]Resource{resource})
+}
 
-	names := append([]string{resource.Kind()}, resource.Aliases()...)
+func (r *Registry) RegisterAll(resources []Resource) error {
+	names := make(map[string]struct{})
 
-	for _, name := range names {
-		name = normalize(name)
-
-		if name == "" {
-			return fmt.Errorf("resource name cannot be empty")
+	for _, resource := range resources {
+		if err := r.validateCommands(resource); err != nil {
+			return err
 		}
 
-		if _, exists := r.resources[name]; exists {
-			return fmt.Errorf("resource name %q already registered", name)
+		resourceNames := append([]string{resource.Kind()}, resource.Aliases()...)
+
+		for _, name := range resourceNames {
+			name = normalize(name)
+
+			if name == "" {
+				return fmt.Errorf("resource name cannot be empty")
+			}
+
+			if _, exists := r.resources[name]; exists {
+				return fmt.Errorf("resource name %q already registered", name)
+			}
+
+			if _, exists := names[name]; exists {
+				return fmt.Errorf("resource name %q already registered", name)
+			}
+
+			names[name] = struct{}{}
 		}
 	}
 
-	for _, name := range names {
-		r.resources[normalize(name)] = resource
+	for _, resource := range resources {
+		resourceNames := append([]string{resource.Kind()}, resource.Aliases()...)
+
+		for _, name := range resourceNames {
+			r.resources[normalize(name)] = resource
+		}
 	}
 
 	return nil

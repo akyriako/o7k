@@ -72,10 +72,8 @@ func (c *Client) Resources() []resource.Resource {
 }
 
 func (c *Client) Register(registry *resource.Registry) error {
-	for _, r := range c.Resources() {
-		if err := registry.Register(r); err != nil {
-			return fmt.Errorf("registering plugin resource %q: %w", r.Kind(), err)
-		}
+	if err := registry.RegisterAll(c.Resources()); err != nil {
+		return fmt.Errorf("registering plugin resources: %w", err)
 	}
 
 	return nil

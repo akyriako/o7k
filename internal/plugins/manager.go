@@ -9,8 +9,8 @@ import (
 type Status string
 
 const (
-	StatusLoaded Status = "loaded"
-	StatusFailed Status = "failed"
+	StatusLoaded Status = "LOADED"
+	StatusFailed Status = "FAILED"
 )
 
 type Info struct {
