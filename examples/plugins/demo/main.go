@@ -5,10 +5,12 @@ import (
 	"strconv"
 
 	plugin "github.com/akyriako/o7k/plugin"
+	"github.com/gophercloud/gophercloud/v2"
 )
 
 type demoPlugin struct {
-	host plugin.Host
+	host      plugin.Host
+	openstack *plugin.ClientProvider[*gophercloud.ProviderClient]
 }
 
 func (p *demoPlugin) Metadata() plugin.Metadata {
@@ -26,6 +28,7 @@ func (p *demoPlugin) Resources() []plugin.Resource {
 
 func (p *demoPlugin) SetHost(host plugin.Host) {
 	p.host = host
+	p.openstack = newClient(host)
 }
 
 type contextResource struct {
@@ -37,11 +40,11 @@ func (r *contextResource) Service() string {
 }
 
 func (r *contextResource) Kind() string {
-	return "plugin-context"
+	return "demo"
 }
 
 func (r *contextResource) Title() string {
-	return "Plugin Context"
+	return "Demo Plugin"
 }
 
 func (r *contextResource) Aliases() []string {
@@ -53,6 +56,7 @@ func (r *contextResource) Columns() []plugin.Column {
 		{Key: "cloud", Title: "Cloud", MinWidth: 20, Flex: 1},
 		{Key: "region", Title: "Region", MinWidth: 20, Flex: 1},
 		{Key: "generation", Title: "Generation", MinWidth: 10},
+		{Key: "identity", Title: "Identity Endpoint", MinWidth: 30, Flex: 2},
 	}
 }
 
@@ -66,6 +70,11 @@ func (r *contextResource) List(ctx context.Context) ([]plugin.Row, error) {
 		return nil, err
 	}
 
+	provider, err := r.plugin.openstack.Client(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	return []plugin.Row{
 		{
 			ID: current.Cloud,
@@ -73,6 +82,7 @@ func (r *contextResource) List(ctx context.Context) ([]plugin.Row, error) {
 				"cloud":      current.Cloud,
 				"region":     current.Region,
 				"generation": strconv.FormatUint(current.Generation, 10),
+				"identity":   provider.IdentityEndpoint,
 			},
 		},
 	}, nil
