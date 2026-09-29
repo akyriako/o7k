@@ -1031,33 +1031,31 @@ import (
 	"fmt"
 
 	"example.com/o7k-plugin-example/internal/plugin"
-	"github.com/akyriako/o7k/pluginsdk"
-	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
 )
 
-type ExampleServers struct {
+type Resource struct {
 	plugin *plugin.Plugin
 }
 
-func NewServers(p *plugin.Plugin) *ExampleServers {
-	return &ExampleServers{
+func NewExampleServers(p *plugin.Plugin) *Resource {
+	return &Resource{
 		plugin: p,
 	}
 }
 
-func (r *ExampleServers) Service() string {
+func (r *Resource) Service() string {
 	return "example-compute"
 }
 
-func (r *ExampleServers) Kind() string {
+func (r *Resource) Kind() string {
 	return "example-servers"
 }
 
-func (r *ExampleServers) Title() string {
+func (r *Resource) Title() string {
 	return "Example Servers"
 }
 
-func (r *ExampleServers) Aliases() []string {
+func (r *Resource) Aliases() []string {
 	return nil
 }
 ```
@@ -1075,7 +1073,7 @@ func (r *ExampleServers) Aliases() []string {
 `Aliases()` can provide additional names accepted by the resource command:
 
 ```go
-func (r *ExampleServers) Aliases() []string {
+func (r *Resource) Aliases() []string {
 	return []string{
 		"example-server",
 	}
@@ -1087,7 +1085,7 @@ func (r *ExampleServers) Aliases() []string {
 Plugin resources use `pluginsdk.Column` to describe their table view:
 
 ```go
-func (r *ExampleServers) Columns() []pluginsdk.Column {
+func (r *Resource) Columns() []pluginsdk.Column {
 	return []pluginsdk.Column{
 		{Key: "id", Title: "ID", MinWidth: 36},
 		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
@@ -1107,7 +1105,7 @@ Fields do not have to be visible columns. A resource may add additional values t
 `List()` obtains the service client from the plugin, retrieves the provider resources and converts them to `pluginsdk.Row` values:
 
 ```go
-func (r *ExampleServers) List(ctx context.Context) ([]pluginsdk.Row, error) {
+func (r *Resource) List(ctx context.Context) ([]pluginsdk.Row, error) {
 	client, err := r.plugin.ComputeV2(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("getting compute client: %w", err)
@@ -1161,7 +1159,7 @@ Fields: map[string]string{
 Commands are declared using `pluginsdk.Command`:
 
 ```go
-func (r *ExampleServers) Commands() []pluginsdk.Command {
+func (r *Resource) Commands() []pluginsdk.Command {
 	return []pluginsdk.Command{
 		{Key: "s", Description: "Show", Default: true},
 	}
@@ -1173,7 +1171,7 @@ func (r *ExampleServers) Commands() []pluginsdk.Command {
 Command execution is handled by `Execute()`:
 
 ```go
-func (r *ExampleServers) Execute(ctx context.Context, command pluginsdk.Command, row pluginsdk.Row) (pluginsdk.Result, error) {
+func (r *Resource) Execute(ctx context.Context, command pluginsdk.Command, row pluginsdk.Row) (pluginsdk.Result, error) {
 	switch command.Key {
 	case "s":
 		return r.show(ctx, row.ID)
@@ -1203,7 +1201,7 @@ import (
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
 )
 
-func (r *ExampleServers) show(ctx context.Context, id string) (pluginsdk.Result, error) {
+func (r *Resource) show(ctx context.Context, id string) (pluginsdk.Result, error) {
 	client, err := r.plugin.ComputeV2(ctx)
 	if err != nil {
 		return pluginsdk.Result{}, fmt.Errorf("getting compute client: %w", err)
@@ -1237,7 +1235,7 @@ Plugin resources can use `pluginsdk.Navigate` to participate in normal **o7k** r
 For example, a compute server can expose a command that opens only the volumes attached to that server:
 
 ```go
-func (r *ExampleServers) Commands() []pluginsdk.Command {
+func (r *Resource) Commands() []pluginsdk.Command {
 	return []pluginsdk.Command{
 		{Key: "s", Description: "Show", Default: true},
 		{Key: "shift-v", Description: "Volumes"},
@@ -1248,7 +1246,7 @@ func (r *ExampleServers) Commands() []pluginsdk.Command {
 Handle the command in `Execute()`:
 
 ```go
-func (r *ExampleServers) Execute(ctx context.Context, command pluginsdk.Command, row pluginsdk.Row) (pluginsdk.Result, error) {
+func (r *Resource) Execute(ctx context.Context, command pluginsdk.Command, row pluginsdk.Row) (pluginsdk.Result, error) {
 	switch command.Key {
 	case "s":
 		return r.show(ctx, row.ID)
@@ -1263,7 +1261,7 @@ func (r *ExampleServers) Execute(ctx context.Context, command pluginsdk.Command,
 The navigation command can then return:
 
 ```go
-func (r *ExampleServers) volumes(row pluginsdk.Row) (pluginsdk.Result, error) {
+func (r *Resource) volumes(row pluginsdk.Row) (pluginsdk.Result, error) {
 	return pluginsdk.Result{
 		Navigate: &pluginsdk.Navigate{
 			Resource: "example-volumes",
