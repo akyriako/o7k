@@ -79,3 +79,14 @@ type Navigate struct {
 	Value    string
 	Scope    map[string]string
 }
+
+type scopeContextKey struct{}
+
+func WithScope(ctx context.Context, scope map[string]string) context.Context {
+	return context.WithValue(ctx, scopeContextKey{}, scope)
+}
+
+func Scope(ctx context.Context) map[string]string {
+	scope, _ := ctx.Value(scopeContextKey{}).(map[string]string)
+	return scope
+}
