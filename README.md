@@ -978,14 +978,14 @@ Add a helper for each OpenStack service used by the plugin in `internal/plugin/p
 
 ```go
 func (p *Plugin) ComputeV2(ctx context.Context) (*golangsdk.ServiceClient, error) {
-	return pluginsdk.GetServiceClient(ctx, p.host, p.provider, &p.serviceClients, "compute", func(provider *golangsdk.ProviderClient, current pluginsdk.Context) (*golangsdk.ServiceClient, error) {
-		return openstack.NewComputeV2(provider, gophercloud.EndpointOpts{Region: current.Region})
+	return pluginsdk.GetServiceClient(ctx, p.provider, "compute", func(provider *golangsdk.ProviderClient, current pluginsdk.Context) (*golangsdk.ServiceClient, error) {
+		return openstack.NewComputeV2(provider, golangsdk.EndpointOpts{Region: current.Region})
 	})
 }
 
 func (p *Plugin) BlockStorageV3(ctx context.Context) (*golangsdk.ServiceClient, error) {
-	return pluginsdk.GetServiceClient(ctx, p.host, p.provider, &p.serviceClients, "block-storage", func(provider *golangsdk.ProviderClient, current pluginsdk.Context) (*golangsdk.ServiceClient, error) {
-		return openstack.NewBlockStorageV3(provider, gophercloud.EndpointOpts{Region: current.Region})
+	return pluginsdk.GetServiceClient(ctx, p.provider, "block-storage", func(provider *golangsdk.ProviderClient, current pluginsdk.Context) (*golangsdk.ServiceClient, error) {
+		return openstack.NewBlockStorageV3(provider, golangsdk.EndpointOpts{Region: current.Region})
 	})
 }
 ```
