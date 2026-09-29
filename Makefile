@@ -1,10 +1,9 @@
 # Configuration variables
 APP ?= o7k
-TAG ?= 0.6.0
+TAG ?= 0.7.2
 ITERATION ?= 1
 TARGET_ENV ?= dev
 VERSION ?= $(TAG)-$(TARGET_ENV).$(ITERATION)
-#VERSION ?= $(TAG)
 
 # Build metadata
 BIN_VERSION ?= $(VERSION)
@@ -38,4 +37,13 @@ clean:
 	@echo "Cleaning up..."
 	rm -rf bin
 
-.PHONY: build run test version clean
+release-tag:
+	@test "$$(git branch --show-current)" = "main" || { echo "Error: release-tag must run on main"; exit 1; }
+	@git diff --quiet && git diff --cached --quiet || { echo "Error: working tree has uncommitted changes"; exit 1; }
+	@git fetch origin main
+	@test "$$(git rev-list --count origin/main..HEAD)" -eq 0 || { echo "Error: main has unpushed commits"; exit 1; }
+	@test "$$(git rev-list --count HEAD..origin/main)" -eq 0 || { echo "Error: main is behind origin/main"; exit 1; }
+	git tag -a v$(TAG) -m "o7k v$(TAG)"
+	git push origin v$(TAG)
+
+.PHONY: build run test version clean release-tag
