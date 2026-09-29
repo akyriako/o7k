@@ -108,3 +108,14 @@ func (m Model) maxTableXOffset() int {
 
 	return max(tableWidth-visibleWidth, 0)
 }
+
+func (m *Model) suggestions() []string {
+	var suggestions []string
+
+	for _, r := range m.registry.Resources() {
+		suggestions = append(suggestions, r.Kind())
+		suggestions = append(suggestions, r.Aliases()...)
+	}
+
+	return suggestions
+}

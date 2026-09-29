@@ -96,11 +96,17 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, plugi
 	command := textinput.New()
 	command.Prompt = ":"
 	command.CharLimit = 64
+	command.ShowSuggestions = true
+
+	command.PromptStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#87CEFA"))
+	command.TextStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#87CEFA"))
+	command.Cursor.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("#87CEFA"))
+	command.PlaceholderStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#666666"))
 
 	detail := viewport.New(1, 1)
 	detail.SetHorizontalStep(4)
 
-	return Model{
+	m := Model{
 		version: version,
 
 		registry: registry,
@@ -119,6 +125,9 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, plugi
 		loaded:       false,
 		loadID:       1,
 	}
+
+	m.command.SetSuggestions(m.suggestions())
+	return m
 }
 
 func (m Model) Init() tea.Cmd {
@@ -573,7 +582,7 @@ func (m Model) View() string {
 	}
 
 	if m.commandMode {
-		commandLine = commandStyle.Render(m.command.View())
+		commandLine = m.command.View()
 	}
 
 	view := header +

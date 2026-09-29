@@ -5,6 +5,8 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+//Header and AppView
+
 var (
 	resourceTagStyle = lipgloss.NewStyle().
 				Foreground(lipgloss.Color("255")).
@@ -17,6 +19,10 @@ var (
 
 	commandStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#87CEFA"))
+
+	commandGhostStyle = lipgloss.NewStyle().
+				Foreground(lipgloss.Color("#5C6370")).
+				Faint(true)
 
 	statusStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#000000")).
@@ -67,6 +73,8 @@ var (
 				Bold(true)
 )
 
+//DetailsView
+
 var (
 	jsonKeyStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#87CEFA"))
@@ -84,6 +92,8 @@ var (
 			Foreground(lipgloss.Color("#7F848E"))
 )
 
+//ErrorView
+
 var (
 	errorModalStyle = lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
@@ -96,6 +106,8 @@ var (
 			Foreground(lipgloss.Color("#ED1944")).
 			Bold(true)
 )
+
+//TableView
 
 var (
 	tableTitleStyle = lipgloss.NewStyle().
