@@ -816,20 +816,20 @@ Initialize the module and add the **o7k** plugin SDK:
 go mod init example.com/o7k-plugin-example
 go get github.com/akyriako/o7k/pluginsdk
 ```
-
-Add the **OpenStack SDK used by the provider** as a dependency as well.
-
-The plugin is an independent Go application and must not import packages from `github.com/akyriako/o7k/internal/xxx` 
-Communication between the plugin and o7k happens over gRPC, using [HashiCorp's go-plugin](https://github.com/hashicorp/go-plugin),
-to manage the plugin subprocess and RPC connection. The public `github.com/akyriako/o7k/pluginsdk` module defines the 
-interfaces and gRPC protocol shared by o7k and the plugin(s).
-
-The examples in `/examples/plugins/demo` uses two T Cloud Public (formerly known as Open Telekom Cloud) resources:
-
-```text
-Compute       -> ecs-servers
-Block Storage -> ecs-volumes
-```
+> [!Tip]
+> Add the **OpenStack SDK used by the provider** as a dependency as well.
+>
+> The plugin is an independent Go application and must not import packages from `github.com/akyriako/o7k/internal/xxx`.  
+> Communication between the plugin and o7k happens over gRPC, using [HashiCorp's go-plugin](https://github.com/hashicorp/go-plugin),
+> to manage the plugin subprocess and RPC connection. The public `github.com/akyriako/o7k/pluginsdk` module defines the 
+> interfaces and gRPC protocol shared by o7k and the plugin(s).
+>
+> The examples in `/examples/plugins/demo` uses two T Cloud Public (formerly known as Open Telekom Cloud) resources:
+>
+>```text
+>Compute       -> ecs-servers
+>Block Storage -> ecs-volumes
+>```
 
 #### 2. Implement the plugin
 
@@ -897,7 +897,7 @@ func (p *Plugin) Provider() *pluginsdk.ClientProvider[*gophercloud.ProviderClien
 
 > [!Important]
 > 1. Fill in the `Metadata()` and leave the rest intact.
-> 2. Create the `pluginsdk.ClientProvider` that corresponds to the target cloud provider.
+> 2. Create the `pluginsdk.ClientProvider[T]`, where T corresponds to the target cloud provider.
 
 #### 3. Create the provider client
 
@@ -916,25 +916,33 @@ import (
 	"github.com/akyriako/o7k/pluginsdk"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack"
-	"gopkg.in/yaml.v3"
 )
 
 func newClient(host pluginsdk.Host) *pluginsdk.ClientProvider[*golangsdk.ProviderClient] {
 	return pluginsdk.NewClientProvider(host, connectClient)
 }
 
-func connectClient(ctx context.Context, current pluginsdk.Context) (*golangsdk.ProviderClient, error) {
-	authOpts, _, tlsConfig, err := clouds.Parse(
-		clouds.WithLocations(current.CloudsPath),
-		clouds.WithCloudName(current.Cloud),
-	)
+func connectClient(_ context.Context, current pluginsdk.Context) (*golangsdk.ProviderClient, error) {
+	data, err := os.ReadFile(current.CloudsPath)
 	if err != nil {
-		return nil, fmt.Errorf("parsing cloud %q: %w", current.Cloud, err)
+		return nil, fmt.Errorf("reading clouds.yaml %q: %w", current.CloudsPath, err)
 	}
 
-	authOpts.AllowReauth = true
+	var config openstack.Config
+	if err := yaml.Unmarshal(data, &config); err != nil {
+		return nil, fmt.Errorf("parsing clouds.yaml %q: %w", current.CloudsPath, err)
+	}
 
-	provider, err := config.NewProviderClient(ctx, authOpts, config.WithTLSConfig(tlsConfig))
+	cloud, ok := config.Clouds[current.Cloud]
+	if !ok {
+		return nil, fmt.Errorf("cloud %q not found in %q", current.Cloud, current.CloudsPath)
+	}
+
+	if current.Region != "" {
+		cloud.RegionName = current.Region
+	}
+
+	provider, err := openstack.AuthenticatedClientFromCloud(&cloud)
 	if err != nil {
 		return nil, fmt.Errorf("authenticating cloud %q: %w", current.Cloud, err)
 	}
@@ -944,7 +952,7 @@ func connectClient(ctx context.Context, current pluginsdk.Context) (*golangsdk.P
 ```
 
 > [!Important]
-> The exact authentication implementation depends on the OpenStack SDK used by the target provider. The example above 
+> The exact authentication implementation depends on the OpenStack Golang SDK used/developed by the target cloud provider. The example above 
 uses Open Telekom Cloud Golang SDK. A provider plugin using another SDK should implement `connectClient` using that SDK's `clouds.yaml` and authentication support.
 
 The `pluginsdk.Context` supplied to `connectClient` contains the active **o7k** context:
