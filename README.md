@@ -7,10 +7,91 @@ It provides a fast way to inspect and navigate OpenStack resources directly from
 
 <img width="2544" height="1247" alt="image" src="https://github.com/user-attachments/assets/fd654afe-5813-4aeb-99a6-0cd79fa56a3a" />
 
-> [!CAUTION]
-> **o7k is early beta and under active development.** Expect bugs, incomplete features, and breaking changes. Behavior and configuration may change without notice.
->
-> Use against production OpenStack environments at your own risk.
+## Installation
+
+### Homebrew
+
+Install **o7k** using the Homebrew tap:
+
+```bash
+brew install --cask akyriako/tap/o7k
+```
+
+Upgrade to the latest release:
+
+```bash
+brew upgrade --cask o7k
+```
+
+### Debian / Ubuntu
+
+Add the **o7k** repository signing key:
+
+```bash
+curl -fsSL https://akyriako.github.io/o7k-apt/o7k-archive-keyring.gpg \
+  | sudo tee /usr/share/keyrings/o7k-archive-keyring.gpg >/dev/null
+```
+
+Add the APT repository:
+
+```bash
+echo "deb [signed-by=/usr/share/keyrings/o7k-archive-keyring.gpg] https://akyriako.github.io/o7k-apt/ stable main" \
+  | sudo tee /etc/apt/sources.list.d/o7k.list
+```
+
+Install **o7k**:
+
+```bash
+sudo apt update
+sudo apt install o7k
+```
+
+Upgrade to the latest release:
+
+```bash
+sudo apt update
+sudo apt install --only-upgrade o7k
+```
+
+### Fedora / RHEL / Rocky Linux / AlmaLinux
+
+Import the repository signing key:
+
+```bash
+sudo rpm --import https://akyriako.github.io/o7k-rpm/o7k-rpm-signing-key.asc
+```
+
+Add the **o7k** repository:
+
+```bash
+sudo tee /etc/yum.repos.d/o7k.repo >/dev/null <<'EOF'
+[o7k]
+name=o7k
+baseurl=https://akyriako.github.io/o7k-rpm/
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://akyriako.github.io/o7k-rpm/o7k-rpm-signing-key.asc
+EOF
+```
+
+Install **o7k**:
+
+```bash
+sudo dnf install o7k
+```
+
+Upgrade to the latest release:
+
+```bash
+sudo dnf upgrade --refresh o7k
+```
+
+### Verify the installation
+
+```bash
+o7k --version
+```
 
 ## Usage
 
@@ -109,6 +190,11 @@ Press `Esc` to return to the previous resource and selection.
 | **Barbican / Key Manager** | secrets, secret containers, orders | ✅ |
 | **Trove / Databases** | instances | ⬜ |
 
+> [!CAUTION]
+> **o7k is early beta and under active development.** Expect bugs, incomplete features, and breaking changes. Behavior and configuration may change without notice.
+>
+> Use against production OpenStack environments at your own risk.
+
 ### Aliases
 
 | Service | Resource | Command | Aliases |
@@ -157,92 +243,6 @@ Press `Esc` to return to the previous resource and selection.
 | Barbican / Key Manager | Orders | `orders` | `order` |
 | Designate / DNS | Zones | `zones` | `zone`, `dns-zones`, `dns-zone` |
 | Designate / DNS | Recordsets | `recordsets` | `recordset`, `records`, `record` |
-
-## Installation
-
-### Homebrew
-
-Install **o7k** using the Homebrew tap:
-
-```bash
-brew install --cask akyriako/tap/o7k
-```
-
-Upgrade to the latest release:
-
-```bash
-brew upgrade --cask o7k
-```
-
-### Debian / Ubuntu
-
-Add the **o7k** repository signing key:
-
-```bash
-curl -fsSL https://akyriako.github.io/o7k-apt/o7k-archive-keyring.gpg \
-  | sudo tee /usr/share/keyrings/o7k-archive-keyring.gpg >/dev/null
-```
-
-Add the APT repository:
-
-```bash
-echo "deb [signed-by=/usr/share/keyrings/o7k-archive-keyring.gpg] https://akyriako.github.io/o7k-apt/ stable main" \
-  | sudo tee /etc/apt/sources.list.d/o7k.list
-```
-
-Install **o7k**:
-
-```bash
-sudo apt update
-sudo apt install o7k
-```
-
-Upgrade to the latest release:
-
-```bash
-sudo apt update
-sudo apt install --only-upgrade o7k
-```
-
-### Fedora / RHEL / Rocky Linux / AlmaLinux
-
-Import the repository signing key:
-
-```bash
-sudo rpm --import https://akyriako.github.io/o7k-rpm/o7k-rpm-signing-key.asc
-```
-
-Add the **o7k** repository:
-
-```bash
-sudo tee /etc/yum.repos.d/o7k.repo >/dev/null <<'EOF'
-[o7k]
-name=o7k
-baseurl=https://akyriako.github.io/o7k-rpm/
-enabled=1
-gpgcheck=1
-repo_gpgcheck=1
-gpgkey=https://akyriako.github.io/o7k-rpm/o7k-rpm-signing-key.asc
-EOF
-```
-
-Install **o7k**:
-
-```bash
-sudo dnf install o7k
-```
-
-Upgrade to the latest release:
-
-```bash
-sudo dnf upgrade --refresh o7k
-```
-
-### Verify the installation
-
-```bash
-o7k --version
-```
 
 ## Development
 
