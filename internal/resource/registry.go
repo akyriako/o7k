@@ -26,36 +26,22 @@ func NewRegistry() *Registry {
 	}
 }
 
+func (r *Registry) Resources() []Resource {
+	resources := make([]Resource, 0)
+
+	for name, res := range r.resources {
+		if name == normalize(res.Kind()) {
+			resources = append(resources, res)
+		}
+	}
+
+	return resources
+}
+
 func (r *Registry) Get(name string) (Resource, bool) {
 	resource, ok := r.resources[normalize(name)]
 	return resource, ok
 }
-
-//func (r *Registry) Register(resource Resource) error {
-//	if err := r.validateCommands(resource); err != nil {
-//		return err
-//	}
-//
-//	names := append([]string{resource.Kind()}, resource.Aliases()...)
-//
-//	for _, name := range names {
-//		name = normalize(name)
-//
-//		if name == "" {
-//			return fmt.Errorf("resource name cannot be empty")
-//		}
-//
-//		if _, exists := r.resources[name]; exists {
-//			return fmt.Errorf("resource name %q already registered", name)
-//		}
-//	}
-//
-//	for _, name := range names {
-//		r.resources[normalize(name)] = resource
-//	}
-//
-//	return nil
-//}
 
 func (r *Registry) Register(resource Resource) error {
 	return r.RegisterAll([]Resource{resource})
