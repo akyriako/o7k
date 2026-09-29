@@ -94,6 +94,7 @@ func (r *grpcResource) Commands() []Command {
 func (r *grpcResource) List(ctx context.Context) ([]Row, error) {
 	response, err := r.client.List(ctx, &pb.ListRequest{
 		Resource: r.Kind(),
+		Scope:    Scope(ctx),
 	})
 	if err != nil {
 		return nil, err
@@ -123,6 +124,7 @@ func (r *grpcResource) Execute(ctx context.Context, command Command, row Row) (R
 			Id:     row.ID,
 			Fields: row.Fields,
 		},
+		Scope: Scope(ctx),
 	})
 	if err != nil {
 		return Result{}, err

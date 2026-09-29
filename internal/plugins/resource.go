@@ -67,6 +67,8 @@ func (r *pluginResource) Commands() []resource.Command {
 }
 
 func (r *pluginResource) List(ctx context.Context) ([]resource.Row, error) {
+	ctx = pluginsdk.WithScope(ctx, resource.Scope(ctx))
+
 	rows, err := r.resource.List(ctx)
 	if err != nil {
 		return nil, err

@@ -68,6 +68,7 @@ message Row {
 
 message ListRequest {
   string resource = 1;
+  map<string, string> scope = 2;
 }
 
 message ListResponse {
@@ -78,6 +79,7 @@ message ExecuteRequest {
   string resource = 1;
   Command command = 2;
   Row row = 3;
+  map<string, string> scope = 4;
 }
 
 message ExecuteResponse {

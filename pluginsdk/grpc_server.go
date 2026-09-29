@@ -85,6 +85,8 @@ func (s *grpcServer) List(ctx context.Context, request *pb.ListRequest) (*pb.Lis
 		return nil, err
 	}
 
+	ctx = WithScope(ctx, request.Scope)
+
 	rows, err := resource.List(ctx)
 	if err != nil {
 		return nil, err
@@ -115,6 +117,8 @@ func (s *grpcServer) Execute(ctx context.Context, request *pb.ExecuteRequest) (*
 	if err != nil {
 		return nil, err
 	}
+
+	ctx = WithScope(ctx, request.Scope)
 
 	result, err := resource.Execute(ctx, Command{
 		Key:         request.Command.Key,
