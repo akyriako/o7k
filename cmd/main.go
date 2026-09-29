@@ -11,6 +11,7 @@ import (
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/plugins"
 	"github.com/akyriako/o7k/internal/resource"
+	"github.com/akyriako/o7k/internal/resources/aliases"
 	"github.com/akyriako/o7k/internal/resources/blockstorage/backups"
 	"github.com/akyriako/o7k/internal/resources/blockstorage/snapshots"
 	"github.com/akyriako/o7k/internal/resources/blockstorage/volumes"
@@ -403,6 +404,10 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 
 	if err := r.Register(orders.New(openstackContext)); err != nil {
 		return fmt.Errorf("registering orders resource: %w", err)
+	}
+
+	if err := r.Register(aliases.New(r)); err != nil {
+		return fmt.Errorf("registering aliases resource: %w", err)
 	}
 
 	return errs
