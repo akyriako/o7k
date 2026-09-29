@@ -880,7 +880,7 @@ func (p *Plugin) Host() pluginsdk.Host {
 	return p.host
 }
 
-func (p *Plugin) Provider() *pluginsdk.ClientProvider[*gophercloud.ProviderClient] {
+func (p *Plugin) Provider() *pluginsdk.ClientProvider[*golangsdk.ProviderClient] {
 	return p.provider
 }
 ```
@@ -954,17 +954,6 @@ func connectClient(_ context.Context, current pluginsdk.Context) (*golangsdk.Pro
 > [!Important]
 > The exact authentication implementation depends on the OpenStack Golang SDK used/developed by the target cloud provider. The example above 
 uses Open Telekom Cloud Golang SDK. A provider plugin using another SDK should implement `connectClient` using that SDK's `clouds.yaml` and authentication support.
-
-The `pluginsdk.Context` supplied to `connectClient` contains the active **o7k** context:
-
-```go
-type Context struct {
-	Generation uint64
-	Cloud      string
-	CloudsPath string
-	Region     string
-}
-```
 
 > [!Note]
 > Always use both `Cloud` and `CloudsPath`. `CloudsPath` identifies the exact `clouds.yaml` file from which **o7k** loaded the active cloud.
