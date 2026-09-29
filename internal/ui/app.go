@@ -433,6 +433,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.navigation = append(m.navigation, navigationEntry{
 				resource: m.resource.Kind(),
 				id:       m.resourceRows[cursor].ID,
+				filter:   m.filter,
+				scope:    m.scope,
 			})
 		}
 
@@ -448,6 +450,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				resource: m.resource.Kind(),
 				id:       m.resourceRows[cursor].ID,
 				filter:   m.filter,
+				scope:    m.scope,
 			})
 		}
 
