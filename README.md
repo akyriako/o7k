@@ -199,6 +199,7 @@ Press `Esc` to return to the previous resource and selection.
 
 | Service | Resource | Command | Aliases |
 |---|---|---|---|
+| Command Palette | Aliases | `commands` | `command`, `cmd`, `aliases`, `alias` |
 | Local / Auth | Contexts | `contexts` | `context`, `ctx`, `cloud`, `clouds` |
 | Keystone / Catalog | Catalog | `catalog` | `cat` |
 | Keystone / Catalog | Services | `services` | `service`, `svc` |
