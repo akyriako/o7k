@@ -60,6 +60,7 @@ func (r *pluginResource) Commands() []resource.Command {
 			Key:         command.Key,
 			Description: command.Description,
 			Default:     command.Default,
+			StatusLabel: command.StatusLabel,
 		})
 	}
 
@@ -92,6 +93,7 @@ func (r *pluginResource) Execute(command resource.Command, row resource.Row) tea
 			Key:         command.Key,
 			Description: command.Description,
 			Default:     command.Default,
+			StatusLabel: command.StatusLabel,
 		}, pluginsdk.Row{
 			ID:     row.ID,
 			Fields: row.Fields,

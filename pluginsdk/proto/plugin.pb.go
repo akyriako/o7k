@@ -430,6 +430,7 @@ type Command struct {
 	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
 	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
 	Default       bool                   `protobuf:"varint,3,opt,name=default,proto3" json:"default,omitempty"`
+	StatusLabel   string                 `protobuf:"bytes,4,opt,name=status_label,json=statusLabel,proto3" json:"status_label,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -483,6 +484,13 @@ func (x *Command) GetDefault() bool {
 		return x.Default
 	}
 	return false
+}
+
+func (x *Command) GetStatusLabel() string {
+	if x != nil {
+		return x.StatusLabel
+	}
+	return ""
 }
 
 type Row struct {
@@ -958,11 +966,12 @@ const file_plugin_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x1b\n" +
 	"\tmin_width\x18\x03 \x01(\x05R\bminWidth\x12\x12\n" +
-	"\x04flex\x18\x04 \x01(\x05R\x04flex\"W\n" +
+	"\x04flex\x18\x04 \x01(\x05R\x04flex\"z\n" +
 	"\aCommand\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x18\n" +
-	"\adefault\x18\x03 \x01(\bR\adefault\"\x88\x01\n" +
+	"\adefault\x18\x03 \x01(\bR\adefault\x12!\n" +
+	"\fstatus_label\x18\x04 \x01(\tR\vstatusLabel\"\x88\x01\n" +
 	"\x03Row\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x126\n" +
 	"\x06fields\x18\x02 \x03(\v2\x1e.o7k.plugin.v1.Row.FieldsEntryR\x06fields\x1a9\n" +

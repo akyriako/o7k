@@ -104,18 +104,26 @@ func (m *Model) executeResourceCommand(key string) tea.Cmd {
 		if command.Key == key {
 			row := m.resourceRows[cursor]
 
+			m.showLoading = true
+			m.loadingLabel = command.StatusLabel
+			if m.loadingLabel == "" {
+				m.loadingLabel = "Loading..."
+			}
+
 			if m.resource.Kind() == "contexts" && key == "a" {
 				m.activatingContext = true
 				m.showLoading = true
 				m.loadingLabel = "Connecting to " + row.ID + "..."
 			}
 
-			if key == "s" {
-				m.showLoading = true
-				m.loadingLabel = "Loading..."
-			}
+			cmd := m.resource.Execute(command, row)
 
-			return m.resource.Execute(command, row)
+			return tea.Sequence(
+				cmd,
+				func() tea.Msg {
+					return resource.CommandCompletedMsg{}
+				},
+			)
 		}
 	}
 

@@ -31,3 +31,5 @@ type NavigateScopedMsg struct {
 type ErrorMsg struct {
 	Err error
 }
+
+type CommandCompletedMsg struct{}

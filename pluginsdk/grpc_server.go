@@ -63,6 +63,7 @@ func (s *grpcServer) GetResources(context.Context, *pb.Empty) (*pb.Resources, er
 				Key:         command.Key,
 				Description: command.Description,
 				Default:     command.Default,
+				StatusLabel: command.StatusLabel,
 			})
 		}
 
@@ -124,6 +125,7 @@ func (s *grpcServer) Execute(ctx context.Context, request *pb.ExecuteRequest) (*
 		Key:         request.Command.Key,
 		Description: request.Command.Description,
 		Default:     request.Command.Default,
+		StatusLabel: request.Command.StatusLabel,
 	}, Row{
 		ID:     request.Row.Id,
 		Fields: request.Row.Fields,
