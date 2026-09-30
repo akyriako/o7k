@@ -5,7 +5,7 @@
 
 It provides a fast way to inspect and navigate OpenStack resources directly from the terminal.
 
-<img width="2544" height="1247" alt="image" src="https://github.com/user-attachments/assets/fd654afe-5813-4aeb-99a6-0cd79fa56a3a" />
+![o7k demo](assets/demo/demo.gif)
 
 ## Installation
 

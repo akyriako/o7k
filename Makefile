@@ -46,4 +46,7 @@ release-tag:
 	git tag -a v$(TAG) -m "o7k v$(TAG)"
 	git push origin v$(TAG)
 
-.PHONY: build run test version clean release-tag
+tape:
+	vhs assets/demo/demo.tape
+
+.PHONY: build run test version clean release-tag tape
