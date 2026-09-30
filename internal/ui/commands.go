@@ -3,6 +3,7 @@ package ui
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -43,8 +44,9 @@ type navigationEntry struct {
 }
 
 type resourceFilter struct {
-	field string
-	value string
+	field  string
+	value  string
+	values []string
 }
 
 type autoRefreshMsg struct{}
@@ -230,7 +232,17 @@ func filterResourceRows(rows []resource.Row, filter *resourceFilter) []resource.
 	filtered := make([]resource.Row, 0, len(rows))
 
 	for _, row := range rows {
-		if row.Fields[filter.field] == filter.value {
+		value := row.Fields[filter.field]
+
+		if len(filter.values) > 0 {
+			if slices.Contains(filter.values, value) {
+				filtered = append(filtered, row)
+			}
+
+			continue
+		}
+
+		if value == filter.value {
 			filtered = append(filtered, row)
 		}
 	}

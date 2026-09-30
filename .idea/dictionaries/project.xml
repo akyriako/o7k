@@ -5,6 +5,7 @@
       <w>keypairs</w>
       <w>loadbalancer</w>
       <w>recordsets</w>
+      <w>securitygroups</w>
     </words>
   </dictionary>
 </component>

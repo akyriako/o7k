@@ -41,8 +41,7 @@ func (r *Resource) Columns() []resource.Column {
 		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
 		{Key: "status", Title: "STATUS", MinWidth: 12, Flex: 0},
 		{Key: "flavor", Title: "FLAVOR", MinWidth: 15, Flex: 1},
-		{Key: "image", Title: "IMAGE", MinWidth: 40, Flex: 0},
-		{Key: "addresses", Title: "ADDRESSES", MinWidth: 40, Flex: 2},
+		{Key: "addresses", Title: "ADDRESSES", MinWidth: 40, Flex: 1},
 	}
 }
 
@@ -51,6 +50,7 @@ func (r *Resource) Commands() []resource.Command {
 		{Key: "s", Description: "Show", Default: true},
 		{Key: "shift-i", Description: "Image"},
 		{Key: "shift-f", Description: "Flavor"},
+		{Key: "shift-g", Description: "Security Groups"},
 	}
 }
 
@@ -96,9 +96,7 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 			flavorName = flavorID
 		}
 
-		//fmt.Printf("SERVER IMAGE: server=%q image=%#v\n", server.Name, server.Image)
 		imageID, _ := server.Image["id"].(string)
-
 		image := imageID
 		if name, ok := server.Image["name"].(string); ok && name != "" {
 			image = name
@@ -124,7 +122,7 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 func serverAddresses(addresses map[string]any) string {
 	values := make([]string, 0)
 
-	for network, raw := range addresses {
+	for _, raw := range addresses {
 		items, ok := raw.([]any)
 		if !ok {
 			continue
@@ -141,7 +139,7 @@ func serverAddresses(addresses map[string]any) string {
 				continue
 			}
 
-			values = append(values, network+"="+ip)
+			values = append(values, ip)
 		}
 	}
 
@@ -156,6 +154,8 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 		return r.image(row)
 	case "shift-f":
 		return r.flavor(row)
+	case "shift-g":
+		return r.securityGroups(row)
 	}
 
 	return nil

@@ -11,6 +11,12 @@ type NavigateFilteredMsg struct {
 	Value    string
 }
 
+type NavigateFilteredMultiMsg struct {
+	Resource string
+	Field    string
+	Values   []string
+}
+
 type DetailsMsg struct {
 	ID      string
 	Content any
@@ -20,4 +26,8 @@ type DetailsMsg struct {
 type NavigateScopedMsg struct {
 	Resource string
 	Scope    map[string]string
+}
+
+type ErrorMsg struct {
+	Err error
 }
