@@ -173,6 +173,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		slog.Error(msg.err.Error(), "cloud", m.context.Cloud)
 		return m, nil
 
+	case resource.ErrorMsg:
+		m.autoRefreshPaused = true
+		m.loading = false
+		m.showLoading = false
+		m.loadingLabel = ""
+
+		m.err = msg.Err
+
+		slog.Error(msg.Err.Error(), "cloud", m.context.Cloud)
+		return m, nil
+
 	case clipboardResultMsg:
 		m.status = "copied to clipboard"
 		return m, clearStatus(m.status)
@@ -479,6 +490,26 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.scope = msg.Scope
 
 		return m, m.navigateScopedResource(msg.Resource)
+
+	case resource.NavigateFilteredMultiMsg:
+		cursor := m.table.Cursor()
+
+		if cursor >= 0 && cursor < len(m.resourceRows) {
+			m.navigation = append(m.navigation, navigationEntry{
+				resource: m.resource.Kind(),
+				id:       m.resourceRows[cursor].ID,
+				filter:   m.filter,
+				scope:    m.scope,
+			})
+		}
+
+		m.navigateID = ""
+		m.filter = &resourceFilter{
+			field:  msg.Field,
+			values: msg.Values,
+		}
+
+		return m, m.navigateFilteredResource(msg.Resource)
 
 	case resource.DetailsMsg:
 		m.showLoading = false
