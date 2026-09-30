@@ -22,6 +22,7 @@ type Command struct {
 	Key         string
 	Description string
 	Default     bool
+	StatusLabel string
 }
 
 type Resource interface {

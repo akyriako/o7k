@@ -59,6 +59,7 @@ message Command {
   string key = 1;
   string description = 2;
   bool default = 3;
+  string status_label = 4;
 }
 
 message Row {

@@ -536,6 +536,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, nil
 
+	case resource.CommandCompletedMsg:
+		m.showLoading = false
+		m.loadingLabel = ""
+		return m, nil
+
 	}
 
 	var cmd tea.Cmd

@@ -85,6 +85,7 @@ func (r *grpcResource) Commands() []Command {
 			Key:         command.Key,
 			Description: command.Description,
 			Default:     command.Default,
+			StatusLabel: command.StatusLabel,
 		})
 	}
 
@@ -119,6 +120,7 @@ func (r *grpcResource) Execute(ctx context.Context, command Command, row Row) (R
 			Key:         command.Key,
 			Description: command.Description,
 			Default:     command.Default,
+			StatusLabel: command.StatusLabel,
 		},
 		Row: &pb.Row{
 			Id:     row.ID,
