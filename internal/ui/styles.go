@@ -49,7 +49,7 @@ var (
 
 	loadingStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#000000")).
-			Background(lipgloss.Color("#FFA500")).
+			Background(lipgloss.Color("#ff8c00")).
 			Bold(true)
 
 	infoStyle = lipgloss.NewStyle().

@@ -107,22 +107,25 @@ func (m *Model) executeResourceCommand(key string) tea.Cmd {
 			m.showLoading = true
 			m.loadingLabel = command.StatusLabel
 			if m.loadingLabel == "" {
-				m.loadingLabel = "Loading..."
+				m.loadingLabel = "Loading"
 			}
 
 			if m.resource.Kind() == "contexts" && key == "a" {
 				m.activatingContext = true
 				m.showLoading = true
-				m.loadingLabel = "Connecting to " + row.ID + "..."
+				m.loadingLabel = "Connecting to " + row.ID
 			}
 
 			cmd := m.resource.Execute(command, row)
 
-			return tea.Sequence(
-				cmd,
-				func() tea.Msg {
-					return resource.CommandCompletedMsg{}
-				},
+			return tea.Batch(
+				m.spinner.Tick,
+				tea.Sequence(
+					cmd,
+					func() tea.Msg {
+						return resource.CommandCompletedMsg{}
+					},
+				),
 			)
 		}
 	}
@@ -153,7 +156,7 @@ func (m *Model) switchResource(name string, scope resourceScope) tea.Cmd {
 
 	m.loading = true
 	m.showLoading = true
-	m.loadingLabel = "Loading..."
+	m.loadingLabel = "Loading"
 	m.loaded = false
 	m.itemCount = 0
 	m.loadID++
@@ -165,7 +168,10 @@ func (m *Model) switchResource(name string, scope resourceScope) tea.Cmd {
 
 	m.Resize()
 
-	return m.loadResource()
+	return tea.Batch(
+		m.loadResource(),
+		m.spinner.Tick,
+	)
 }
 
 func (m *Model) navigateResource(name string) tea.Cmd {
@@ -268,10 +274,14 @@ func (m *Model) refreshResource() tea.Cmd {
 
 	m.loading = true
 	m.showLoading = true
-	m.loadingLabel = "Loading..."
+	m.spinner.Tick()
+	m.loadingLabel = "Loading"
 	m.loadID++
 
-	return m.loadResource()
+	return tea.Batch(
+		m.loadResource(),
+		m.spinner.Tick,
+	)
 }
 
 func (m *Model) autoRefreshResource() tea.Cmd {
@@ -284,10 +294,14 @@ func (m *Model) autoRefreshResource() tea.Cmd {
 
 	m.loading = true
 	m.showLoading = true
-	m.loadingLabel = "Refreshing..."
+	m.spinner.Tick()
+	m.loadingLabel = "Refreshing"
 	m.loadID++
 
-	return m.loadResource()
+	return tea.Batch(
+		m.loadResource(),
+		m.spinner.Tick,
+	)
 }
 
 func (m Model) loadResource() tea.Cmd {
