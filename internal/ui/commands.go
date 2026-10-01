@@ -116,6 +116,7 @@ func (m *Model) executeResourceCommand(key string) tea.Cmd {
 				m.loadingLabel = "Connecting to " + row.ID
 			}
 
+			loadID := m.loadID
 			cmd := m.resource.Execute(command, row)
 
 			return tea.Batch(
@@ -123,7 +124,9 @@ func (m *Model) executeResourceCommand(key string) tea.Cmd {
 				tea.Sequence(
 					cmd,
 					func() tea.Msg {
-						return resource.CommandCompletedMsg{}
+						return resource.CommandCompletedMsg{
+							LoadID: loadID,
+						}
 					},
 				),
 			)

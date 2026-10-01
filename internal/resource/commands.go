@@ -32,4 +32,6 @@ type ErrorMsg struct {
 	Err error
 }
 
-type CommandCompletedMsg struct{}
+type CommandCompletedMsg struct {
+	LoadID uint64
+}
