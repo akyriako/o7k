@@ -554,8 +554,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case resource.CommandCompletedMsg:
-		//m.showLoading = false
-		//m.loadingLabel = ""
+		if msg.LoadID != m.loadID {
+			return m, nil
+		}
+
+		m.showLoading = false
+		m.loadingLabel = ""
 		return m, nil
 
 	}
