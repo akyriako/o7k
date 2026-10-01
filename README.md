@@ -1365,7 +1365,9 @@ Start **o7k** and open the built-in plugin resource:
 :plugins
 ```
 
-The plugin should be listed with its name, version and loading status.
+The plugin should be listed with its name, version and loading status, e.g.:
+
+<img width="1913" height="862" alt="image" src="https://github.com/user-attachments/assets/2bd42ea7-fafa-401f-bb35-fb06863db83f" />
 
 Its registered resources are then available through the normal resource command:
 
