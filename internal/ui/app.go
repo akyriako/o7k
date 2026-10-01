@@ -11,6 +11,7 @@ import (
 	"github.com/akyriako/o7k/internal/plugins"
 	"github.com/akyriako/o7k/internal/resource"
 	"github.com/akyriako/o7k/internal/resources/contexts"
+	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -39,6 +40,7 @@ type Model struct {
 	showLoading  bool
 	loaded       bool
 	loadID       uint64
+	spinner      spinner.Model
 
 	autoRefreshTimestamp *time.Time
 	autoRefreshPaused    bool
@@ -106,6 +108,9 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, plugi
 	detail := viewport.New(1, 1)
 	detail.SetHorizontalStep(4)
 
+	s := spinner.New()
+	s.Spinner = spinner.Points
+
 	m := Model{
 		version: version,
 
@@ -121,9 +126,11 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, plugi
 
 		loading:      true,
 		showLoading:  true,
-		loadingLabel: "Loading...",
+		loadingLabel: "Loading",
 		loaded:       false,
 		loadID:       1,
+
+		spinner: s,
 	}
 
 	m.command.SetSuggestions(m.suggestions())
@@ -134,6 +141,7 @@ func (m Model) Init() tea.Cmd {
 	return tea.Batch(
 		m.loadResource(),
 		autoRefresh(),
+		m.spinner.Tick,
 	)
 }
 
@@ -319,6 +327,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, cmd
 		}
 
+	case spinner.TickMsg:
+		if !m.showLoading {
+			return m, nil
+		}
+
+		var cmd tea.Cmd
+		m.spinner, cmd = m.spinner.Update(msg)
+		return m, cmd
+
 	case resourcesLoadedMsg:
 		if msg.loadID != m.loadID {
 			return m, nil
@@ -429,7 +446,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.pluginHost.ContextChanged(m.context)
 		m.status = fmt.Sprintf("connected to %s", m.context.Cloud)
 
-		m.loadingLabel = "Loading..."
+		m.loadingLabel = "Loading"
 		cmd := m.refreshResource()
 
 		return m, tea.Batch(
@@ -537,8 +554,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case resource.CommandCompletedMsg:
-		m.showLoading = false
-		m.loadingLabel = ""
+		//m.showLoading = false
+		//m.loadingLabel = ""
 		return m, nil
 
 	}
@@ -599,7 +616,9 @@ func (m Model) View() string {
 		rightTag = lipgloss.JoinHorizontal(lipgloss.Left, rightTag, autoRefreshMsgState, timeTag)
 
 		if m.showLoading {
-			loadingTag := loadingStyle.Render(fmt.Sprintf(" %s ", m.loadingLabel))
+			loadingLabelTag := infoStyle.Render(fmt.Sprintf(" %s ", m.loadingLabel))
+			spinnerTag := loadingStyle.Render(fmt.Sprintf(" %s ", m.spinner.View()))
+			loadingTag := lipgloss.JoinHorizontal(lipgloss.Left, loadingLabelTag, spinnerTag)
 			rightTag = lipgloss.JoinHorizontal(lipgloss.Left, loadingTag, rightTag)
 		}
 
