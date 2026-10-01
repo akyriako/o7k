@@ -19,6 +19,25 @@ func (r *Resource) activate(row resource.Row) tea.Cmd {
 	cloudName := row.ID
 
 	return func() tea.Msg {
+		if cloudName == openstack.EnvCloudName {
+			cloud, _ := openstack.EnvCloud()
+
+			next := openstack.Context{
+				Cloud:    cloudName,
+				Identity: cloud.Identity,
+				Region:   cloud.Region,
+				Domain:   cloud.Domain,
+				Project:  cloud.Project,
+			}
+
+			err := next.ConnectFromEnv(context.Background())
+
+			return ActivatedMsg{
+				Context: &next,
+				Err:     err,
+			}
+		}
+
 		clouds, err := openstack.LoadClouds(cloudsPaths)
 		if err != nil {
 			return ActivatedMsg{Err: err}

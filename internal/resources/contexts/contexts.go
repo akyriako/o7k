@@ -2,6 +2,7 @@ package contexts
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
@@ -45,9 +46,24 @@ func (r *Resource) Commands() []resource.Command {
 }
 
 func (r *Resource) List(_ context.Context) ([]resource.Row, error) {
-	clouds, err := openstack.LoadClouds(r.cloudsPaths)
-	if err != nil {
-		return nil, err
+	clouds := &openstack.Clouds{}
+
+	if len(r.cloudsPaths) > 0 {
+		loaded, err := openstack.LoadClouds(r.cloudsPaths)
+		if err != nil {
+			return nil, err
+		}
+
+		clouds = loaded
+	}
+
+	if cloud, ok := openstack.EnvCloud(); ok {
+		if _, exists := clouds.Get(cloud.Name); exists {
+			slog.Warn("ignoring OS_* environment variables, clouds.yaml defines a cloud with the same name", "cloud", cloud.Name)
+		} else {
+			cloud.Path = openstack.EnvCloudSource
+			clouds.Items = append(clouds.Items, cloud)
+		}
 	}
 
 	rows := make([]resource.Row, 0, len(clouds.Items))
