@@ -3,6 +3,7 @@ package recordsets
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -44,7 +45,6 @@ func (r *Resource) Columns() []resource.Column {
 		{Key: "records", Title: "RECORDS", MinWidth: 30, Flex: 2},
 		{Key: "ttl", Title: "TTL", MinWidth: 8, Flex: 0},
 		{Key: "status", Title: "STATUS", MinWidth: 12, Flex: 0},
-		//{Key: "zone_id", Title: "ZONE ID", MinWidth: 40, Flex: 0},
 	}
 }
 
@@ -76,6 +76,9 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 
 	rows := make([]resource.Row, 0, len(items))
 
+	slices.SortFunc(items, func(a, b dnsrecordsets.RecordSet) int {
+		return strings.Compare(a.Name, b.Name)
+	})
 	for _, recordset := range items {
 		rows = append(rows, resource.Row{
 			ID: recordset.ID,
