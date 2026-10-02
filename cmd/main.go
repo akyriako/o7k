@@ -117,14 +117,21 @@ func main() {
 
 	cloudsPaths, err := openstack.DiscoverCloudsFiles("")
 	if err != nil {
-		fmt.Fprintf(stderr, "error discovering clouds.yaml: %v\n", err)
-		os.Exit(1)
+		if _, ok := openstack.EnvCloud(); !ok {
+			fmt.Fprintf(stderr, "error discovering clouds.yaml: %v\n", err)
+			os.Exit(1)
+		}
+
+		logger.Info("clouds.yaml not found, using OS_* environment variables", "error", err)
+		cloudsPaths = nil
 	}
 
-	_, err = openstack.LoadClouds(cloudsPaths)
-	if err != nil {
-		fmt.Fprintf(stderr, "error loading clouds.yaml: %v\n", err)
-		os.Exit(1)
+	if len(cloudsPaths) > 0 {
+		_, err = openstack.LoadClouds(cloudsPaths)
+		if err != nil {
+			fmt.Fprintf(stderr, "error loading clouds.yaml: %v\n", err)
+			os.Exit(1)
+		}
 	}
 
 	if err := registry.Register(contexts.New(cloudsPaths)); err != nil {

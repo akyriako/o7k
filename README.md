@@ -105,6 +105,27 @@ configuration files from the following places:
 > [!Note]
 > All the discovered files will be automatically loaded as context in **o7k** 
 
+### Environment variables
+
+**o7k** can also authenticate from the standard OpenStack `OS_*` environment variables, e.g. after sourcing an 
+`openrc` file or by injecting them from a secret manager:
+
+```bash
+source openrc.sh && o7k
+```
+
+When `OS_AUTH_URL` is set, an additional context named `envvars` is listed after the `clouds.yaml` contexts 
+(the name follows the openstacksdk convention), and a `clouds.yaml` file is no longer required.
+
+The following variables are honoured: `OS_AUTH_URL`, `OS_USERNAME` or `OS_USER_ID`, `OS_PASSWORD`, 
+`OS_PROJECT_ID` or `OS_PROJECT_NAME`, `OS_USER_DOMAIN_ID` or `OS_USER_DOMAIN_NAME`, `OS_PROJECT_DOMAIN_ID` or 
+`OS_PROJECT_DOMAIN_NAME`, `OS_DOMAIN_ID` or `OS_DOMAIN_NAME`, `OS_APPLICATION_CREDENTIAL_ID`, 
+`OS_APPLICATION_CREDENTIAL_NAME`, `OS_APPLICATION_CREDENTIAL_SECRET`, `OS_TOKEN` and `OS_REGION_NAME`.
+
+> [!Note]
+> As with `clouds.yaml`, the user and the project are expected to live in the same domain; set `OS_PROJECT_ID` 
+> to scope to a project in a different domain. `OS_CACERT`, `OS_CERT` and `OS_KEY` are not applied to this context yet.
+
 ### Global Controls
 
 | Key | Action |
@@ -957,7 +978,8 @@ func connectClient(_ context.Context, current pluginsdk.Context) (*golangsdk.Pro
 uses Open Telekom Cloud Golang SDK. A provider plugin using another SDK should implement `connectClient` using that SDK's `clouds.yaml` and authentication support.
 
 > [!Note]
-> Always use both `Cloud` and `CloudsPath`. `CloudsPath` identifies the exact `clouds.yaml` file from which **o7k** loaded the active cloud.
+> Always use both `Cloud` and `CloudsPath`. `CloudsPath` identifies the exact `clouds.yaml` file from which **o7k** loaded the active cloud. 
+> When the active context is `envvars` (credentials taken from the `OS_*` environment variables), `CloudsPath` is empty; plugin processes inherit the environment of **o7k** and should authenticate from it.
 >
 > `pluginsdk.ClientProvider` caches the authenticated provider client for the current context generation. When the user activates another **o7k** context, the generation changes and the provider client is recreated automatically.
 > 
