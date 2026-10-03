@@ -571,6 +571,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
+	if m.width < minTerminalWidth || m.height < minTerminalHeight {
+		return lipgloss.Place(
+			m.width,
+			m.height,
+			lipgloss.Center,
+			lipgloss.Center,
+			"Terminal window too small",
+		)
+	}
+
 	header := m.renderHeader()
 
 	contentView := m.renderTable()
@@ -584,10 +594,12 @@ func (m Model) View() string {
 	if m.resource != nil {
 		var resourceTags strings.Builder
 
-		for _, entry := range m.navigation {
-			resourceTags.WriteString(
-				navigationTagStyle.Render(" <"+entry.resource+"> ") + " ",
-			)
+		if m.width > compactWidth {
+			for _, entry := range m.navigation {
+				resourceTags.WriteString(
+					navigationTagStyle.Render(" <"+entry.resource+"> ") + " ",
+				)
+			}
 		}
 
 		activeResourceStyle := resourceTagStyle

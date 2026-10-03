@@ -113,7 +113,11 @@ func (m *Model) executeResourceCommand(key string) tea.Cmd {
 			if m.resource.Kind() == "contexts" && key == "a" {
 				m.activatingContext = true
 				m.showLoading = true
-				m.loadingLabel = "Connecting to " + row.ID
+
+				m.loadingLabel = "Connecting"
+				if m.width > compactWidth {
+					m.loadingLabel += " to " + row.ID
+				}
 			}
 
 			loadID := m.loadID
