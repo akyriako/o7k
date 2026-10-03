@@ -19,7 +19,7 @@ func New(context *openstack.Context) *Resource {
 }
 
 func (r *Resource) Title() string {
-	return "L7 Rules"
+	return "Octavia L7 Rules"
 }
 
 func (r *Resource) Kind() string {

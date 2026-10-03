@@ -23,7 +23,7 @@ func (r *Resource) Kind() string {
 }
 
 func (r *Resource) Title() string {
-	return "Security Groups"
+	return "Neutron Security Groups"
 }
 
 func (r *Resource) Aliases() []string {

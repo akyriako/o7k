@@ -23,7 +23,7 @@ func (r *Resource) Kind() string {
 }
 
 func (r *Resource) Title() string {
-	return "Volume Types"
+	return "Cinder Volume Types"
 }
 
 func (r *Resource) Aliases() []string {

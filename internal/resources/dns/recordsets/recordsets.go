@@ -22,7 +22,7 @@ func New(context *openstack.Context) *Resource {
 }
 
 func (r *Resource) Title() string {
-	return "DNS Recordsets"
+	return "Designate DNS Recordsets"
 }
 
 func (r *Resource) Kind() string {

@@ -136,6 +136,10 @@ func (c *Context) ObjectStorageV1() (*gophercloud.ServiceClient, error) {
 	return c.getClientService("object-storage", gophercloud.EndpointOpts{Region: c.Region}, openstack.NewObjectStorageV1)
 }
 
+func (c *Context) SharedFileSystemV2() (*gophercloud.ServiceClient, error) {
+	return c.getClientService("shared-file-system", gophercloud.EndpointOpts{Region: c.Region}, openstack.NewSharedFileSystemV2)
+}
+
 type clientServiceBuilder func(*gophercloud.ProviderClient, gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error)
 
 func (c *Context) getClientService(key string, opts gophercloud.EndpointOpts, builder clientServiceBuilder) (*gophercloud.ServiceClient, error) {

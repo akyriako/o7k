@@ -24,7 +24,7 @@ func (r *Resource) Kind() string {
 }
 
 func (r *Resource) Title() string {
-	return "Snapshots"
+	return "Cinder Snapshots"
 }
 
 func (r *Resource) Aliases() []string {

@@ -19,7 +19,7 @@ func New(context *openstack.Context) *Resource {
 }
 
 func (r *Resource) Title() string {
-	return "Load Balancers"
+	return "Octavia Load Balancers"
 }
 
 func (r *Resource) Kind() string {

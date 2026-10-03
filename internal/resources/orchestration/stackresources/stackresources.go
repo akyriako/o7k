@@ -19,7 +19,7 @@ func New(context *openstack.Context) *Resource {
 }
 
 func (r *Resource) Title() string {
-	return "Stack Resources"
+	return "Heat Stack Resources"
 }
 
 func (r *Resource) Kind() string {

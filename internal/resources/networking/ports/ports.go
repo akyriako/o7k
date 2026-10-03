@@ -23,7 +23,7 @@ func (r *Resource) Kind() string {
 }
 
 func (r *Resource) Title() string {
-	return "Ports"
+	return "Neutron Ports"
 }
 
 func (r *Resource) Aliases() []string {

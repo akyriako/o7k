@@ -24,7 +24,7 @@ func (r *Resource) Kind() string {
 }
 
 func (r *Resource) Title() string {
-	return "Endpoints"
+	return "Keystone Endpoints"
 }
 
 func (r *Resource) Aliases() []string {

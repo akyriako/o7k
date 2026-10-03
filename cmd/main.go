@@ -55,6 +55,8 @@ import (
 	"github.com/akyriako/o7k/internal/resources/orchestration/stackresources"
 	"github.com/akyriako/o7k/internal/resources/orchestration/stacks"
 	pluginresource "github.com/akyriako/o7k/internal/resources/plugins"
+	"github.com/akyriako/o7k/internal/resources/sharedfilesystem/shares"
+	manilasnapshots "github.com/akyriako/o7k/internal/resources/sharedfilesystem/snapshots"
 	"github.com/akyriako/o7k/internal/version"
 	tea "github.com/charmbracelet/bubbletea"
 
@@ -411,6 +413,14 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 
 	if err := r.Register(orders.New(openstackContext)); err != nil {
 		return fmt.Errorf("registering orders resource: %w", err)
+	}
+
+	if err := r.Register(shares.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering shares resource: %w", err))
+	}
+
+	if err := r.Register(manilasnapshots.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering share snapshots resource: %w", err))
 	}
 
 	if err := r.Register(aliases.New(r)); err != nil {
