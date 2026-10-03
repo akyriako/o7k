@@ -15,17 +15,31 @@ const logo = `  ___   _____  _
 | |_| |  / /  |   < 
  \___/  /_/   |_|\_\`
 
-func (m Model) renderHeader() string {
-	const (
-		contextWidth = 55
-		logoWidth    = 23
-	)
+const (
+	minTerminalWidth  = 60
+	minTerminalHeight = 15
+	compactWidth      = 120
+	logoWidth         = 23
+)
 
-	profile := m.renderHeaderContext(contextWidth)
+func (m Model) renderHeader() string {
+	if m.width < minTerminalWidth {
+		return ""
+	}
+
 	commands := m.renderHeaderCommands()
+	if m.width < compactWidth {
+		return lipgloss.NewStyle().
+			Width(m.width).
+			Render(commands)
+	}
+
+	profile := m.renderHeaderContext()
 	renderedLogo := logoStyle.Render(logo)
 
-	commandWidth := max(m.width-contextWidth-logoWidth, 1)
+	availableWidth := m.width
+	contextWidth := lipgloss.Width(profile)
+	commandWidth := max(availableWidth-contextWidth-logoWidth, 1)
 
 	left := lipgloss.NewStyle().Width(contextWidth).Render(profile)
 	center := lipgloss.NewStyle().Width(commandWidth).Align(lipgloss.Left).Render(commands)
@@ -34,16 +48,17 @@ func (m Model) renderHeader() string {
 	return lipgloss.JoinHorizontal(lipgloss.Top, left, center, right)
 }
 
-func (m Model) renderHeaderContext(width int) string {
+func (m Model) renderHeaderContext() string {
 	const labelWidth = 10
+	const contextWidth = 48
 
-	valueWidth := max(width-labelWidth, 1)
+	valueWidth := contextWidth - labelWidth
 
 	field := func(label, value string) string {
 		value = truncate(value, valueWidth)
 
 		return headerLabelStyle.Width(labelWidth).Render(label) +
-			headerValueStyle.Render(value)
+			headerValueStyle.Width(valueWidth).Render(value)
 	}
 
 	return strings.Join([]string{
@@ -106,6 +121,10 @@ func (m Model) renderTable() string {
 			m.resource.Kind(),
 			m.itemCount,
 		)
+
+		if m.width < compactWidth && m.context.Cloud != "" {
+			title = fmt.Sprintf(" (%s)%s", m.context.Cloud, title)
+		}
 	}
 
 	innerWidth := max(m.width-2, 1)
