@@ -3,7 +3,9 @@ package endpoints
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
@@ -80,6 +82,9 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 		})
 	}
 
+	slices.SortFunc(rows, func(a, b resource.Row) int {
+		return strings.Compare(a.Fields["url"], b.Fields["url"])
+	})
 	return rows, nil
 }
 
