@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/akyriako/o7k/internal/resource"
+	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"golang.design/x/clipboard"
 )
@@ -41,6 +42,7 @@ type navigationEntry struct {
 	id       string
 	filter   *resourceFilter
 	scope    resourceScope
+	rows     []resource.Row
 }
 
 type resourceFilter struct {
@@ -225,24 +227,52 @@ func (m *Model) navigateBack() tea.Cmd {
 	last := len(m.navigation) - 1
 	entry := m.navigation[last]
 
+	r, ok := m.registry.Get(entry.resource)
+	if !ok {
+		return nil
+	}
+
+	// I have to clear rows before switching resource schema.
+	// Resize() will bring the new-old resource's columns in correct dimensions.
+	m.table.SetRows(nil)
+
 	m.navigation = m.navigation[:last]
-	m.navigateID = entry.id
+	m.resource = r
 	m.filter = entry.filter
 	m.scope = entry.scope
+	m.resourceRows = entry.rows
+	m.itemCount = len(entry.rows)
 
-	navigation := m.navigation
-	navigateID := m.navigateID
-	filter := m.filter
-	scope := m.scope
+	m.Resize()
 
-	cmd := m.switchResource(entry.resource, entry.scope)
+	columns := m.resource.Columns()
+	rows := make([]table.Row, 0, len(entry.rows))
+	cursor := 0
 
-	m.navigation = navigation
-	m.navigateID = navigateID
-	m.filter = filter
-	m.scope = scope
+	for i, row := range entry.rows {
+		values := make(table.Row, 0, len(columns))
 
-	return cmd
+		for _, column := range columns {
+			values = append(values, row.Fields[column.Key])
+		}
+
+		rows = append(rows, values)
+
+		if row.ID == entry.id {
+			cursor = i
+		}
+	}
+
+	m.table.SetRows(rows)
+	m.table.SetCursor(cursor)
+	m.tableXOffset = 0
+
+	m.err = nil
+	m.status = ""
+	m.loading = false
+	m.showLoading = false
+
+	return nil
 }
 
 func filterResourceRows(rows []resource.Row, filter *resourceFilter) []resource.Row {

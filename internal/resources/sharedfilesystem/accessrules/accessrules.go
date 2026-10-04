@@ -19,7 +19,7 @@ func New(context *openstack.Context) *Resource {
 }
 
 func (r *Resource) Title() string {
-	return "Share Access Rules"
+	return "Manila Share Access Rules"
 }
 
 func (r *Resource) Kind() string {

@@ -20,7 +20,7 @@ func New(context *openstack.Context) *Resource {
 }
 
 func (r *Resource) Title() string {
-	return "Share Types"
+	return "Manila Share Types"
 }
 
 func (r *Resource) Kind() string {
