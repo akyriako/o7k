@@ -2,6 +2,8 @@ package catalog
 
 import (
 	"context"
+	"slices"
+	"strings"
 
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
@@ -43,6 +45,7 @@ func (r *Resource) Commands() []resource.Command {
 		{Key: "shift-s", Description: "Service"},
 	}
 }
+
 func (r *Resource) List(_ context.Context) ([]resource.Row, error) {
 	catalog, err := r.context.ServiceCatalog()
 	if err != nil {
@@ -66,6 +69,9 @@ func (r *Resource) List(_ context.Context) ([]resource.Row, error) {
 		}
 	}
 
+	slices.SortFunc(rows, func(a, b resource.Row) int {
+		return strings.Compare(a.Fields["url"], b.Fields["url"])
+	})
 	return rows, nil
 }
 

@@ -463,6 +463,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				id:       m.resourceRows[cursor].ID,
 				filter:   m.filter,
 				scope:    m.scope,
+				rows:     m.resourceRows,
 			})
 		}
 
@@ -479,6 +480,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				id:       m.resourceRows[cursor].ID,
 				filter:   m.filter,
 				scope:    m.scope,
+				rows:     m.resourceRows,
 			})
 		}
 
@@ -499,6 +501,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				id:       m.resourceRows[cursor].ID,
 				filter:   m.filter,
 				scope:    m.scope,
+				rows:     m.resourceRows,
 			})
 		}
 
@@ -517,6 +520,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				id:       m.resourceRows[cursor].ID,
 				filter:   m.filter,
 				scope:    m.scope,
+				rows:     m.resourceRows,
 			})
 		}
 
