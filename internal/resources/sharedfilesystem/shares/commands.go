@@ -39,3 +39,55 @@ func (r *Resource) snapshots(row resource.Row) tea.Cmd {
 		}
 	}
 }
+
+func (r *Resource) replicas(row resource.Row) tea.Cmd {
+	return func() tea.Msg {
+		return resource.NavigateFilteredMsg{
+			Resource: "share-replicas",
+			Field:    "share_id",
+			Value:    row.ID,
+		}
+	}
+}
+
+func (r *Resource) shareNetwork(row resource.Row) tea.Cmd {
+	return func() tea.Msg {
+		return resource.NavigateFilteredMsg{
+			Resource: "share-networks",
+			Field:    "id",
+			Value:    row.Fields["share_network_id"],
+		}
+	}
+}
+
+func (r *Resource) accessRules(row resource.Row) tea.Cmd {
+	return func() tea.Msg {
+		return resource.NavigateScopedMsg{
+			Resource: "share-access-rules",
+			Scope: map[string]string{
+				"share_id": row.ID,
+			},
+		}
+	}
+}
+
+func (r *Resource) shareType(row resource.Row) tea.Cmd {
+	return func() tea.Msg {
+		return resource.NavigateFilteredMsg{
+			Resource: "share-types",
+			Field:    "id",
+			Value:    row.Fields["share_type_id"],
+		}
+	}
+}
+
+func (r *Resource) exportLocations(row resource.Row) tea.Cmd {
+	return func() tea.Msg {
+		return resource.NavigateScopedMsg{
+			Resource: "share-export-locations",
+			Scope: map[string]string{
+				"share_id": row.ID,
+			},
+		}
+	}
+}

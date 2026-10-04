@@ -209,6 +209,8 @@ Press `Esc` to return to the previous resource and selection.
 | **Octavia / Load Balancing** | load balancers, listeners, pools, members | ✅ |
 | **Octavia / Load Balancing** | health monitors, L7 policies, L7 rules | ✅ |
 | **Barbican / Key Manager** | secrets, secret containers, orders | ✅ |
+| **Manila / Shared File Systems** | shares, share snapshots, share networks, share types | ✅ |
+| **Manila / Shared File Systems** | share replicas, access rules, export locations | ✅ |
 | **Trove / Databases** | instances | ⬜ |
 
 > [!CAUTION]
@@ -263,6 +265,13 @@ Press `Esc` to return to the previous resource and selection.
 | Barbican / Key Manager | Secrets | `secrets` | `secret` |
 | Barbican / Key Manager | Secret Containers | `secret-containers` | `secret-container` |
 | Barbican / Key Manager | Orders | `orders` | `order` |
+| Manila / Shared File Systems | Shares | `shares` | `share` |
+| Manila / Shared File Systems | Share Snapshots | `share-snapshots` | `share-snapshot` |
+| Manila / Shared File Systems | Share Replicas | `share-replicas` | `share-replica` |
+| Manila / Shared File Systems | Share Networks | `share-networks` | `share-network` |
+| Manila / Shared File Systems | Share Types | `share-types` | `share-type` |
+| Manila / Shared File Systems | Share Access Rules | `share-access-rules` | `share-access-rule` |
+| Manila / Shared File Systems | Share Export Locations | `share-export-locations` | `share-export-location` |
 | Designate / DNS | Zones | `zones` | `zone`, `dns-zones`, `dns-zone` |
 | Designate / DNS | Recordsets | `recordsets` | `recordset`, `records`, `record` |
 

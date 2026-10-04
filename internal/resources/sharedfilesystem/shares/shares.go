@@ -53,6 +53,11 @@ func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
 		{Key: "s", Description: "Show", Default: true},
 		{Key: "shift-s", Description: "Snapshots"},
+		{Key: "shift-r", Description: "Replicas"},
+		{Key: "shift-n", Description: "Share Network"},
+		{Key: "shift-a", Description: "Access Rules"},
+		{Key: "shift-t", Description: "Share Type"},
+		{Key: "shift-e", Description: "Export Locations"},
 	}
 }
 
@@ -83,7 +88,7 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 				"size":              strconv.Itoa(share.Size),
 				"protocol":          share.ShareProto,
 				"status":            share.Status,
-				"share_type":        share.ShareType,
+				"share_type":        share.ShareTypeName,
 				"share_type_id":     share.ShareType,
 				"share_network_id":  share.ShareNetworkID,
 				"share_server_id":   share.ShareServerID,
@@ -104,6 +109,16 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 		return r.show(row.ID)
 	case "shift-s":
 		return r.snapshots(row)
+	case "shift-r":
+		return r.replicas(row)
+	case "shift-n":
+		return r.shareNetwork(row)
+	case "shift-a":
+		return r.accessRules(row)
+	case "shift-t":
+		return r.shareType(row)
+	case "shift-e":
+		return r.exportLocations(row)
 	}
 
 	return nil

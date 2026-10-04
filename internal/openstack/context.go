@@ -136,9 +136,10 @@ func (c *Context) ObjectStorageV1() (*gophercloud.ServiceClient, error) {
 	return c.getClientService("object-storage", gophercloud.EndpointOpts{Region: c.Region}, openstack.NewObjectStorageV1)
 }
 
-func (c *Context) SharedFileSystemV2() (*gophercloud.ServiceClient, error) {
-	return c.getClientService("shared-file-system", gophercloud.EndpointOpts{Region: c.Region}, openstack.NewSharedFileSystemV2)
-}
+//
+//func (c *Context) SharedFileSystemV2() (*gophercloud.ServiceClient, error) {
+//	return c.getClientService("shared-file-system", gophercloud.EndpointOpts{Region: c.Region}, openstack.NewSharedFileSystemV2)
+//}
 
 type clientServiceBuilder func(*gophercloud.ProviderClient, gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error)
 
@@ -158,4 +159,18 @@ func (c *Context) getClientService(key string, opts gophercloud.EndpointOpts, bu
 
 	actual, _ := c.serviceClients.LoadOrStore(key, client)
 	return actual.(*gophercloud.ServiceClient), nil
+}
+
+func (c *Context) SharedFileSystemV2() (*gophercloud.ServiceClient, error) {
+	return c.getClientService("shared-file-system", gophercloud.EndpointOpts{Region: c.Region}, newSharedFileSystemV2)
+}
+
+func newSharedFileSystemV2(provider *gophercloud.ProviderClient, opts gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
+	client, err := openstack.NewSharedFileSystemV2(provider, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	client.Microversion = "2.60"
+	return client, nil
 }
