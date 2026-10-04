@@ -55,6 +55,13 @@ import (
 	"github.com/akyriako/o7k/internal/resources/orchestration/stackresources"
 	"github.com/akyriako/o7k/internal/resources/orchestration/stacks"
 	pluginresource "github.com/akyriako/o7k/internal/resources/plugins"
+	"github.com/akyriako/o7k/internal/resources/sharedfilesystem/accessrules"
+	"github.com/akyriako/o7k/internal/resources/sharedfilesystem/exportlocations"
+	"github.com/akyriako/o7k/internal/resources/sharedfilesystem/replicas"
+	"github.com/akyriako/o7k/internal/resources/sharedfilesystem/sharenetworks"
+	"github.com/akyriako/o7k/internal/resources/sharedfilesystem/shares"
+	"github.com/akyriako/o7k/internal/resources/sharedfilesystem/sharetypes"
+	manilasnapshots "github.com/akyriako/o7k/internal/resources/sharedfilesystem/snapshots"
 	"github.com/akyriako/o7k/internal/version"
 	tea "github.com/charmbracelet/bubbletea"
 
@@ -249,6 +256,10 @@ func printPluginUsage() {
 }
 
 func registerAll(r *resource.Registry, openstackContext *openstack.Context) (errs error) {
+	if err := r.Register(aliases.New(r)); err != nil {
+		return fmt.Errorf("registering aliases resource: %w", err)
+	}
+
 	if err := r.Register(catalog.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering catalog resource: %w", err))
 	}
@@ -413,8 +424,32 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 		return fmt.Errorf("registering orders resource: %w", err)
 	}
 
-	if err := r.Register(aliases.New(r)); err != nil {
-		return fmt.Errorf("registering aliases resource: %w", err)
+	if err := r.Register(shares.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering shares resource: %w", err))
+	}
+
+	if err := r.Register(manilasnapshots.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering share snapshots resource: %w", err))
+	}
+
+	if err := r.Register(replicas.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering share replicas resource: %w", err))
+	}
+
+	if err := r.Register(sharenetworks.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering share networks resource: %w", err))
+	}
+
+	if err := r.RegisterNavigationOnly(accessrules.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering share access rules resource: %w", err))
+	}
+
+	if err := r.Register(sharetypes.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering share types resource: %w", err))
+	}
+
+	if err := r.RegisterNavigationOnly(exportlocations.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering share export locations resource: %w", err))
 	}
 
 	return errs

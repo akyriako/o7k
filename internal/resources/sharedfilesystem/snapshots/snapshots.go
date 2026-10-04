@@ -1,4 +1,4 @@
-package zones
+package snapshots
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
 	tea "github.com/charmbracelet/bubbletea"
-	dnszones "github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
+	manilasnapshots "github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/snapshots"
 )
 
 type Resource struct {
@@ -20,67 +20,62 @@ func New(context *openstack.Context) *Resource {
 }
 
 func (r *Resource) Title() string {
-	return "Designate DNS Zones"
+	return "Manila Share Snapshots"
 }
 
 func (r *Resource) Kind() string {
-	return "zones"
+	return "share-snapshots"
 }
 
 func (r *Resource) Aliases() []string {
 	return []string{
-		"zone",
-		"dns-zones",
-		"dns-zone",
+		"share-snapshot",
 	}
 }
 
 func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
-		{Key: "id", Title: "ID", MinWidth: 32, Flex: 0},
-		{Key: "name", Title: "NAME", MinWidth: 30, Flex: 1},
+		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
+		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
 		{Key: "status", Title: "STATUS", MinWidth: 12, Flex: 0},
-		{Key: "type", Title: "TYPE", MinWidth: 12, Flex: 0},
-		{Key: "ttl", Title: "TTL", MinWidth: 8, Flex: 0},
-		{Key: "description", Title: "DESCRIPTION", MinWidth: 30, Flex: 2},
+		{Key: "size", Title: "SIZE", MinWidth: 8, Flex: 0},
+		{Key: "share_id", Title: "SHARE ID", MinWidth: 40, Flex: 0},
 	}
 }
 
 func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
 		{Key: "s", Description: "Show", Default: true},
-		{Key: "shift-r", Description: "Recordsets"},
 	}
 }
 
 func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
-	client, err := r.context.DNSV2()
+	client, err := r.context.SharedFileSystemV2()
 	if err != nil {
 		return nil, err
 	}
 
-	pages, err := dnszones.List(client, dnszones.ListOpts{}).AllPages(ctx)
+	pages, err := manilasnapshots.ListDetail(client, manilasnapshots.ListOpts{}).AllPages(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("listing DNS zones: %w", err)
+		return nil, fmt.Errorf("listing share snapshots: %w", err)
 	}
 
-	items, err := dnszones.ExtractZones(pages)
+	items, err := manilasnapshots.ExtractSnapshots(pages)
 	if err != nil {
-		return nil, fmt.Errorf("extracting DNS zones: %w", err)
+		return nil, fmt.Errorf("extracting share snapshots: %w", err)
 	}
 
 	rows := make([]resource.Row, 0, len(items))
 
-	for _, zone := range items {
+	for _, snapshot := range items {
 		rows = append(rows, resource.Row{
-			ID: zone.ID,
+			ID: snapshot.ID,
 			Fields: map[string]string{
-				"id":          zone.ID,
-				"name":        zone.Name,
-				"status":      zone.Status,
-				"type":        zone.Type,
-				"ttl":         strconv.Itoa(zone.TTL),
-				"description": zone.Description,
+				"id":       snapshot.ID,
+				"name":     snapshot.Name,
+				"status":   snapshot.Status,
+				"size":     strconv.Itoa(snapshot.Size),
+				"share_id": snapshot.ShareID,
 			},
 		})
 	}
@@ -92,8 +87,6 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	switch command.Key {
 	case "s":
 		return r.show(row.ID)
-	case "shift-r":
-		return r.navigateToRecordsets(row)
 	}
 
 	return nil

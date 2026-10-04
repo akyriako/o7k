@@ -24,7 +24,7 @@ func (r *Resource) Kind() string {
 }
 
 func (r *Resource) Title() string {
-	return "Flavors"
+	return "Compute Flavors"
 }
 
 func (r *Resource) Aliases() []string {

@@ -19,7 +19,7 @@ func New(context *openstack.Context) *Resource {
 }
 
 func (r *Resource) Title() string {
-	return "Stacks"
+	return "Heat Stacks"
 }
 
 func (r *Resource) Kind() string {
@@ -43,9 +43,9 @@ func (r *Resource) Columns() []resource.Column {
 
 func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
-		{Key: "s", Description: "Show", Default: true},
+		{Key: "s", Description: "Show"},
 		{Key: "shift-r", Description: "Resources"},
-		{Key: "shift-e", Description: "Events"},
+		{Key: "shift-e", Description: "Events", Default: true},
 	}
 }
 func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {

@@ -20,7 +20,7 @@ func New(context *openstack.Context) *Resource {
 }
 
 func (r *Resource) Title() string {
-	return "Listeners"
+	return "Octavia Listeners"
 }
 
 func (r *Resource) Kind() string {

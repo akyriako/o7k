@@ -23,7 +23,7 @@ func (r *Resource) Kind() string {
 }
 
 func (r *Resource) Title() string {
-	return "Floating IPs"
+	return "Neutron Floating IPs"
 }
 
 func (r *Resource) Aliases() []string {

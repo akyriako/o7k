@@ -26,7 +26,7 @@ func (r *Resource) Kind() string {
 }
 
 func (r *Resource) Title() string {
-	return "Networks"
+	return "Neutron Networks"
 }
 
 func (r *Resource) Aliases() []string {

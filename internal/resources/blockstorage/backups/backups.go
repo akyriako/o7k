@@ -24,7 +24,7 @@ func (r *Resource) Kind() string {
 }
 
 func (r *Resource) Title() string {
-	return "Volume Backups"
+	return "Cinder Volume Backups"
 }
 
 func (r *Resource) Aliases() []string {

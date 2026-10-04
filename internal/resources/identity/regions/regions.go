@@ -23,7 +23,7 @@ func (r *Resource) Kind() string {
 }
 
 func (r *Resource) Title() string {
-	return "Regions"
+	return "Keystone Regions"
 }
 
 func (r *Resource) Aliases() []string {

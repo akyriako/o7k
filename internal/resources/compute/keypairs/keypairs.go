@@ -23,7 +23,7 @@ func (r *Resource) Kind() string {
 }
 
 func (r *Resource) Title() string {
-	return "Keypairs"
+	return "Compute Keypairs"
 }
 
 func (r *Resource) Aliases() []string {

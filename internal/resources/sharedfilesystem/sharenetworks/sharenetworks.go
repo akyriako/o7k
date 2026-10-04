@@ -1,4 +1,4 @@
-package securitygroups
+package sharenetworks
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/groups"
+	manilasharenetworks "github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/sharenetworks"
 )
 
 type Resource struct {
@@ -18,59 +18,60 @@ func New(context *openstack.Context) *Resource {
 	return &Resource{context: context}
 }
 
-func (r *Resource) Kind() string {
-	return "securitygroups"
+func (r *Resource) Title() string {
+	return "Manila Share Networks"
 }
 
-func (r *Resource) Title() string {
-	return "Neutron Security Groups"
+func (r *Resource) Kind() string {
+	return "share-networks"
 }
 
 func (r *Resource) Aliases() []string {
-	return []string{"securitygroup", "secgroups", "secgroup", "sg"}
+	return []string{
+		"share-network",
+	}
 }
 
 func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
 		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
-		//{Key: "project_id", Title: "PROJECT ID", MinWidth: 40, Flex: 0},
-		{Key: "description", Title: "DESCRIPTION", MinWidth: 30, Flex: 2},
+		{Key: "description", Title: "DESCRIPTION", MinWidth: 32, Flex: 2},
 	}
 }
 
 func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
-		{Key: "shift-r", Description: "Rules", Default: true},
+		{Key: "s", Description: "Show", Default: true},
 	}
 }
 
 func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
-	client, err := r.context.NetworkV2()
+	client, err := r.context.SharedFileSystemV2()
 	if err != nil {
 		return nil, err
 	}
 
-	pages, err := groups.List(client, groups.ListOpts{}).AllPages(ctx)
+	pages, err := manilasharenetworks.ListDetail(client, manilasharenetworks.ListOpts{}).AllPages(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("listing security groups: %w", err)
+		return nil, fmt.Errorf("listing share networks: %w", err)
 	}
 
-	items, err := groups.ExtractGroups(pages)
+	items, err := manilasharenetworks.ExtractShareNetworks(pages)
 	if err != nil {
-		return nil, fmt.Errorf("extracting security groups: %w", err)
+		return nil, fmt.Errorf("extracting share networks: %w", err)
 	}
 
 	rows := make([]resource.Row, 0, len(items))
 
-	for _, group := range items {
+	for _, network := range items {
 		rows = append(rows, resource.Row{
-			ID: group.ID,
+			ID: network.ID,
 			Fields: map[string]string{
-				"id":          group.ID,
-				"name":        group.Name,
-				"project_id":  group.ProjectID,
-				"description": group.Description,
+				"id":          network.ID,
+				"name":        network.Name,
+				"description": network.Description,
+				"project_id":  network.ProjectID,
 			},
 		})
 	}
@@ -80,8 +81,8 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 
 func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	switch command.Key {
-	case "shift-r":
-		return r.navigateToRules(row)
+	case "s":
+		return r.show(row.ID)
 	}
 
 	return nil

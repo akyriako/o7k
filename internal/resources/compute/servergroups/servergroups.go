@@ -24,7 +24,7 @@ func (r *Resource) Kind() string {
 }
 
 func (r *Resource) Title() string {
-	return "Server Groups"
+	return "Compute Server Groups"
 }
 
 func (r *Resource) Aliases() []string {

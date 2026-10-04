@@ -21,7 +21,7 @@ func New(context *openstack.Context) *Resource {
 }
 
 func (r *Resource) Title() string {
-	return "Servers"
+	return "Compute Servers"
 }
 
 func (r *Resource) Kind() string {
