@@ -61,6 +61,26 @@ func (c *Context) Activate(other *Context) {
 	c.serviceClients = sync.Map{}
 }
 
+type clientServiceBuilder func(*gophercloud.ProviderClient, gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error)
+
+func (c *Context) getClientService(key string, opts gophercloud.EndpointOpts, builder clientServiceBuilder) (*gophercloud.ServiceClient, error) {
+	if c.Provider == nil {
+		return nil, fmt.Errorf("context %q is not connected", c.Cloud)
+	}
+
+	if client, ok := c.serviceClients.Load(key); ok {
+		return client.(*gophercloud.ServiceClient), nil
+	}
+
+	client, err := builder(c.Provider, opts)
+	if err != nil {
+		return nil, fmt.Errorf("creating %s client: %w", key, err)
+	}
+
+	actual, _ := c.serviceClients.LoadOrStore(key, client)
+	return actual.(*gophercloud.ServiceClient), nil
+}
+
 func (c *Context) ServiceCatalog() (*identitytokens.ServiceCatalog, error) {
 	if c.Provider == nil {
 		return nil, fmt.Errorf("context %q is not connected", c.Cloud)
@@ -136,41 +156,6 @@ func (c *Context) ObjectStorageV1() (*gophercloud.ServiceClient, error) {
 	return c.getClientService("object-storage", gophercloud.EndpointOpts{Region: c.Region}, openstack.NewObjectStorageV1)
 }
 
-//
-//func (c *Context) SharedFileSystemV2() (*gophercloud.ServiceClient, error) {
-//	return c.getClientService("shared-file-system", gophercloud.EndpointOpts{Region: c.Region}, openstack.NewSharedFileSystemV2)
-//}
-
-type clientServiceBuilder func(*gophercloud.ProviderClient, gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error)
-
-func (c *Context) getClientService(key string, opts gophercloud.EndpointOpts, builder clientServiceBuilder) (*gophercloud.ServiceClient, error) {
-	if c.Provider == nil {
-		return nil, fmt.Errorf("context %q is not connected", c.Cloud)
-	}
-
-	if client, ok := c.serviceClients.Load(key); ok {
-		return client.(*gophercloud.ServiceClient), nil
-	}
-
-	client, err := builder(c.Provider, opts)
-	if err != nil {
-		return nil, fmt.Errorf("creating %s client: %w", key, err)
-	}
-
-	actual, _ := c.serviceClients.LoadOrStore(key, client)
-	return actual.(*gophercloud.ServiceClient), nil
-}
-
 func (c *Context) SharedFileSystemV2() (*gophercloud.ServiceClient, error) {
 	return c.getClientService("shared-file-system", gophercloud.EndpointOpts{Region: c.Region}, newSharedFileSystemV2)
-}
-
-func newSharedFileSystemV2(provider *gophercloud.ProviderClient, opts gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
-	client, err := openstack.NewSharedFileSystemV2(provider, opts)
-	if err != nil {
-		return nil, err
-	}
-
-	client.Microversion = "2.60"
-	return client, nil
 }
