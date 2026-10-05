@@ -28,6 +28,7 @@ import (
 	"github.com/akyriako/o7k/internal/resources/identity/domains"
 	"github.com/akyriako/o7k/internal/resources/identity/endpoints"
 	"github.com/akyriako/o7k/internal/resources/identity/projects"
+	"github.com/akyriako/o7k/internal/resources/identity/quotas"
 	"github.com/akyriako/o7k/internal/resources/identity/regions"
 	"github.com/akyriako/o7k/internal/resources/identity/roles"
 	"github.com/akyriako/o7k/internal/resources/identity/services"
@@ -506,6 +507,10 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 
 	if err := r.RegisterNavigationOnly(exportlocations.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering share export locations resource: %w", err))
+	}
+
+	if err := r.RegisterNavigationOnly(quotas.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering quotas resource: %w", err))
 	}
 
 	return errs
