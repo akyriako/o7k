@@ -11,6 +11,7 @@ import (
 	"github.com/akyriako/o7k/internal/plugins"
 	"github.com/akyriako/o7k/internal/resource"
 	"github.com/akyriako/o7k/internal/resources/contexts"
+	pluginresource "github.com/akyriako/o7k/internal/resources/plugins"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -566,6 +567,25 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.loadingLabel = ""
 		return m, nil
 
+	case pluginresource.UpdatedMsg:
+		if msg.Err != nil {
+			m.err = fmt.Errorf("updating plugin failed: %v", msg.Err)
+			slog.Error(m.err.Error(), "cloud", m.context.Cloud)
+			return m, nil
+		}
+
+		if !msg.Result.Updated {
+			m.status = fmt.Sprintf("plugin is already up to date (%s)", msg.Result.FromVersion)
+			return m, clearStatus(m.status)
+		}
+
+		m.status = fmt.Sprintf(
+			"plugin updated from %s to %s; restart o7k to use the new version",
+			msg.Result.FromVersion,
+			msg.Result.ToVersion,
+		)
+
+		return m, clearStatus(m.status)
 	}
 
 	var cmd tea.Cmd

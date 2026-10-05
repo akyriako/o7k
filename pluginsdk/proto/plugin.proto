@@ -26,6 +26,7 @@ message Metadata {
   string name = 1;
   string version = 2;
   string color = 3;
+  string url = 4;
 }
 
 message Context {

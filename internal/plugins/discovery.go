@@ -8,12 +8,10 @@ import (
 )
 
 func Discover() ([]string, error) {
-	configDir, err := os.UserConfigDir()
+	dir, err := useUserPluginsDir()
 	if err != nil {
 		return nil, err
 	}
-
-	dir := filepath.Join(configDir, "o7k", "plugins")
 
 	entries, err := os.ReadDir(dir)
 	if err != nil {

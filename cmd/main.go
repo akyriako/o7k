@@ -215,6 +215,10 @@ func pluginCommand(args []string) error {
 		return nil
 	}
 
+	if len(args) == 1 && args[0] == "update" {
+		return updatePlugins()
+	}
+
 	if len(args) != 2 {
 		printPluginUsage()
 		return fmt.Errorf("invalid plugin command")
@@ -225,13 +229,62 @@ func pluginCommand(args []string) error {
 		if err := plugins.Install(context.Background(), args[1]); err != nil {
 			return fmt.Errorf("error installing plugin: %w", err)
 		}
+
 	case "remove":
 		if err := plugins.Remove(args[1]); err != nil {
 			return fmt.Errorf("error removing plugin: %w", err)
 		}
+
 	default:
 		printPluginUsage()
 		return fmt.Errorf("unknown plugin command %q", args[0])
+	}
+
+	return nil
+}
+
+func updatePlugins() error {
+	openstackContext := openstack.Context{}
+	host := plugins.NewHost(&openstackContext)
+
+	paths, err := plugins.Discover()
+	if err != nil {
+		return fmt.Errorf("discovering plugins: %w", err)
+	}
+
+	for _, path := range paths {
+		client, err := plugins.NewClient(path, host)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error loading plugin %s: %v\n", path, err)
+			continue
+		}
+
+		metadata, err := client.Plugin().Metadata()
+		client.Close()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error getting plugin metadata %s: %v\n", path, err)
+			continue
+		}
+
+		plugin := plugins.Info{
+			Path:    path,
+			Name:    metadata.Name,
+			Version: metadata.Version,
+			URL:     metadata.URL,
+		}
+
+		result, err := plugins.Update(context.Background(), plugin)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error updating plugin %q: %v\n", plugin.Name, err)
+			continue
+		}
+
+		if !result.Updated {
+			fmt.Printf("plugin %q is already up to date (%s)\n", plugin.Name, result.FromVersion)
+			continue
+		}
+
+		fmt.Printf("updated plugin %q from %s to %s\n", plugin.Name, result.FromVersion, result.ToVersion)
 	}
 
 	return nil
@@ -242,16 +295,19 @@ func printUsage() {
 	fmt.Fprintln(os.Stderr, "  o7k")
 	fmt.Fprintln(os.Stderr, "  o7k --version")
 	fmt.Fprintln(os.Stderr, "  o7k plugin install <source>")
+	fmt.Fprintln(os.Stderr, "  o7k plugin update")
 	fmt.Fprintln(os.Stderr, "  o7k plugin remove <name>")
 }
 
 func printPluginUsage() {
 	fmt.Fprintln(os.Stderr, "Usage:")
 	fmt.Fprintln(os.Stderr, "  o7k plugin install <source>")
+	fmt.Fprintln(os.Stderr, "  o7k plugin update")
 	fmt.Fprintln(os.Stderr, "  o7k plugin remove <name>")
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Commands:")
 	fmt.Fprintln(os.Stderr, "  install    Install a plugin from a local path or HTTP(S) URL")
+	fmt.Fprintln(os.Stderr, "  update     Update all installed plugins")
 	fmt.Fprintln(os.Stderr, "  remove     Remove an installed plugin")
 }
 

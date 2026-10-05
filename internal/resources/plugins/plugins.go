@@ -13,6 +13,11 @@ type Resource struct {
 	manager *pluginmanager.Manager
 }
 
+type UpdatedMsg struct {
+	Result pluginmanager.UpdateResult
+	Err    error
+}
+
 func New(manager *pluginmanager.Manager) *Resource {
 	return &Resource{
 		manager: manager,
@@ -33,16 +38,18 @@ func (r *Resource) Aliases() []string {
 
 func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
-		{Key: "name", Title: "NAME", MinWidth: 20, Flex: 1},
+		{Key: "name", Title: "NAME", MinWidth: 20, Flex: 2},
 		{Key: "version", Title: "VERSION", MinWidth: 12},
 		{Key: "status", Title: "STATUS", MinWidth: 10},
-		{Key: "path", Title: "PATH", MinWidth: 30, Flex: 2},
+		{Key: "url", Title: "REMOTE URL", MinWidth: 30, Flex: 5},
+		{Key: "path", Title: "PATH", MinWidth: 30, Flex: 5},
 	}
 }
 
 func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
 		{Key: "d", Description: "Details", Default: true},
+		{Key: "u", Description: "Update", StatusLabel: "Updating"},
 	}
 }
 
@@ -67,6 +74,7 @@ func (r *Resource) List(context.Context) ([]resource.Row, error) {
 				"name":    name,
 				"version": version,
 				"status":  string(plugin.Status),
+				"url":     plugin.URL,
 				"path":    plugin.Path,
 			},
 		})
@@ -82,25 +90,39 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 				continue
 			}
 
-			content := map[string]any{
-				"name":    plugin.Name,
-				"version": plugin.Version,
-				"status":  plugin.Status,
-				"path":    plugin.Path,
+			switch command.Key {
+			case "d":
+				content := map[string]any{
+					"name":    plugin.Name,
+					"version": plugin.Version,
+					"status":  plugin.Status,
+					"url":     plugin.URL,
+					"path":    plugin.Path,
+				}
+
+				if plugin.Err != nil {
+					content["error"] = plugin.Err.Error()
+				}
+
+				return resource.DetailsMsg{
+					ID:      row.ID,
+					Content: content,
+				}
+
+			case "u":
+				result, err := pluginmanager.Update(context.Background(), plugin)
+				return UpdatedMsg{
+					Result: result,
+					Err:    err,
+				}
 			}
 
-			if plugin.Err != nil {
-				content["error"] = plugin.Err.Error()
-			}
-
-			return resource.DetailsMsg{
-				ID:      row.ID,
-				Content: content,
+			return resource.ErrorMsg{
+				Err: fmt.Errorf("unsupported plugin command %q", command.Key),
 			}
 		}
 
-		return resource.DetailsMsg{
-			ID:  row.ID,
+		return resource.ErrorMsg{
 			Err: fmt.Errorf("plugin %q not found", row.ID),
 		}
 	}
