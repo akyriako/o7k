@@ -20,6 +20,7 @@ type Metadata struct {
 	Name    string
 	Version string
 	Color   string
+	URL     string
 }
 
 type Context struct {
