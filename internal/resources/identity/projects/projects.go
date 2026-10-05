@@ -38,11 +38,22 @@ func (r *Resource) Columns() []resource.Column {
 		{Key: "domain_id", Title: "DOMAIN ID", MinWidth: 32, Flex: 0},
 		{Key: "parent_id", Title: "PARENT ID", MinWidth: 32, Flex: 0},
 		{Key: "enabled", Title: "ENABLED", MinWidth: 10, Flex: 0},
-		{Key: "description", Title: "DESCRIPTION", MinWidth: 30, Flex: 2},
+		{Key: "description", Title: "DESCRIPTION", MinWidth: 30, Flex: 3},
 	}
 }
 
 func (r *Resource) Commands() []resource.Command {
+	return []resource.Command{
+		{Key: "shift-q", Description: "Quotas"},
+	}
+}
+
+func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
+	switch command.Key {
+	case "shift-q":
+		return r.quotas(row)
+	}
+
 	return nil
 }
 
@@ -79,8 +90,4 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 	}
 
 	return rows, nil
-}
-
-func (r *Resource) Execute(_ resource.Command, _ resource.Row) tea.Cmd {
-	return nil
 }
