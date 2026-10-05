@@ -20,6 +20,7 @@ func (c *grpcClient) Metadata() (Metadata, error) {
 		Name:    response.Name,
 		Version: response.Version,
 		Color:   response.Color,
+		URL:     response.Url,
 	}, nil
 }
 

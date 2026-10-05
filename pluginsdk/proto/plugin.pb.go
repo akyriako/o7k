@@ -438,6 +438,7 @@ type Command struct {
 	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
 	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
 	Default       bool                   `protobuf:"varint,3,opt,name=default,proto3" json:"default,omitempty"`
+	StatusLabel   string                 `protobuf:"bytes,4,opt,name=status_label,json=statusLabel,proto3" json:"status_label,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -491,6 +492,13 @@ func (x *Command) GetDefault() bool {
 		return x.Default
 	}
 	return false
+}
+
+func (x *Command) GetStatusLabel() string {
+	if x != nil {
+		return x.StatusLabel
+	}
+	return ""
 }
 
 type Row struct {
@@ -548,6 +556,7 @@ func (x *Row) GetFields() map[string]string {
 type ListRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Resource      string                 `protobuf:"bytes,1,opt,name=resource,proto3" json:"resource,omitempty"`
+	Scope         map[string]string      `protobuf:"bytes,2,rep,name=scope,proto3" json:"scope,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -587,6 +596,13 @@ func (x *ListRequest) GetResource() string {
 		return x.Resource
 	}
 	return ""
+}
+
+func (x *ListRequest) GetScope() map[string]string {
+	if x != nil {
+		return x.Scope
+	}
+	return nil
 }
 
 type ListResponse struct {
@@ -638,6 +654,7 @@ type ExecuteRequest struct {
 	Resource      string                 `protobuf:"bytes,1,opt,name=resource,proto3" json:"resource,omitempty"`
 	Command       *Command               `protobuf:"bytes,2,opt,name=command,proto3" json:"command,omitempty"`
 	Row           *Row                   `protobuf:"bytes,3,opt,name=row,proto3" json:"row,omitempty"`
+	Scope         map[string]string      `protobuf:"bytes,4,rep,name=scope,proto3" json:"scope,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -689,6 +706,13 @@ func (x *ExecuteRequest) GetCommand() *Command {
 func (x *ExecuteRequest) GetRow() *Row {
 	if x != nil {
 		return x.Row
+	}
+	return nil
+}
+
+func (x *ExecuteRequest) GetScope() map[string]string {
+	if x != nil {
+		return x.Scope
 	}
 	return nil
 }
@@ -951,25 +975,36 @@ const file_pluginsdk_proto_plugin_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x1b\n" +
 	"\tmin_width\x18\x03 \x01(\x05R\bminWidth\x12\x12\n" +
-	"\x04flex\x18\x04 \x01(\x05R\x04flex\"W\n" +
+	"\x04flex\x18\x04 \x01(\x05R\x04flex\"z\n" +
 	"\aCommand\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x18\n" +
-	"\adefault\x18\x03 \x01(\bR\adefault\"\x88\x01\n" +
+	"\adefault\x18\x03 \x01(\bR\adefault\x12!\n" +
+	"\fstatus_label\x18\x04 \x01(\tR\vstatusLabel\"\x88\x01\n" +
 	"\x03Row\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x126\n" +
 	"\x06fields\x18\x02 \x03(\v2\x1e.o7k.plugin.v1.Row.FieldsEntryR\x06fields\x1a9\n" +
 	"\vFieldsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\")\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xa0\x01\n" +
 	"\vListRequest\x12\x1a\n" +
-	"\bresource\x18\x01 \x01(\tR\bresource\"6\n" +
+	"\bresource\x18\x01 \x01(\tR\bresource\x12;\n" +
+	"\x05scope\x18\x02 \x03(\v2%.o7k.plugin.v1.ListRequest.ScopeEntryR\x05scope\x1a8\n" +
+	"\n" +
+	"ScopeEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"6\n" +
 	"\fListResponse\x12&\n" +
-	"\x04rows\x18\x01 \x03(\v2\x12.o7k.plugin.v1.RowR\x04rows\"\x84\x01\n" +
+	"\x04rows\x18\x01 \x03(\v2\x12.o7k.plugin.v1.RowR\x04rows\"\xfe\x01\n" +
 	"\x0eExecuteRequest\x12\x1a\n" +
 	"\bresource\x18\x01 \x01(\tR\bresource\x120\n" +
 	"\acommand\x18\x02 \x01(\v2\x16.o7k.plugin.v1.CommandR\acommand\x12$\n" +
-	"\x03row\x18\x03 \x01(\v2\x12.o7k.plugin.v1.RowR\x03row\"@\n" +
+	"\x03row\x18\x03 \x01(\v2\x12.o7k.plugin.v1.RowR\x03row\x12>\n" +
+	"\x05scope\x18\x04 \x03(\v2(.o7k.plugin.v1.ExecuteRequest.ScopeEntryR\x05scope\x1a8\n" +
+	"\n" +
+	"ScopeEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"@\n" +
 	"\x0fExecuteResponse\x12-\n" +
 	"\x06result\x18\x01 \x01(\v2\x15.o7k.plugin.v1.ResultR\x06result\"o\n" +
 	"\x06Result\x120\n" +
@@ -1011,7 +1046,7 @@ func file_pluginsdk_proto_plugin_proto_rawDescGZIP() []byte {
 	return file_pluginsdk_proto_plugin_proto_rawDescData
 }
 
-var file_pluginsdk_proto_plugin_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_pluginsdk_proto_plugin_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
 var file_pluginsdk_proto_plugin_proto_goTypes = []any{
 	(*Empty)(nil),             // 0: o7k.plugin.v1.Empty
 	(*InitializeRequest)(nil), // 1: o7k.plugin.v1.InitializeRequest
@@ -1030,37 +1065,41 @@ var file_pluginsdk_proto_plugin_proto_goTypes = []any{
 	(*Details)(nil),           // 14: o7k.plugin.v1.Details
 	(*Navigate)(nil),          // 15: o7k.plugin.v1.Navigate
 	nil,                       // 16: o7k.plugin.v1.Row.FieldsEntry
-	nil,                       // 17: o7k.plugin.v1.Navigate.ScopeEntry
+	nil,                       // 17: o7k.plugin.v1.ListRequest.ScopeEntry
+	nil,                       // 18: o7k.plugin.v1.ExecuteRequest.ScopeEntry
+	nil,                       // 19: o7k.plugin.v1.Navigate.ScopeEntry
 }
 var file_pluginsdk_proto_plugin_proto_depIdxs = []int32{
 	5,  // 0: o7k.plugin.v1.Resources.resources:type_name -> o7k.plugin.v1.Resource
 	6,  // 1: o7k.plugin.v1.Resource.columns:type_name -> o7k.plugin.v1.Column
 	7,  // 2: o7k.plugin.v1.Resource.commands:type_name -> o7k.plugin.v1.Command
 	16, // 3: o7k.plugin.v1.Row.fields:type_name -> o7k.plugin.v1.Row.FieldsEntry
-	8,  // 4: o7k.plugin.v1.ListResponse.rows:type_name -> o7k.plugin.v1.Row
-	7,  // 5: o7k.plugin.v1.ExecuteRequest.command:type_name -> o7k.plugin.v1.Command
-	8,  // 6: o7k.plugin.v1.ExecuteRequest.row:type_name -> o7k.plugin.v1.Row
-	13, // 7: o7k.plugin.v1.ExecuteResponse.result:type_name -> o7k.plugin.v1.Result
-	14, // 8: o7k.plugin.v1.Result.details:type_name -> o7k.plugin.v1.Details
-	15, // 9: o7k.plugin.v1.Result.navigate:type_name -> o7k.plugin.v1.Navigate
-	17, // 10: o7k.plugin.v1.Navigate.scope:type_name -> o7k.plugin.v1.Navigate.ScopeEntry
-	1,  // 11: o7k.plugin.v1.Plugin.Initialize:input_type -> o7k.plugin.v1.InitializeRequest
-	0,  // 12: o7k.plugin.v1.Plugin.GetMetadata:input_type -> o7k.plugin.v1.Empty
-	0,  // 13: o7k.plugin.v1.Plugin.GetResources:input_type -> o7k.plugin.v1.Empty
-	9,  // 14: o7k.plugin.v1.Plugin.List:input_type -> o7k.plugin.v1.ListRequest
-	11, // 15: o7k.plugin.v1.Plugin.Execute:input_type -> o7k.plugin.v1.ExecuteRequest
-	0,  // 16: o7k.plugin.v1.Host.GetContext:input_type -> o7k.plugin.v1.Empty
-	0,  // 17: o7k.plugin.v1.Plugin.Initialize:output_type -> o7k.plugin.v1.Empty
-	2,  // 18: o7k.plugin.v1.Plugin.GetMetadata:output_type -> o7k.plugin.v1.Metadata
-	4,  // 19: o7k.plugin.v1.Plugin.GetResources:output_type -> o7k.plugin.v1.Resources
-	10, // 20: o7k.plugin.v1.Plugin.List:output_type -> o7k.plugin.v1.ListResponse
-	12, // 21: o7k.plugin.v1.Plugin.Execute:output_type -> o7k.plugin.v1.ExecuteResponse
-	3,  // 22: o7k.plugin.v1.Host.GetContext:output_type -> o7k.plugin.v1.Context
-	17, // [17:23] is the sub-list for method output_type
-	11, // [11:17] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	17, // 4: o7k.plugin.v1.ListRequest.scope:type_name -> o7k.plugin.v1.ListRequest.ScopeEntry
+	8,  // 5: o7k.plugin.v1.ListResponse.rows:type_name -> o7k.plugin.v1.Row
+	7,  // 6: o7k.plugin.v1.ExecuteRequest.command:type_name -> o7k.plugin.v1.Command
+	8,  // 7: o7k.plugin.v1.ExecuteRequest.row:type_name -> o7k.plugin.v1.Row
+	18, // 8: o7k.plugin.v1.ExecuteRequest.scope:type_name -> o7k.plugin.v1.ExecuteRequest.ScopeEntry
+	13, // 9: o7k.plugin.v1.ExecuteResponse.result:type_name -> o7k.plugin.v1.Result
+	14, // 10: o7k.plugin.v1.Result.details:type_name -> o7k.plugin.v1.Details
+	15, // 11: o7k.plugin.v1.Result.navigate:type_name -> o7k.plugin.v1.Navigate
+	19, // 12: o7k.plugin.v1.Navigate.scope:type_name -> o7k.plugin.v1.Navigate.ScopeEntry
+	1,  // 13: o7k.plugin.v1.Plugin.Initialize:input_type -> o7k.plugin.v1.InitializeRequest
+	0,  // 14: o7k.plugin.v1.Plugin.GetMetadata:input_type -> o7k.plugin.v1.Empty
+	0,  // 15: o7k.plugin.v1.Plugin.GetResources:input_type -> o7k.plugin.v1.Empty
+	9,  // 16: o7k.plugin.v1.Plugin.List:input_type -> o7k.plugin.v1.ListRequest
+	11, // 17: o7k.plugin.v1.Plugin.Execute:input_type -> o7k.plugin.v1.ExecuteRequest
+	0,  // 18: o7k.plugin.v1.Host.GetContext:input_type -> o7k.plugin.v1.Empty
+	0,  // 19: o7k.plugin.v1.Plugin.Initialize:output_type -> o7k.plugin.v1.Empty
+	2,  // 20: o7k.plugin.v1.Plugin.GetMetadata:output_type -> o7k.plugin.v1.Metadata
+	4,  // 21: o7k.plugin.v1.Plugin.GetResources:output_type -> o7k.plugin.v1.Resources
+	10, // 22: o7k.plugin.v1.Plugin.List:output_type -> o7k.plugin.v1.ListResponse
+	12, // 23: o7k.plugin.v1.Plugin.Execute:output_type -> o7k.plugin.v1.ExecuteResponse
+	3,  // 24: o7k.plugin.v1.Host.GetContext:output_type -> o7k.plugin.v1.Context
+	19, // [19:25] is the sub-list for method output_type
+	13, // [13:19] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_pluginsdk_proto_plugin_proto_init() }
@@ -1074,7 +1113,7 @@ func file_pluginsdk_proto_plugin_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pluginsdk_proto_plugin_proto_rawDesc), len(file_pluginsdk_proto_plugin_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   18,
+			NumMessages:   20,
 			NumExtensions: 0,
 			NumServices:   2,
 		},
