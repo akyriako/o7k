@@ -17,6 +17,7 @@ type Info struct {
 	Path    string
 	Name    string
 	Version string
+	URL     string
 	Status  Status
 	Err     error
 }
@@ -67,6 +68,7 @@ func (m *Manager) Load(path string) error {
 			Name:    metadata.Name,
 			Version: metadata.Version,
 			Status:  StatusFailed,
+			URL:     metadata.URL,
 			Err:     err,
 		})
 
@@ -79,6 +81,7 @@ func (m *Manager) Load(path string) error {
 		Name:    metadata.Name,
 		Version: metadata.Version,
 		Status:  StatusLoaded,
+		URL:     metadata.URL,
 	})
 
 	return nil

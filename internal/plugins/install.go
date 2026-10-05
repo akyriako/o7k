@@ -41,67 +41,55 @@ func installLocal(source string) error {
 }
 
 func installRemote(ctx context.Context, source *url.URL) error {
-	request, err := http.NewRequestWithContext(ctx, http.MethodGet, source.String(), nil)
+	body, err := download(ctx, source.String())
 	if err != nil {
-		return fmt.Errorf("creating request: %w", err)
+		return err
 	}
-
-	response, err := http.DefaultClient.Do(request)
-	if err != nil {
-		return fmt.Errorf("downloading plugin: %w", err)
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		return fmt.Errorf("downloading plugin: %s", response.Status)
-	}
+	defer body.Close()
 
 	name := filepath.Base(source.Path)
 	if name == "." || name == "/" || name == "" {
 		return fmt.Errorf("plugin URL does not contain a filename")
 	}
 
-	return install(name, response.Body)
+	return install(name, body)
 }
 
 func install(name string, source io.Reader) error {
-	configDir, err := os.UserConfigDir()
+	pluginDir, err := useUserPluginsDir()
 	if err != nil {
-		return fmt.Errorf("getting user config directory: %w", err)
+		return err
 	}
-
-	pluginDir := filepath.Join(configDir, "o7k", "plugins")
 
 	if err := os.MkdirAll(pluginDir, 0755); err != nil {
 		return fmt.Errorf("creating plugin directory: %w", err)
 	}
 
-	temp, err := os.CreateTemp(pluginDir, ".o7k-plugin-*")
+	tempPath, err := writePluginTemp(pluginDir, source)
 	if err != nil {
-		return fmt.Errorf("creating temporary plugin: %w", err)
+		return err
 	}
-
-	tempPath := temp.Name()
 	defer os.Remove(tempPath)
 
-	written, err := io.Copy(temp, io.LimitReader(source, maxPluginSize+1))
+	binaryName := pluginBinaryName(name)
+
+	entries, err := os.ReadDir(pluginDir)
 	if err != nil {
-		temp.Close()
-		return fmt.Errorf("writing plugin: %w", err)
+		return fmt.Errorf("reading plugin directory: %w", err)
 	}
 
-	if written > maxPluginSize {
-		temp.Close()
-		return fmt.Errorf("plugin exceeds maximum size of %d MiB", maxPluginSize>>20)
-	}
+	for _, entry := range entries {
+		if entry.IsDir() || entry.Name() == name {
+			continue
+		}
 
-	if err := temp.Chmod(0755); err != nil {
-		temp.Close()
-		return fmt.Errorf("making plugin executable: %w", err)
-	}
+		if pluginBinaryName(entry.Name()) != binaryName {
+			continue
+		}
 
-	if err := temp.Close(); err != nil {
-		return fmt.Errorf("closing plugin: %w", err)
+		if err := os.Remove(filepath.Join(pluginDir, entry.Name())); err != nil {
+			return fmt.Errorf("removing previous plugin version: %w", err)
+		}
 	}
 
 	destination := filepath.Join(pluginDir, name)
@@ -120,12 +108,12 @@ func Remove(name string) error {
 		return fmt.Errorf("invalid plugin name %q", name)
 	}
 
-	configDir, err := os.UserConfigDir()
+	pluginDir, err := useUserPluginsDir()
 	if err != nil {
-		return fmt.Errorf("getting user config directory: %w", err)
+		return err
 	}
 
-	path := filepath.Join(configDir, "o7k", "plugins", name)
+	path := filepath.Join(pluginDir, name)
 
 	if err := os.Remove(path); err != nil {
 		return fmt.Errorf("removing plugin %q: %w", name, err)
@@ -134,4 +122,58 @@ func Remove(name string) error {
 	fmt.Printf("removed plugin %s\n", path)
 
 	return nil
+}
+
+func download(ctx context.Context, source string) (io.ReadCloser, error) {
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, source, nil)
+	if err != nil {
+		return nil, fmt.Errorf("creating request: %w", err)
+	}
+
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return nil, fmt.Errorf("downloading plugin: %w", err)
+	}
+
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		response.Body.Close()
+		return nil, fmt.Errorf("downloading plugin: %s", response.Status)
+	}
+
+	return response.Body, nil
+}
+
+func writePluginTemp(pluginDir string, source io.Reader) (string, error) {
+	temp, err := os.CreateTemp(pluginDir, ".o7k-plugin-*")
+	if err != nil {
+		return "", fmt.Errorf("creating temporary plugin: %w", err)
+	}
+
+	tempPath := temp.Name()
+
+	written, err := io.Copy(temp, io.LimitReader(source, maxPluginSize+1))
+	if err != nil {
+		temp.Close()
+		os.Remove(tempPath)
+		return "", fmt.Errorf("writing plugin: %w", err)
+	}
+
+	if written > maxPluginSize {
+		temp.Close()
+		os.Remove(tempPath)
+		return "", fmt.Errorf("plugin exceeds maximum size of %d MiB", maxPluginSize>>20)
+	}
+
+	if err := temp.Chmod(0755); err != nil {
+		temp.Close()
+		os.Remove(tempPath)
+		return "", fmt.Errorf("making plugin executable: %w", err)
+	}
+
+	if err := temp.Close(); err != nil {
+		os.Remove(tempPath)
+		return "", fmt.Errorf("closing plugin: %w", err)
+	}
+
+	return tempPath, nil
 }
