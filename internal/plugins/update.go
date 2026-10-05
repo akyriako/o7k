@@ -31,8 +31,7 @@ func Update(ctx context.Context, plugin Info) (UpdateResult, error) {
 	}
 
 	if plugin.URL == "" {
-		plugin.URL = "https://github.com/akyriako/o7k-opentelekomcloud-plugin"
-		//return result, fmt.Errorf("plugin %q does not provide an update URL", plugin.Name)
+		return result, fmt.Errorf("plugin %q does not provide an update URL", plugin.Name)
 	}
 
 	repository, err := parseGitHubRepository(plugin.URL)
