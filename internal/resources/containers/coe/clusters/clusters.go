@@ -35,23 +35,11 @@ func (r *Resource) Aliases() []string {
 func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
-		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
-		{Key: "status", Title: "STATUS", MinWidth: 16, Flex: 1},
-		{Key: "master_flavor_id", Title: "MASTER_FLAVOR_ID", MinWidth: 16, Flex: 1},
-		{Key: "flavor_id", Title: "FLAVOR_ID", MinWidth: 16, Flex: 1},
-		{Key: "node_count", Title: "NODE COUNT", MinWidth: 12, Flex: 0},
-		{Key: "master_count", Title: "MASTER COUNT", MinWidth: 14, Flex: 0},
-	}
-}
-
-func (r *Resource) Commands() []resource.Command {
-	return []resource.Command{
-		{Key: "s", Description: "Show", Default: true},
-		{Key: "shift-t", Description: "Cluster Template"},
-		{Key: "shift-n", Description: "Node Groups"},
-		{Key: "shift-k", Description: "Keypair"},
-		{Key: "k", Description: "Show Kubeconfig"},
-		{Key: "ctrl+k", Description: "Get Kubeconfig", StatusLabel: "Downloading"},
+		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 2},
+		{Key: "status", Title: "STATUS", MinWidth: 16, Flex: 2},
+		{Key: "flavor_id", Title: "FLAVOR", MinWidth: 16, Flex: 0},
+		{Key: "nodes", Title: "NODES (W/M)", MinWidth: 12, Flex: 1},
+		{Key: "health_status", Title: "HEALTH", MinWidth: 16, Flex: 1},
 	}
 }
 
@@ -77,14 +65,15 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 		rows = append(rows, resource.Row{
 			ID: cluster.UUID,
 			Fields: map[string]string{
-				"id":   cluster.UUID,
-				"name": cluster.Name,
-				//"version":             cluster.COEVersion,
+				"id":                  cluster.UUID,
+				"name":                cluster.Name,
 				"status":              cluster.Status,
+				"health_status":       cluster.HealthStatus,
 				"master_flavor_id":    cluster.MasterFlavorID,
 				"flavor_id":           cluster.FlavorID,
 				"node_count":          fmt.Sprintf("%d", cluster.NodeCount),
 				"master_count":        fmt.Sprintf("%d", cluster.MasterCount),
+				"nodes":               fmt.Sprintf("%d+%d", cluster.NodeCount, cluster.MasterCount),
 				"keypair":             cluster.KeyPair,
 				"cluster_template_id": cluster.ClusterTemplateID,
 			},
@@ -92,6 +81,16 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 	}
 
 	return rows, nil
+}
+
+func (r *Resource) Commands() []resource.Command {
+	return []resource.Command{
+		{Key: "s", Description: "Show", Default: true},
+		{Key: "shift-t", Description: "Cluster Template"},
+		{Key: "shift-n", Description: "Node Groups"},
+		{Key: "k", Description: "Show Kubeconfig"},
+		{Key: "ctrl+k", Description: "Get Kubeconfig", StatusLabel: "Downloading"},
+	}
 }
 
 func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {

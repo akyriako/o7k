@@ -102,5 +102,20 @@ func newSharedFileSystemV2(provider *gophercloud.ProviderClient, opts gopherclou
 }
 
 func (c *Context) ContainerInfraV1() (*gophercloud.ServiceClient, error) {
-	return c.getClientService("container-infra", gophercloud.EndpointOpts{Region: c.Region}, openstack.NewContainerInfraV1)
+	return c.getClientService(
+		"container-infra",
+		gophercloud.EndpointOpts{Region: c.Region},
+		newContainerInfraV1,
+	)
+}
+
+func newContainerInfraV1(provider *gophercloud.ProviderClient, opts gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
+	client, err := openstack.NewContainerInfraV1(provider, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	client.Microversion = "1.14"
+
+	return client, nil
 }
