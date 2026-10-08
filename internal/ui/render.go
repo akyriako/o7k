@@ -27,23 +27,63 @@ func (m Model) renderHeader() string {
 		return ""
 	}
 
-	commands := m.renderHeaderCommands()
+	const (
+		commandsPerColumn  = 5
+		commandColumnWidth = 28
+		contextWidth       = 48
+	)
+
+	commandCount := 5
+	if m.resource != nil {
+		commandCount += len(m.resource.Commands())
+	}
+
+	columnCount := (commandCount + commandsPerColumn - 1) / commandsPerColumn
+	preferredCommandsWidth := columnCount * commandColumnWidth
+
+	// Compact mode: commands only, without context or logo.
 	if m.width < compactWidth {
-		return lipgloss.NewStyle().
-			Width(m.width).
-			Render(commands)
+		return m.renderHeaderCommands(m.width)
 	}
 
 	profile := m.renderHeaderContext()
 	renderedLogo := logoStyle.Render(logo)
 
-	availableWidth := m.width
-	contextWidth := lipgloss.Width(profile)
-	commandWidth := max(availableWidth-contextWidth-logoWidth, 1)
+	// Preserve the existing context breakpoint.
+	leftWidth := contextWidth
 
-	left := lipgloss.NewStyle().Width(contextWidth).Render(profile)
-	center := lipgloss.NewStyle().Width(commandWidth).Align(lipgloss.Left).Render(commands)
-	right := lipgloss.NewStyle().Width(logoWidth).Align(lipgloss.Right).Render(renderedLogo)
+	// The logo is independently anchored to the right edge.
+	// Hide it if it would reduce the commands below their
+	// preferred width.
+	showLogo := m.width-leftWidth-preferredCommandsWidth >= logoWidth
+
+	rightWidth := 0
+	if showLogo {
+		rightWidth = logoWidth
+	}
+
+	centerWidth := max(m.width-leftWidth-rightWidth, 0)
+
+	left := lipgloss.NewStyle().
+		Width(leftWidth).
+		Render(profile)
+
+	center := m.renderHeaderCommands(centerWidth)
+
+	if !showLogo {
+		return lipgloss.JoinHorizontal(lipgloss.Top, left, center)
+	}
+
+	// Fill all available space before the logo, so the logo
+	// remains at the terminal's right edge.
+	center = lipgloss.NewStyle().
+		Width(centerWidth).
+		Render(center)
+
+	right := lipgloss.NewStyle().
+		Width(rightWidth).
+		Align(lipgloss.Right).
+		Render(renderedLogo)
 
 	return lipgloss.JoinHorizontal(lipgloss.Top, left, center, right)
 }
@@ -70,7 +110,7 @@ func (m Model) renderHeaderContext() string {
 	}, "\n")
 }
 
-func (m Model) renderHeaderCommands() string {
+func (m Model) renderHeaderCommands(availableWidth int) string {
 	commands := []resource.Command{
 		{Key: "ctrl+x", Description: "Quit"},
 		{Key: ":", Description: "Resource"},
@@ -83,30 +123,69 @@ func (m Model) renderHeaderCommands() string {
 		commands = append(commands, m.resource.Commands()...)
 	}
 
-	const commandsPerColumn = 5
-	const commandColumnWidth = 28
+	const (
+		commandsPerColumn  = 5
+		commandColumnWidth = 30
+		keyWidth           = 10
+	)
 
-	columns := make([]string, 0, (len(commands)+commandsPerColumn-1)/commandsPerColumn)
+	columnCount := (len(commands) + commandsPerColumn - 1) / commandsPerColumn
 
-	for start := 0; start < len(commands); start += commandsPerColumn {
-		end := min(start+commandsPerColumn, len(commands))
-		lines := make([]string, 0, end-start)
+	if availableWidth <= 0 {
+		return strings.Repeat("\n", commandsPerColumn-1)
+	}
 
-		for _, command := range commands[start:end] {
-			key := headerCommandKeyStyle.Width(10).Render("<" + command.Key + ">")
-			text := headerCommandTextStyle.Render(command.Description)
-			if command.Default {
-				text = headerCommandTextStyle.Render(command.Description + " (Default)")
-			}
-			lines = append(lines, key+text)
+	widths := make([]int, columnCount)
+	baseWidth := availableWidth / columnCount
+	remainder := availableWidth % columnCount
+
+	for i := range widths {
+		widths[i] = baseWidth
+		if i < remainder {
+			widths[i]++
 		}
 
-		columns = append(
-			columns,
-			lipgloss.NewStyle().
-				Width(commandColumnWidth).
-				Render(strings.Join(lines, "\n")),
-		)
+		widths[i] = min(widths[i], commandColumnWidth)
+	}
+
+	columns := make([]string, 0, columnCount)
+
+	for column := range columnCount {
+		start := column * commandsPerColumn
+		end := min(start+commandsPerColumn, len(commands))
+		width := widths[column]
+
+		lines := make([]string, 0, commandsPerColumn)
+
+		for _, command := range commands[start:end] {
+			description := command.Description
+			if command.Default {
+				description += " (Default)"
+			}
+
+			// Preserve the original keybinding spacing.
+			key := headerCommandKeyStyle.
+				Width(keyWidth).
+				Render("<" + command.Key + ">")
+
+			text := headerCommandTextStyle.Render(description)
+
+			// Truncate the description, not the spacing between
+			// the keybinding and the description.
+			if width <= keyWidth {
+				lines = append(lines, ansi.Cut(key, 0, width))
+				continue
+			}
+
+			text = ansi.Truncate(text, max(width-keyWidth-1, 0), "")
+			lines = append(lines, key+text+" ")
+		}
+
+		for len(lines) < commandsPerColumn {
+			lines = append(lines, "")
+		}
+
+		columns = append(columns, strings.Join(lines, "\n"))
 	}
 
 	return lipgloss.JoinHorizontal(lipgloss.Top, columns...)
@@ -296,18 +375,6 @@ func overlayCenter(background, foreground string) string {
 
 	return strings.Join(bg, "\n")
 }
-
-//func (m Model) renderErrorModal() string {
-//	content := errorTitleStyle.Render("Error") +
-//		"\n\n" +
-//		m.err.Error() +
-//		"\n\n" +
-//		lipgloss.NewStyle().
-//			Faint(true).
-//			Render("Press Esc or Enter to dismiss")
-//
-//	return errorModalStyle.Render(content)
-//}
 
 func (m Model) renderErrorModal() string {
 	hint := lipgloss.NewStyle().
