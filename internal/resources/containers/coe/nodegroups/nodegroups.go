@@ -20,7 +20,7 @@ func New(context *openstack.Context) *Resource {
 }
 
 func (r *Resource) Title() string {
-	return "COE Node Groups"
+	return "Magnum Node Groups"
 }
 
 func (r *Resource) Kind() string {

@@ -19,7 +19,7 @@ func New(context *openstack.Context) *Resource {
 }
 
 func (r *Resource) Title() string {
-	return "COE Cluster Templates"
+	return "Magnum Cluster Templates"
 }
 
 func (r *Resource) Kind() string {
