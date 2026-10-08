@@ -27,9 +27,7 @@ func (r *Resource) Kind() string {
 }
 
 func (r *Resource) Aliases() []string {
-	return []string{
-		"cluster",
-	}
+	return []string{"cluster", "coe"}
 }
 
 func (r *Resource) Columns() []resource.Column {
