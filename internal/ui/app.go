@@ -560,11 +560,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case resource.CommandCompletedMsg:
 		if msg.LoadID != m.loadID {
+			if msg.RefreshOnCompletion {
+				return m, m.refreshResource()
+			}
 			return m, nil
 		}
 
 		m.showLoading = false
 		m.loadingLabel = ""
+
+		if msg.RefreshOnCompletion {
+			return m, m.refreshResource()
+		}
 		return m, nil
 
 	case pluginresource.UpdatedMsg:

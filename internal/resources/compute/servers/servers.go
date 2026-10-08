@@ -40,6 +40,7 @@ func (r *Resource) Columns() []resource.Column {
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
 		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
 		{Key: "status", Title: "STATUS", MinWidth: 12, Flex: 0},
+		{Key: "task_state", Title: "STATE", MinWidth: 16, Flex: 0},
 		{Key: "flavor", Title: "FLAVOR", MinWidth: 15, Flex: 1},
 		{Key: "availability_zone", Title: "AVAILABILITY ZONE", MinWidth: 15, Flex: 1},
 		{Key: "addresses", Title: "ADDRESSES", MinWidth: 40, Flex: 1},
@@ -53,6 +54,10 @@ func (r *Resource) Commands() []resource.Command {
 		{Key: "shift-f", Description: "Flavor"},
 		{Key: "shift-g", Description: "Security Groups"},
 		{Key: "shift-v", Description: "Volumes"},
+		{Key: "ctrl+s", Description: "Start", StatusLabel: "Starting"},
+		{Key: "ctrl+t", Description: "Stop", StatusLabel: "Stopping"},
+		{Key: "ctrl+r", Description: "Soft Reboot", StatusLabel: "Rebooting"},
+		{Key: "ctrl+h", Description: "Hard Reboot", StatusLabel: "Hard Rebooting"},
 	}
 }
 
@@ -117,6 +122,7 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 				"id":                server.ID,
 				"name":              server.Name,
 				"status":            server.Status,
+				"task_state":        strings.ToUpper(server.TaskState),
 				"flavor":            flavorName,
 				"availability_zone": server.AvailabilityZone,
 				"addresses":         serverAddresses(server.Addresses),
@@ -168,6 +174,14 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 		return r.securityGroups(row)
 	case "shift-v":
 		return r.volumes(row)
+	case "ctrl+s":
+		return r.start(row)
+	case "ctrl+t":
+		return r.stop(row)
+	case "ctrl+r":
+		return r.reboot(row, true)
+	case "ctrl+h":
+		return r.reboot(row, false)
 	}
 
 	return nil
