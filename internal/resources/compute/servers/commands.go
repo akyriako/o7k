@@ -103,3 +103,43 @@ func (r *Resource) show(id string) tea.Cmd {
 		}
 	}
 }
+
+func (r *Resource) volumes(row resource.Row) tea.Cmd {
+	return func() tea.Msg {
+		client, err := r.context.ComputeV2()
+		if err != nil {
+			return resource.ErrorMsg{Err: err}
+		}
+
+		server, err := computeservers.Get(
+			context.Background(),
+			client,
+			row.ID,
+		).Extract()
+		if err != nil {
+			return resource.ErrorMsg{
+				Err: fmt.Errorf("getting server %q: %w", row.ID, err),
+			}
+		}
+
+		volumeIDs := make([]string, 0, len(server.AttachedVolumes))
+
+		for _, volume := range server.AttachedVolumes {
+			if volume.ID != "" {
+				volumeIDs = append(volumeIDs, volume.ID)
+			}
+		}
+
+		if len(volumeIDs) == 0 {
+			return resource.ErrorMsg{
+				Err: fmt.Errorf("server %q has no attached volumes", row.ID),
+			}
+		}
+
+		return resource.NavigateFilteredMultiMsg{
+			Resource: "volumes",
+			Field:    "id",
+			Values:   volumeIDs,
+		}
+	}
+}
