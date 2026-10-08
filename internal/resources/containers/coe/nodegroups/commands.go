@@ -151,3 +151,103 @@ func (r *Resource) servers(row resource.Row) tea.Cmd {
 		}
 	}
 }
+
+func (r *Resource) scale(row resource.Row, delta int) tea.Cmd {
+	return func() tea.Msg {
+		clusterID := row.Fields["cluster_id"]
+		if clusterID == "" {
+			return resource.ErrorMsg{
+				Err: fmt.Errorf("node group %q has no cluster ID", row.ID),
+			}
+		}
+
+		client, err := r.context.ContainerInfraV1()
+		if err != nil {
+			return resource.ErrorMsg{Err: err}
+		}
+
+		cluster, err := clusters.Get(
+			context.Background(),
+			client,
+			clusterID,
+		).Extract()
+		if err != nil {
+			return resource.ErrorMsg{
+				Err: fmt.Errorf("getting cluster %q: %w", clusterID, err),
+			}
+		}
+
+		if cluster.Status != "CREATE_COMPLETE" && cluster.Status != "UPDATE_COMPLETE" {
+			return resource.ErrorMsg{
+				Err: fmt.Errorf(
+					"cannot scale node group: cluster %q is not ready (status: %s)",
+					cluster.Name,
+					cluster.Status,
+				),
+			}
+		}
+
+		if cluster.HealthStatus != "HEALTHY" {
+			return resource.ErrorMsg{
+				Err: fmt.Errorf(
+					"cannot scale node group: cluster %q is not healthy (health: %s)",
+					cluster.Name,
+					cluster.HealthStatus,
+				),
+			}
+		}
+
+		nodeGroup, err := nodegroups.Get(context.Background(), client, clusterID, row.ID).Extract()
+		if err != nil {
+			return resource.ErrorMsg{
+				Err: fmt.Errorf("getting node group %q: %w", row.ID, err),
+			}
+		}
+
+		nodeCount := nodeGroup.NodeCount + delta
+
+		if nodeCount < 0 {
+			return resource.ErrorMsg{
+				Err: fmt.Errorf("node group cannot be scaled below 0 nodes"),
+			}
+		}
+
+		if nodeCount < nodeGroup.MinNodeCount {
+			return resource.ErrorMsg{
+				Err: fmt.Errorf(
+					"node group %q cannot be scaled below %d nodes",
+					nodeGroup.Name,
+					nodeGroup.MinNodeCount,
+				),
+			}
+		}
+
+		if nodeGroup.MaxNodeCount != nil && nodeCount > *nodeGroup.MaxNodeCount {
+			return resource.ErrorMsg{
+				Err: fmt.Errorf(
+					"node group %q cannot be scaled above %d nodes",
+					nodeGroup.Name,
+					nodeGroup.MaxNodeCount,
+				),
+			}
+		}
+
+		err = clusters.Resize(context.Background(), client, clusterID, clusters.ResizeOpts{
+			NodeCount: &nodeCount,
+			NodeGroup: row.ID,
+		}).Err
+		if err != nil {
+			return resource.ErrorMsg{
+				Err: fmt.Errorf(
+					"scaling node group %q from %d to %d nodes: %w",
+					nodeGroup.Name,
+					nodeGroup.NodeCount,
+					nodeCount,
+					err,
+				),
+			}
+		}
+
+		return resource.CommandCompletedMsg{}
+	}
+}

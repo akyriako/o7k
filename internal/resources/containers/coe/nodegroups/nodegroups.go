@@ -46,9 +46,11 @@ func (r *Resource) Columns() []resource.Column {
 func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
 		{Key: "s", Description: "Show", Default: true},
+		{Key: "shift-s", Description: "Servers"},
+		{Key: "ctrl+u", Description: "Scale Up   (+1)", StatusLabel: "Scaling up"},
+		{Key: "ctrl+d", Description: "Scale Down (-1)", StatusLabel: "Scaling down"},
 		{Key: "shift-f", Description: "Flavor"},
 		{Key: "shift-i", Description: "Image"},
-		{Key: "shift-s", Description: "Servers"},
 	}
 }
 
@@ -112,6 +114,10 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 		return r.image(row)
 	case "shift-s":
 		return r.servers(row)
+	case "ctrl+u":
+		return r.scale(row, 1)
+	case "ctrl+d":
+		return r.scale(row, -1)
 	}
 
 	return nil
