@@ -59,10 +59,10 @@ type Model struct {
 	filter     *resourceFilter
 	scope      resourceScope
 
-	detailMode    bool
-	detail        viewport.Model
-	detailID      string
-	detailContent string
+	detailMode     bool
+	detailViewport viewport.Model
+	detailID       string
+	detailContent  string
 
 	commandMode bool
 	command     textinput.Model
@@ -126,8 +126,8 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, plugi
 		context:    openstackContext,
 		pluginHost: pluginHost,
 
-		detail:        detailViewport,
-		errorViewport: errorViewport,
+		detailViewport: detailViewport,
+		errorViewport:  errorViewport,
 
 		loading:      true,
 		showLoading:  true,
@@ -262,7 +262,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		var cmd tea.Cmd
-		m.detail, cmd = m.detail.Update(msg)
+		m.detailViewport, cmd = m.detailViewport.Update(msg)
 
 		return m, cmd
 	}
@@ -568,8 +568,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.detailMode = true
 		m.detailID = msg.ID
 		m.detailContent = string(data)
-		m.detail.SetContent(colorizeJSON(data))
-		m.detail.GotoTop()
+		m.detailViewport.SetContent(colorizeJSON(data))
+		m.detailViewport.GotoTop()
 		m.Resize()
 
 		return m, nil
@@ -740,8 +740,8 @@ func (m *Model) Resize() {
 
 	m.table.SetHeight(contentHeight)
 
-	m.detail.Width = max(m.width-2, 1)
-	m.detail.Height = contentHeight
+	m.detailViewport.Width = max(m.width-2, 1)
+	m.detailViewport.Height = contentHeight
 
 	if m.resource == nil {
 		return

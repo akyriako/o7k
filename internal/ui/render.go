@@ -319,8 +319,15 @@ func (m Model) renderDetails() string {
 			"┘",
 	)
 
-	body := m.detail.View()
+	body := m.detailViewport.View()
 	bodyLines := strings.Split(body, "\n")
+
+	scrollbar := m.renderDetailScrollbar()
+	var scrollbarLines []string
+
+	if scrollbar != "" {
+		scrollbarLines = strings.Split(scrollbar, "\n")
+	}
 
 	for i, line := range bodyLines {
 		lineWidth := lipgloss.Width(line)
@@ -329,10 +336,16 @@ func (m Model) renderDetails() string {
 			line += strings.Repeat(" ", innerWidth-lineWidth)
 		}
 
+		rightBorder := borderStyle.Render("│")
+
+		if i < len(scrollbarLines) {
+			rightBorder = scrollbarLines[i]
+		}
+
 		bodyLines[i] =
 			borderStyle.Render("│") +
 				line +
-				borderStyle.Render("│")
+				rightBorder
 	}
 
 	return top +
@@ -340,6 +353,35 @@ func (m Model) renderDetails() string {
 		strings.Join(bodyLines, "\n") +
 		"\n" +
 		bottom
+}
+
+func (m Model) renderDetailScrollbar() string {
+	height := m.detailViewport.Height
+
+	if height <= 0 || m.detailViewport.TotalLineCount() <= height {
+		return ""
+	}
+
+	totalLines := m.detailViewport.TotalLineCount()
+	maxOffset := max(totalLines-height, 1)
+
+	thumbHeight := max(height*height/totalLines, 1)
+	thumbHeight = min(thumbHeight, height)
+
+	thumbTravel := height - thumbHeight
+	thumbStart := m.detailViewport.YOffset * thumbTravel / maxOffset
+
+	lines := make([]string, height)
+
+	for i := range lines {
+		if i >= thumbStart && i < thumbStart+thumbHeight {
+			lines[i] = detailScrollbarThumbStyle.Render("█")
+		} else {
+			lines[i] = detailScrollbarTrackStyle.Render("│")
+		}
+	}
+
+	return strings.Join(lines, "\n")
 }
 
 func overlayCenter(background, foreground string) string {

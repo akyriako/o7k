@@ -90,6 +90,13 @@ var (
 
 	jsonNullStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#7F848E"))
+
+	detailScrollbarTrackStyle = lipgloss.NewStyle().
+					Foreground(lipgloss.Color("#00BFFF"))
+
+	detailScrollbarThumbStyle = lipgloss.NewStyle().
+					Foreground(lipgloss.Color("#00BFFF")).
+					Bold(true)
 )
 
 //ErrorView
