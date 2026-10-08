@@ -21,6 +21,9 @@ import (
 	"github.com/akyriako/o7k/internal/resources/compute/keypairs"
 	"github.com/akyriako/o7k/internal/resources/compute/servergroups"
 	"github.com/akyriako/o7k/internal/resources/compute/servers"
+	"github.com/akyriako/o7k/internal/resources/containers/coe/clusters"
+	"github.com/akyriako/o7k/internal/resources/containers/coe/clustertemplates"
+	"github.com/akyriako/o7k/internal/resources/containers/coe/nodegroups"
 	"github.com/akyriako/o7k/internal/resources/contexts"
 	"github.com/akyriako/o7k/internal/resources/dns/recordsets"
 	"github.com/akyriako/o7k/internal/resources/dns/zones"
@@ -511,6 +514,18 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 
 	if err := r.RegisterNavigationOnly(quotas.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering quotas resource: %w", err))
+	}
+
+	if err := r.Register(clusters.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering COE clusters resource: %w", err))
+	}
+
+	if err := r.Register(clustertemplates.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering COE cluster templates resource: %w", err))
+	}
+
+	if err := r.RegisterNavigationOnly(nodegroups.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering COE node groups resource: %w", err))
 	}
 
 	return errs

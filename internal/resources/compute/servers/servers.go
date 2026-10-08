@@ -70,6 +70,9 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 		return nil, fmt.Errorf("extracting servers: %w", err)
 	}
 
+	scope := resource.Scope(ctx)
+	namePrefix := scope["name_prefix"]
+
 	rows := make([]resource.Row, 0, len(items))
 
 	flavorPages, err := computeflavors.ListDetail(client, computeflavors.ListOpts{}).AllPages(ctx)
@@ -89,6 +92,10 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 	}
 
 	for _, server := range items {
+		if namePrefix != "" && !strings.HasPrefix(server.Name, namePrefix) {
+			continue
+		}
+
 		flavorID, _ := server.Flavor["id"].(string)
 		flavorName := flavorNames[flavorID]
 
