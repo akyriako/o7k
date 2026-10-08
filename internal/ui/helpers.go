@@ -119,3 +119,15 @@ func (m *Model) suggestions() []string {
 
 	return suggestions
 }
+
+func (m *Model) setError(err error) {
+	m.err = err
+
+	if err == nil {
+		m.errorViewport.SetContent("")
+		m.errorViewport.GotoTop()
+		return
+	}
+
+	m.resizeErrorViewport()
+}

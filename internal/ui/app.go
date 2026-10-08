@@ -32,7 +32,8 @@ type Model struct {
 	table        table.Model
 	tableXOffset int
 
-	err error
+	err           error
+	errorViewport viewport.Model
 
 	itemCount    int
 	status       string
@@ -106,8 +107,10 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, plugi
 	command.Cursor.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("#87CEFA"))
 	command.PlaceholderStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#666666"))
 
-	detail := viewport.New(1, 1)
-	detail.SetHorizontalStep(4)
+	detailViewport := viewport.New(1, 1)
+	detailViewport.SetHorizontalStep(4)
+
+	errorViewport := viewport.New(1, 1)
 
 	s := spinner.New()
 	s.Spinner = spinner.Points
@@ -123,7 +126,8 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, plugi
 		context:    openstackContext,
 		pluginHost: pluginHost,
 
-		detail: detail,
+		detail:        detailViewport,
+		errorViewport: errorViewport,
 
 		loading:      true,
 		showLoading:  true,
@@ -148,22 +152,34 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.err != nil {
-		if keyMsg, ok := msg.(tea.KeyMsg); ok {
-			switch keyMsg.String() {
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.String() {
 			case "esc", "enter":
-				m.err = nil
+				m.setError(nil)
 
 				if len(m.navigation) > 0 {
 					return m, m.navigateBack()
 				}
 
 				return m, nil
+
 			case "ctrl+x":
 				return m, tea.Quit
 			}
+
+		case tea.WindowSizeMsg:
+			m.width = msg.Width
+			m.height = msg.Height
+			m.Resize()
+			m.resizeErrorViewport()
+			return m, nil
 		}
 
-		return m, nil
+		var cmd tea.Cmd
+		m.errorViewport, cmd = m.errorViewport.Update(msg)
+
+		return m, cmd
 	}
 
 	switch msg := msg.(type) {
@@ -177,7 +193,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.showLoading = false
 		m.loadingLabel = ""
 
-		m.err = msg.err
+		m.setError(msg.err)
 
 		slog.Error(msg.err.Error(), "cloud", m.context.Cloud)
 		return m, nil
@@ -188,7 +204,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.showLoading = false
 		m.loadingLabel = ""
 
-		m.err = msg.Err
+		m.setError(msg.Err)
 
 		slog.Error(msg.Err.Error(), "cloud", m.context.Cloud)
 		return m, nil

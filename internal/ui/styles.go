@@ -99,7 +99,7 @@ var (
 			Border(lipgloss.RoundedBorder()).
 			BorderForeground(lipgloss.Color("#ED1944")).
 			Foreground(lipgloss.Color("#FFFFFF")).
-			Padding(1, 2).
+			Padding(1, 1).
 			Width(60)
 
 	errorTitleStyle = lipgloss.NewStyle().
@@ -124,3 +124,11 @@ func tableStyles() table.Styles {
 
 	return styles
 }
+
+var (
+	errorScrollbarTrackStyle = lipgloss.NewStyle().
+					Foreground(lipgloss.Color("#ED1944"))
+
+	errorScrollbarThumbStyle = lipgloss.NewStyle().
+					Foreground(lipgloss.Color("#ED1944"))
+)

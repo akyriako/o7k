@@ -391,9 +391,105 @@ func (m Model) renderErrorModal() string {
 
 	content := errorTitleStyle.Render("Error") +
 		"\n\n" +
-		m.err.Error() +
+		m.errorViewport.View() +
 		"\n\n" +
 		hint
 
-	return errorModalStyle.Render(content)
+	modal := errorModalStyle.Render(content)
+
+	scrollbar := m.renderErrorScrollbar()
+	if scrollbar == "" {
+		return modal
+	}
+
+	lines := strings.Split(modal, "\n")
+	scrollbarLines := strings.Split(scrollbar, "\n")
+
+	// One border row, one padding row, title row,
+	// one blank row, then the viewport.
+	const viewportStartRow = 4
+
+	for i, scrollbarLine := range scrollbarLines {
+		row := viewportStartRow + i
+
+		if row >= len(lines)-1 {
+			break
+		}
+
+		line := lines[row]
+		width := ansi.StringWidth(line)
+
+		// Preserve everything except the final border cell.
+		lines[row] = ansi.Cut(line, 0, width-1) + scrollbarLine
+	}
+
+	return strings.Join(lines, "\n")
+}
+
+func (m Model) renderErrorScrollbar() string {
+	height := m.errorViewport.Height
+
+	if height <= 0 || m.errorViewport.TotalLineCount() <= height {
+		return ""
+	}
+
+	totalLines := m.errorViewport.TotalLineCount()
+	maxOffset := max(totalLines-height, 1)
+
+	thumbHeight := max(height*height/totalLines, 1)
+	thumbHeight = min(thumbHeight, height)
+
+	thumbTravel := height - thumbHeight
+	thumbStart := m.errorViewport.YOffset * thumbTravel / maxOffset
+
+	lines := make([]string, height)
+
+	for i := range lines {
+		if i >= thumbStart && i < thumbStart+thumbHeight {
+			lines[i] = errorScrollbarThumbStyle.Render("█")
+		} else {
+			lines[i] = errorScrollbarTrackStyle.Render("│")
+		}
+	}
+
+	return strings.Join(lines, "\n")
+}
+
+func (m *Model) resizeErrorViewport() {
+	const (
+		modalWidth      = 60
+		horizontalTrim  = 4
+		scrollbarWidth  = 2
+		verticalTrim    = 8
+		maxVisibleLines = 12
+	)
+
+	contentWidth := modalWidth - horizontalTrim - scrollbarWidth
+	m.errorViewport.Width = contentWidth
+
+	if m.err == nil {
+		m.errorViewport.Height = 1
+		return
+	}
+
+	wrapped := lipgloss.NewStyle().
+		Width(contentWidth).
+		Render(m.err.Error())
+
+	m.errorViewport.SetContent(wrapped)
+
+	contentHeight := lipgloss.Height(wrapped)
+	availableHeight := max(m.height-verticalTrim, 1)
+
+	m.errorViewport.Height = max(
+		min(contentHeight, availableHeight, maxVisibleLines),
+		1,
+	)
+
+	m.errorViewport.SetYOffset(
+		min(
+			m.errorViewport.YOffset,
+			max(contentHeight-m.errorViewport.Height, 0),
+		),
+	)
 }
