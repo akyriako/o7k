@@ -3,6 +3,7 @@ package servers
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/akyriako/o7k/internal/resource"
 	tea "github.com/charmbracelet/bubbletea"
@@ -142,4 +143,114 @@ func (r *Resource) volumes(row resource.Row) tea.Cmd {
 			Values:   volumeIDs,
 		}
 	}
+}
+
+func (r *Resource) start(row resource.Row) tea.Cmd {
+	return func() tea.Msg {
+		if err := validatePowerAction("start", row.Fields["status"]); err != nil {
+			return resource.ErrorMsg{Err: err}
+		}
+
+		client, err := r.context.ComputeV2()
+		if err != nil {
+			return resource.ErrorMsg{Err: err}
+		}
+
+		err = computeservers.Start(
+			context.Background(),
+			client,
+			row.ID,
+		).ExtractErr()
+		if err != nil {
+			return resource.ErrorMsg{
+				Err: fmt.Errorf("starting server %q: %w", row.ID, err),
+			}
+		}
+
+		return resource.CommandCompletedMsg{}
+	}
+}
+
+func (r *Resource) stop(row resource.Row) tea.Cmd {
+	return func() tea.Msg {
+		if err := validatePowerAction("stop", row.Fields["status"]); err != nil {
+			return resource.ErrorMsg{Err: err}
+		}
+
+		client, err := r.context.ComputeV2()
+		if err != nil {
+			return resource.ErrorMsg{Err: err}
+		}
+
+		err = computeservers.Stop(
+			context.Background(),
+			client,
+			row.ID,
+		).ExtractErr()
+		if err != nil {
+			return resource.ErrorMsg{
+				Err: fmt.Errorf("stopping server %q: %w", row.ID, err),
+			}
+		}
+
+		return resource.CommandCompletedMsg{}
+	}
+}
+
+func (r *Resource) reboot(row resource.Row, soft bool) tea.Cmd {
+	return func() tea.Msg {
+		if err := validatePowerAction("reboot", row.Fields["status"]); err != nil {
+			return resource.ErrorMsg{Err: err}
+		}
+
+		client, err := r.context.ComputeV2()
+		if err != nil {
+			return resource.ErrorMsg{Err: err}
+		}
+
+		rebootType := computeservers.SoftReboot
+		if !soft {
+			rebootType = computeservers.HardReboot
+		}
+		err = computeservers.Reboot(
+			context.Background(),
+			client,
+			row.ID,
+			computeservers.RebootOpts{
+				Type: rebootType,
+			},
+		).ExtractErr()
+		if err != nil {
+			return resource.ErrorMsg{
+				Err: fmt.Errorf("rebooting server %q: %w", row.ID, err),
+			}
+		}
+
+		return resource.CommandCompletedMsg{}
+	}
+}
+
+func validatePowerAction(action, status string) error {
+	status = strings.ToUpper(strings.TrimSpace(status))
+
+	switch action {
+	case "start":
+		if status == "SHUTOFF" {
+			return nil
+		}
+	case "stop":
+		if status == "ACTIVE" {
+			return nil
+		}
+	case "reboot":
+		if status == "ACTIVE" {
+			return nil
+		}
+	}
+
+	return fmt.Errorf(
+		"cannot %s server in %s state",
+		action,
+		status,
+	)
 }
