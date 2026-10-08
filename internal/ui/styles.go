@@ -90,6 +90,13 @@ var (
 
 	jsonNullStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#7F848E"))
+
+	detailScrollbarTrackStyle = lipgloss.NewStyle().
+					Foreground(lipgloss.Color("#00BFFF"))
+
+	detailScrollbarThumbStyle = lipgloss.NewStyle().
+					Foreground(lipgloss.Color("#00BFFF")).
+					Bold(true)
 )
 
 //ErrorView
@@ -99,7 +106,7 @@ var (
 			Border(lipgloss.RoundedBorder()).
 			BorderForeground(lipgloss.Color("#ED1944")).
 			Foreground(lipgloss.Color("#FFFFFF")).
-			Padding(1, 2).
+			Padding(1, 1).
 			Width(60)
 
 	errorTitleStyle = lipgloss.NewStyle().
@@ -124,3 +131,11 @@ func tableStyles() table.Styles {
 
 	return styles
 }
+
+var (
+	errorScrollbarTrackStyle = lipgloss.NewStyle().
+					Foreground(lipgloss.Color("#ED1944"))
+
+	errorScrollbarThumbStyle = lipgloss.NewStyle().
+					Foreground(lipgloss.Color("#ED1944"))
+)
