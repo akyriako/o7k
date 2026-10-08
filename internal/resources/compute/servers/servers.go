@@ -41,6 +41,7 @@ func (r *Resource) Columns() []resource.Column {
 		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
 		{Key: "status", Title: "STATUS", MinWidth: 12, Flex: 0},
 		{Key: "flavor", Title: "FLAVOR", MinWidth: 15, Flex: 1},
+		{Key: "availability_zone", Title: "AVAILABILITY ZONE", MinWidth: 15, Flex: 1},
 		{Key: "addresses", Title: "ADDRESSES", MinWidth: 40, Flex: 1},
 	}
 }
@@ -51,6 +52,7 @@ func (r *Resource) Commands() []resource.Command {
 		{Key: "shift-i", Description: "Image"},
 		{Key: "shift-f", Description: "Flavor"},
 		{Key: "shift-g", Description: "Security Groups"},
+		{Key: "shift-v", Description: "Volumes"},
 	}
 }
 
@@ -112,13 +114,14 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 		rows = append(rows, resource.Row{
 			ID: server.ID,
 			Fields: map[string]string{
-				"id":        server.ID,
-				"name":      server.Name,
-				"status":    server.Status,
-				"flavor":    flavorName,
-				"addresses": serverAddresses(server.Addresses),
-				"image":     image,
-				"image_id":  imageID,
+				"id":                server.ID,
+				"name":              server.Name,
+				"status":            server.Status,
+				"flavor":            flavorName,
+				"availability_zone": server.AvailabilityZone,
+				"addresses":         serverAddresses(server.Addresses),
+				"image":             image,
+				"image_id":          imageID,
 			},
 		})
 	}
@@ -163,6 +166,8 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 		return r.flavor(row)
 	case "shift-g":
 		return r.securityGroups(row)
+	case "shift-v":
+		return r.volumes(row)
 	}
 
 	return nil
