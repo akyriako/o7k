@@ -904,6 +904,7 @@ func (p *Plugin) Metadata() pluginsdk.Metadata {
 		Name:    "example",
 		Version: "0.1.0",
 		Color:   "#E20074",
+		URL:     "https://github.com/my_org/o7k-example-plugin",
 	}
 }
 

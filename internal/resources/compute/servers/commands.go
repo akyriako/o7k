@@ -167,7 +167,7 @@ func (r *Resource) start(row resource.Row) tea.Cmd {
 			}
 		}
 
-		return resource.CommandCompletedMsg{}
+		return resource.CommandCompletedMsg{RefreshOnCompletion: true}
 	}
 }
 
@@ -193,7 +193,7 @@ func (r *Resource) stop(row resource.Row) tea.Cmd {
 			}
 		}
 
-		return resource.CommandCompletedMsg{}
+		return resource.CommandCompletedMsg{RefreshOnCompletion: true}
 	}
 }
 
@@ -226,7 +226,7 @@ func (r *Resource) reboot(row resource.Row, soft bool) tea.Cmd {
 			}
 		}
 
-		return resource.CommandCompletedMsg{}
+		return resource.CommandCompletedMsg{RefreshOnCompletion: true}
 	}
 }
 

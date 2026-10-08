@@ -33,5 +33,6 @@ type ErrorMsg struct {
 }
 
 type CommandCompletedMsg struct {
-	LoadID uint64
+	LoadID              uint64
+	RefreshOnCompletion bool
 }
