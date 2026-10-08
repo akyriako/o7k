@@ -211,6 +211,7 @@ Press `Esc` to return to the previous resource and selection.
 | **Barbican / Key Manager** | secrets, secret containers, orders | ✅ |
 | **Manila / Shared File Systems** | shares, share snapshots, share networks, share types | ✅ |
 | **Manila / Shared File Systems** | share replicas, access rules, export locations | ✅ |
+| **Magnum / Container Infrastructure** | clusters, cluster templates, node groups | ✅ |
 | **Trove / Databases** | instances | ⬜ |
 
 > [!CAUTION]
@@ -272,6 +273,9 @@ Press `Esc` to return to the previous resource and selection.
 | Manila / Shared File Systems | Share Types | `share-types` | `share-type` |
 | Manila / Shared File Systems | Share Access Rules | `share-access-rules` | `share-access-rule` |
 | Manila / Shared File Systems | Share Export Locations | `share-export-locations` | `share-export-location` |
+| Magnum / Container Infrastructure | Clusters | `clusters` | `cluster`, `coe` |
+| Magnum / Container Infrastructure | Cluster Templates | `clustertemplates` | `clustertemplate` |
+| Magnum / Container Infrastructure | Node Groups | `nodegroups` | `nodegroup` |
 | Designate / DNS | Zones | `zones` | `zone`, `dns-zones`, `dns-zone` |
 | Designate / DNS | Recordsets | `recordsets` | `recordset`, `records`, `record` |
 
