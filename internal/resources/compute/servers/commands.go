@@ -131,12 +131,6 @@ func (r *Resource) volumes(row resource.Row) tea.Cmd {
 			}
 		}
 
-		if len(volumeIDs) == 0 {
-			return resource.ErrorMsg{
-				Err: fmt.Errorf("server %q has no attached volumes", row.ID),
-			}
-		}
-
 		return resource.NavigateFilteredMultiMsg{
 			Resource: "volumes",
 			Field:    "id",
