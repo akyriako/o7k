@@ -39,18 +39,18 @@ func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
 		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
-		{Key: "type", Title: "TYPE", MinWidth: 12, Flex: 0},
+		{Key: "type", Title: "TYPE", MinWidth: 4, Flex: 0},
 		{Key: "delay", Title: "DELAY", MinWidth: 8, Flex: 0},
 		{Key: "timeout", Title: "TIMEOUT", MinWidth: 8, Flex: 0},
-		{Key: "max_retries", Title: "MAX RETRIES", MinWidth: 12, Flex: 0},
-		{Key: "provisioning_status", Title: "PROVISIONING", MinWidth: 20, Flex: 0},
-		{Key: "operating_status", Title: "OPERATING", MinWidth: 16, Flex: 0},
+		{Key: "max_retries", Title: "MAX RETRIES", MinWidth: 11, Flex: 0},
+		{Key: "provisioning_status", Title: "PROVISIONING", MinWidth: 12, Flex: 0},
+		{Key: "operating_status", Title: "OPERATING", MinWidth: 9, Flex: 0},
 	}
 }
 
 func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
-		{Key: "shift-p", Description: "Pool"},
+		//{Key: "shift-p", Description: "Pool"},
 	}
 }
 
@@ -93,8 +93,8 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 
 func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	switch command.Key {
-	case "shift-p":
-		return r.pool(row)
+	//case "shift-p":
+	//	return r.pool(row)
 	default:
 		return nil
 	}

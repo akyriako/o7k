@@ -36,7 +36,7 @@ func (r *Resource) Columns() []resource.Column {
 		{Key: "region", Title: "REGION", MinWidth: 12, Flex: 1},
 		{Key: "domain", Title: "DOMAIN", MinWidth: 20, Flex: 1},
 		{Key: "project", Title: "PROJECT", MinWidth: 20, Flex: 2},
-		{Key: "cloudsyaml", Title: "CLOUDS_YAML", MinWidth: 40, Flex: 2},
+		{Key: "cloudsyaml", Title: "SOURCE", MinWidth: 40, Flex: 2},
 		//{Key: "identity", Title: "IDENTITY", MinWidth: 24, Flex: 3},
 	}
 }

@@ -34,7 +34,6 @@ func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
 		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
-		//{Key: "project_id", Title: "PROJECT ID", MinWidth: 40, Flex: 0},
 		{Key: "description", Title: "DESCRIPTION", MinWidth: 30, Flex: 2},
 	}
 }

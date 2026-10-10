@@ -38,19 +38,21 @@ func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
 		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
-		{Key: "provisioning_status", Title: "PROVISIONING", MinWidth: 20, Flex: 0},
-		{Key: "operating_status", Title: "OPERATING", MinWidth: 16, Flex: 0},
-		{Key: "vip_address", Title: "VIP ADDRESS", MinWidth: 20, Flex: 0},
-		{Key: "vip_network_id", Title: "VIP NETWORK ID", MinWidth: 40, Flex: 0},
-		{Key: "vip_subnet_id", Title: "VIP SUBNET ID", MinWidth: 40, Flex: 0},
+		{Key: "provisioning_status", Title: "PROVISIONING", MinWidth: 12, Flex: 0},
+		{Key: "operating_status", Title: "OPERATING", MinWidth: 9, Flex: 0},
+		{Key: "vip_address", Title: "VIP ADDRESS", MinWidth: 15, Flex: 1},
+		//{Key: "vip_network_id", Title: "VIP NETWORK ID", MinWidth: 40, Flex: 0},
+		//{Key: "vip_subnet_id", Title: "VIP SUBNET ID", MinWidth: 40, Flex: 0},
 	}
 }
 
 func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
-		{Key: "s", Description: "Show", Default: true},
-		{Key: "shift-l", Description: "Listeners"},
-		{Key: "shift-p", Description: "Pools"},
+		{Key: "s", Description: "Show"},
+		{Key: "shift-n", Description: "Network"},
+		{Key: "shift-s", Description: "Subnet"},
+		{Key: "shift-l", Description: "Listeners", Default: true},
+		//{Key: "shift-p", Description: "Pools"},
 	}
 }
 
@@ -96,8 +98,10 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 		return r.show(row)
 	case "shift-l":
 		return r.listeners(row)
-	case "shift-p":
-		return r.pools(row)
+	case "shift-n":
+		return r.network(row)
+	case "shift-s":
+		return r.subnet(row)
 	}
 
 	return nil

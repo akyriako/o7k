@@ -37,7 +37,7 @@ func (r *Resource) Columns() []resource.Column {
 		{Key: "ethertype", Title: "ETHERTYPE", MinWidth: 12, Flex: 0},
 		{Key: "protocol", Title: "PROTOCOL", MinWidth: 12, Flex: 0},
 		{Key: "port_range", Title: "PORT RANGE", MinWidth: 16, Flex: 0},
-		{Key: "remote_ip_prefix", Title: "REMOTE IP PREFIX", MinWidth: 20, Flex: 1},
+		{Key: "remote_ip_prefix", Title: "REMOTE IP PREFIX", MinWidth: 18, Flex: 1},
 		{Key: "remote_group_id", Title: "REMOTE GROUP ID", MinWidth: 40, Flex: 0},
 		{Key: "security_group_id", Title: "SECURITY GROUP ID", MinWidth: 40, Flex: 0},
 		//{Key: "project_id", Title: "PROJECT ID", MinWidth: 40, Flex: 0},

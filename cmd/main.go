@@ -440,11 +440,11 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 		errs = errors.Join(errs, fmt.Errorf("registering load balancers resource: %w", err))
 	}
 
-	if err := r.Register(listeners.New(openstackContext)); err != nil {
+	if err := r.RegisterNavigationOnly(listeners.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering listeners resource: %w", err))
 	}
 
-	if err := r.Register(pools.New(openstackContext)); err != nil {
+	if err := r.RegisterNavigationOnly(pools.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering pools resource: %w", err))
 	}
 
@@ -452,11 +452,11 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 		errs = errors.Join(errs, fmt.Errorf("registering members resource: %w", err))
 	}
 
-	if err := r.Register(healthmonitors.New(openstackContext)); err != nil {
+	if err := r.RegisterNavigationOnly(healthmonitors.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering health monitors resource: %w", err))
 	}
 
-	if err := r.Register(l7policies.New(openstackContext)); err != nil {
+	if err := r.RegisterNavigationOnly(l7policies.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering L7 policies resource: %w", err))
 	}
 

@@ -3,6 +3,7 @@ package ports
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
@@ -33,12 +34,13 @@ func (r *Resource) Aliases() []string {
 func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
-		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
-		{Key: "network_id", Title: "NETWORK ID", MinWidth: 40, Flex: 0},
-		{Key: "mac_address", Title: "MAC ADDRESS", MinWidth: 20, Flex: 0},
-		{Key: "status", Title: "STATUS", MinWidth: 12, Flex: 0},
 		{Key: "device_owner", Title: "DEVICE OWNER", MinWidth: 28, Flex: 1},
+		{Key: "fixed_ips", Title: "FIXED IPS", MinWidth: 15, Flex: 1},
+		{Key: "mac_address", Title: "MAC ADDRESS", MinWidth: 17, Flex: 0},
+		{Key: "status", Title: "STATUS", MinWidth: 10, Flex: 0},
 		{Key: "device_id", Title: "DEVICE ID", MinWidth: 40, Flex: 0},
+		{Key: "network_id", Title: "NETWORK ID", MinWidth: 40, Flex: 0},
+		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
 	}
 }
 
@@ -68,12 +70,21 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 	rows := make([]resource.Row, 0, len(items))
 
 	for _, port := range items {
+		var ips strings.Builder
+		for i, fxip := range port.FixedIPs {
+			ips.WriteString(fmt.Sprintf("%s", fxip.IPAddress))
+			if i != 0 && i != len(port.FixedIPs) {
+				ips.WriteString(", ")
+			}
+
+		}
 		rows = append(rows, resource.Row{
 			ID: port.ID,
 			Fields: map[string]string{
 				"id":           port.ID,
 				"name":         port.Name,
 				"network_id":   port.NetworkID,
+				"fixed_ips":    ips.String(),
 				"mac_address":  port.MACAddress,
 				"status":       port.Status,
 				"device_owner": port.DeviceOwner,
