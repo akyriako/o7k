@@ -9,7 +9,7 @@ import (
 	dnszones "github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones"
 )
 
-func (r *Resource) navigateToRecordsets(row resource.Row) tea.Cmd {
+func (r *Resource) recordsets(row resource.Row) tea.Cmd {
 	return func() tea.Msg {
 		return resource.NavigateFilteredMsg{
 			Resource: "recordsets",

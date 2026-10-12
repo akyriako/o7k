@@ -5,7 +5,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (r *Resource) navigateToEndpoints(row resource.Row) tea.Cmd {
+func (r *Resource) endpoints(row resource.Row) tea.Cmd {
 	return func() tea.Msg {
 		return resource.NavigateFilteredMsg{
 			Resource: "endpoints",

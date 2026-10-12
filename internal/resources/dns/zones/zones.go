@@ -93,7 +93,7 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	case "s":
 		return r.show(row.ID)
 	case "shift-r":
-		return r.navigateToRecordsets(row)
+		return r.recordsets(row)
 	}
 
 	return nil

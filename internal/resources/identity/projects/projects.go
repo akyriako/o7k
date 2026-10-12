@@ -44,12 +44,24 @@ func (r *Resource) Columns() []resource.Column {
 
 func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
+		//{Key: "s", Description: "Show", Default: true},
+		{Key: "shift-d", Description: "Domain"},
+		{Key: "shift-p", Description: "Parent Project"},
+		{Key: "shift-u", Description: "Users"},
 		{Key: "shift-q", Description: "Quotas"},
 	}
 }
 
 func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	switch command.Key {
+	//case "s":
+	//	return r.show(row.ID)
+	case "shift-d":
+		return r.domain(row)
+	case "shift-p":
+		return r.parentProject(row)
+	case "shift-u":
+		return r.users(row)
 	case "shift-q":
 		return r.quotas(row)
 	}
@@ -63,7 +75,10 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 		return nil, err
 	}
 
-	pages, err := identityprojects.List(client, identityprojects.ListOpts{}).AllPages(ctx)
+	pages, err := identityprojects.List(
+		client,
+		identityprojects.ListOpts{},
+	).AllPages(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("listing projects: %w", err)
 	}

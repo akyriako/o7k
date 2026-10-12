@@ -32,15 +32,18 @@ func (r *Resource) Aliases() []string {
 
 func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
-		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
+		{Key: "id", Title: "ID", MinWidth: 32, Flex: 0},
 		{Key: "name", Title: "NAME", MinWidth: 20, Flex: 1},
-		{Key: "domain_id", Title: "DOMAIN ID", MinWidth: 32, Flex: 1},
+		{Key: "domain_id", Title: "DOMAIN ID", MinWidth: 32, Flex: 0},
 		{Key: "description", Title: "DESCRIPTION", MinWidth: 30, Flex: 2},
 	}
 }
 
 func (r *Resource) Commands() []resource.Command {
-	return nil
+	return []resource.Command{
+		//{Key: "s", Description: "Show", Default: true},
+		{Key: "shift-d", Description: "Domain"},
+	}
 }
 
 func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
@@ -76,6 +79,13 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 	return rows, nil
 }
 
-func (r *Resource) Execute(_ resource.Command, _ resource.Row) tea.Cmd {
+func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
+	switch command.Key {
+	//case "s":
+	//	return r.show(row.ID)
+	case "shift-d":
+		return r.domain(row)
+	}
+
 	return nil
 }

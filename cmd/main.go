@@ -30,11 +30,13 @@ import (
 	"github.com/akyriako/o7k/internal/resources/identity/catalog"
 	"github.com/akyriako/o7k/internal/resources/identity/domains"
 	"github.com/akyriako/o7k/internal/resources/identity/endpoints"
+	"github.com/akyriako/o7k/internal/resources/identity/groups"
 	"github.com/akyriako/o7k/internal/resources/identity/projects"
 	"github.com/akyriako/o7k/internal/resources/identity/quotas"
 	"github.com/akyriako/o7k/internal/resources/identity/regions"
 	"github.com/akyriako/o7k/internal/resources/identity/roles"
 	"github.com/akyriako/o7k/internal/resources/identity/services"
+	"github.com/akyriako/o7k/internal/resources/identity/users"
 	"github.com/akyriako/o7k/internal/resources/images"
 	"github.com/akyriako/o7k/internal/resources/keymanager/containers"
 	"github.com/akyriako/o7k/internal/resources/keymanager/orders"
@@ -342,6 +344,14 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 
 	if err := r.Register(domains.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering domains resource: %w", err))
+	}
+
+	if err := r.Register(users.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering users resource: %w", err))
+	}
+
+	if err := r.Register(groups.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering groups resource: %w", err))
 	}
 
 	if err := r.Register(roles.New(openstackContext)); err != nil {
