@@ -201,6 +201,7 @@ Press `Esc` to return to the previous resource and selection.
 | **Swift / Object Storage** | swift containers, swift objects | ✅ |
 | **Nova / Compute** | servers, flavors | ✅ |
 | **Nova / Compute** | keypairs, server groups, availability zones | ✅ |
+| **Nova / Compute** | hypervisors, host aggregates | ✅ |
 | **Neutron / Network** | networks, subnets, ports, routers, floating IPs, security groups | ✅ |
 | **Neutron / Network** | security group rules | ✅ |
 | **Neutron / Network** | router interfaces | ⬜ |
@@ -239,6 +240,8 @@ Press `Esc` to return to the previous resource and selection.
 | Nova / Compute | Keypairs | `keypairs` | `keypair`, `keys`, `key` |
 | Nova / Compute | Server Groups | `servergroups` | `servergroup`, `sgroups`, `sgroup` |
 | Nova / Compute | Availability Zones | `availabilityzones` | `availabilityzone`, `azs`, `az` |
+| Nova / Compute | Hypervisors | `hypervisors` | `hypervisor`, `hyp`, `hyps` |
+| Nova / Compute | Host Aggregates | `aggregates` | `aggregate`, `hostaggregates`, `hostaggregate` |
 | Neutron / Network | Networks | `networks` | `network`, `net` |
 | Neutron / Network | Subnets | `subnets` | `subnet` |
 | Neutron / Network | Ports | `ports` | `port` |
