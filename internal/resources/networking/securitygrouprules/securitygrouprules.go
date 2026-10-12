@@ -40,14 +40,11 @@ func (r *Resource) Columns() []resource.Column {
 		{Key: "remote_ip_prefix", Title: "REMOTE IP PREFIX", MinWidth: 18, Flex: 1},
 		{Key: "remote_group_id", Title: "REMOTE GROUP ID", MinWidth: 40, Flex: 0},
 		{Key: "security_group_id", Title: "SECURITY GROUP ID", MinWidth: 40, Flex: 0},
-		//{Key: "project_id", Title: "PROJECT ID", MinWidth: 40, Flex: 0},
 	}
 }
 
 func (r *Resource) Commands() []resource.Command {
-	return []resource.Command{
-		{Key: "shift-g", Description: "Security Group"},
-	}
+	return nil
 }
 
 func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
@@ -89,11 +86,6 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 }
 
 func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
-	switch command.Key {
-	case "shift-g":
-		return r.securitygroup(row)
-	}
-
 	return nil
 }
 

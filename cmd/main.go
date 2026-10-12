@@ -385,7 +385,7 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 		errs = errors.Join(errs, fmt.Errorf("registering security groups resource: %w", err))
 	}
 
-	if err := r.Register(securitygrouprules.New(openstackContext)); err != nil {
+	if err := r.RegisterNavigationOnly(securitygrouprules.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering security group rules resource: %w", err))
 	}
 
