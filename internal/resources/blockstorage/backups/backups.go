@@ -20,7 +20,7 @@ func New(context *openstack.Context) *Resource {
 }
 
 func (r *Resource) Kind() string {
-	return "backups"
+	return "volume-backups"
 }
 
 func (r *Resource) Title() string {
@@ -28,17 +28,17 @@ func (r *Resource) Title() string {
 }
 
 func (r *Resource) Aliases() []string {
-	return []string{"backup", "volume-backups", "volume-backup"}
+	return []string{"volume-backup"}
 }
 
 func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
-		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
-		{Key: "status", Title: "STATUS", MinWidth: 14, Flex: 0},
+		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 2},
+		{Key: "is_incremental", Title: "INCREMENTAL", MinWidth: 11, Flex: 0},
 		{Key: "size", Title: "SIZE (GB)", MinWidth: 12, Flex: 0},
-		{Key: "volume_id", Title: "VOLUME ID", MinWidth: 40, Flex: 0},
-		//{Key: "availability_zone", Title: "AVAILABILITY ZONE", MinWidth: 20, Flex: 1},
+		{Key: "status", Title: "STATUS", MinWidth: 14, Flex: 0},
+		//{Key: "volume_id", Title: "VOLUME ID", MinWidth: 40, Flex: 0},
 	}
 }
 
@@ -55,7 +55,7 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 		return nil, err
 	}
 
-	pages, err := backups.List(client, backups.ListOpts{}).AllPages(ctx)
+	pages, err := backups.ListDetail(client, backups.ListDetailOpts{}).AllPages(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("listing volume backups: %w", err)
 	}
@@ -71,12 +71,12 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 		rows = append(rows, resource.Row{
 			ID: backup.ID,
 			Fields: map[string]string{
-				"id":        backup.ID,
-				"name":      backup.Name,
-				"status":    backup.Status,
-				"size":      strconv.Itoa(backup.Size),
-				"volume_id": backup.VolumeID,
-				//"availability_zone": availabilityZone,
+				"id":             backup.ID,
+				"name":           backup.Name,
+				"status":         backup.Status,
+				"size":           strconv.Itoa(backup.Size),
+				"volume_id":      backup.VolumeID,
+				"is_incremental": strconv.FormatBool(backup.IsIncremental),
 			},
 		})
 	}
@@ -89,7 +89,7 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	case "s":
 		return r.show(row.ID)
 	case "shift-v":
-		return r.navigateToVolume(row)
+		return r.volume(row)
 	}
 
 	return nil

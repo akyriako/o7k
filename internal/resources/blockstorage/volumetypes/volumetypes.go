@@ -19,7 +19,7 @@ func New(context *openstack.Context) *Resource {
 }
 
 func (r *Resource) Kind() string {
-	return "volumetypes"
+	return "volume-types"
 }
 
 func (r *Resource) Title() string {
@@ -27,7 +27,7 @@ func (r *Resource) Title() string {
 }
 
 func (r *Resource) Aliases() []string {
-	return []string{"volumetype", "types", "type"}
+	return []string{"volume-type"}
 }
 
 func (r *Resource) Columns() []resource.Column {
