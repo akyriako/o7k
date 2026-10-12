@@ -78,7 +78,7 @@ func (r *Resource) List(_ context.Context) ([]resource.Row, error) {
 func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	switch command.Key {
 	case "shift-s":
-		return r.navigateToService(row)
+		return r.service(row)
 	}
 
 	return nil

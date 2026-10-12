@@ -55,3 +55,27 @@ func (r *Resource) pools(row resource.Row) tea.Cmd {
 		}
 	}
 }
+
+func (r *Resource) network(row resource.Row) tea.Cmd {
+	networkID := row.Fields["vip_network_id"]
+
+	return func() tea.Msg {
+		return resource.NavigateFilteredMsg{
+			Resource: "networks",
+			Field:    "id",
+			Value:    networkID,
+		}
+	}
+}
+
+func (r *Resource) subnet(row resource.Row) tea.Cmd {
+	subnetID := row.Fields["vip_subnet_id"]
+
+	return func() tea.Msg {
+		return resource.NavigateFilteredMsg{
+			Resource: "subnets",
+			Field:    "id",
+			Value:    subnetID,
+		}
+	}
+}

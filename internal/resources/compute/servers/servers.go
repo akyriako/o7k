@@ -39,11 +39,11 @@ func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
 		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 5},
-		{Key: "status", Title: "STATUS", MinWidth: 12, Flex: 0},
-		{Key: "task_state", Title: "STATE", MinWidth: 16, Flex: 0},
 		{Key: "flavor", Title: "FLAVOR", MinWidth: 15, Flex: 1},
-		{Key: "availability_zone", Title: "AVAILABILITY ZONE", MinWidth: 15, Flex: 1},
-		{Key: "addresses", Title: "ADDRESSES", MinWidth: 40, Flex: 1},
+		{Key: "availability_zone", Title: "AZ", MinWidth: 10, Flex: 1},
+		{Key: "addresses", Title: "ADDRESSES", MinWidth: 32, Flex: 1},
+		{Key: "task_state", Title: "STATE", MinWidth: 16, Flex: 0},
+		{Key: "status", Title: "STATUS", MinWidth: 12, Flex: 0},
 	}
 }
 

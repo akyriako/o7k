@@ -194,7 +194,7 @@ Press `Esc` to return to the previous resource and selection.
 | Service | Resources | Status |
 |---|---|:-:|
 | **Local / Auth** | contexts | Partial |
-| **Keystone / Identity** | projects, users, groups, roles, domains | Partial |
+| **Keystone / Identity** | domains, projects, users, groups, roles | ✅ |
 | **Keystone / Catalog** | catalog, services, endpoints, regions | ✅ |
 | **Cinder / Block Storage** | volumes, snapshots, volume types, volume backups | ✅ |
 | **Glance / Image** | images | ✅ |
@@ -229,11 +229,11 @@ Press `Esc` to return to the previous resource and selection.
 | Keystone / Catalog | Services | `services` | `service`, `svc` |
 | Keystone / Catalog | Endpoints | `endpoints` | `endpoint` |
 | Keystone / Catalog | Regions | `regions` | `region` |
+| Keystone / Identity | Domains | `domains` | `domain` |
 | Keystone / Identity | Projects | `projects` | `project` |
 | Keystone / Identity | Users | `users` | `user` |
 | Keystone / Identity | Groups | `groups` | `group` |
 | Keystone / Identity | Roles | `roles` | `role` |
-| Keystone / Identity | Domains | `domains` | `domain` |
 | Nova / Compute | Servers | `servers` | `server`, `srv` |
 | Nova / Compute | Flavors | `flavors` | `flavor` |
 | Nova / Compute | Keypairs | `keypairs` | `keypair`, `keys`, `key` |

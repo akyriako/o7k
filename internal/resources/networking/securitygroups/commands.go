@@ -5,7 +5,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (r *Resource) navigateToRules(row resource.Row) tea.Cmd {
+func (r *Resource) rules(row resource.Row) tea.Cmd {
 	securityGroupID := row.ID
 
 	return func() tea.Msg {

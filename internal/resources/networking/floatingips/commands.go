@@ -5,7 +5,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (r *Resource) navigateToRouter(row resource.Row) tea.Cmd {
+func (r *Resource) router(row resource.Row) tea.Cmd {
 	routerID := row.Fields["router_id"]
 
 	return func() tea.Msg {
@@ -17,7 +17,7 @@ func (r *Resource) navigateToRouter(row resource.Row) tea.Cmd {
 	}
 }
 
-func (r *Resource) navigateToPort(row resource.Row) tea.Cmd {
+func (r *Resource) port(row resource.Row) tea.Cmd {
 	portID := row.Fields["port_id"]
 
 	return func() tea.Msg {

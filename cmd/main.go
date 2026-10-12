@@ -30,11 +30,13 @@ import (
 	"github.com/akyriako/o7k/internal/resources/identity/catalog"
 	"github.com/akyriako/o7k/internal/resources/identity/domains"
 	"github.com/akyriako/o7k/internal/resources/identity/endpoints"
+	"github.com/akyriako/o7k/internal/resources/identity/groups"
 	"github.com/akyriako/o7k/internal/resources/identity/projects"
 	"github.com/akyriako/o7k/internal/resources/identity/quotas"
 	"github.com/akyriako/o7k/internal/resources/identity/regions"
 	"github.com/akyriako/o7k/internal/resources/identity/roles"
 	"github.com/akyriako/o7k/internal/resources/identity/services"
+	"github.com/akyriako/o7k/internal/resources/identity/users"
 	"github.com/akyriako/o7k/internal/resources/images"
 	"github.com/akyriako/o7k/internal/resources/keymanager/containers"
 	"github.com/akyriako/o7k/internal/resources/keymanager/orders"
@@ -344,6 +346,14 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 		errs = errors.Join(errs, fmt.Errorf("registering domains resource: %w", err))
 	}
 
+	if err := r.Register(users.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering users resource: %w", err))
+	}
+
+	if err := r.Register(groups.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering groups resource: %w", err))
+	}
+
 	if err := r.Register(roles.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering roles resource: %w", err))
 	}
@@ -440,11 +450,11 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 		errs = errors.Join(errs, fmt.Errorf("registering load balancers resource: %w", err))
 	}
 
-	if err := r.Register(listeners.New(openstackContext)); err != nil {
+	if err := r.RegisterNavigationOnly(listeners.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering listeners resource: %w", err))
 	}
 
-	if err := r.Register(pools.New(openstackContext)); err != nil {
+	if err := r.RegisterNavigationOnly(pools.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering pools resource: %w", err))
 	}
 
@@ -452,11 +462,11 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 		errs = errors.Join(errs, fmt.Errorf("registering members resource: %w", err))
 	}
 
-	if err := r.Register(healthmonitors.New(openstackContext)); err != nil {
+	if err := r.RegisterNavigationOnly(healthmonitors.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering health monitors resource: %w", err))
 	}
 
-	if err := r.Register(l7policies.New(openstackContext)); err != nil {
+	if err := r.RegisterNavigationOnly(l7policies.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering L7 policies resource: %w", err))
 	}
 

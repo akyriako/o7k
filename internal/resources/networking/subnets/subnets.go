@@ -34,17 +34,18 @@ func (r *Resource) Aliases() []string {
 func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
-		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
+		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 2},
+		{Key: "ip_version", Title: "ETHERTYPE", MinWidth: 9, Flex: 0},
+		{Key: "cidr", Title: "CIDR", MinWidth: 18, Flex: 0},
+		{Key: "gateway", Title: "GATEWAY", MinWidth: 15, Flex: 0},
+		{Key: "dhcp", Title: "DHCP", MinWidth: 5, Flex: 0},
 		{Key: "network_id", Title: "NETWORK ID", MinWidth: 40, Flex: 0},
-		{Key: "cidr", Title: "CIDR", MinWidth: 20, Flex: 1},
-		{Key: "ip_version", Title: "IP VERSION", MinWidth: 12, Flex: 0},
-		{Key: "gateway", Title: "GATEWAY", MinWidth: 20, Flex: 1},
-		{Key: "dhcp", Title: "DHCP", MinWidth: 8, Flex: 0},
 	}
 }
 
 func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
+		{Key: "s", Description: "Show", Default: true},
 		{Key: "shift-n", Description: "Network"},
 	}
 }
@@ -75,7 +76,7 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 				"name":       subnet.Name,
 				"network_id": subnet.NetworkID,
 				"cidr":       subnet.CIDR,
-				"ip_version": strconv.Itoa(subnet.IPVersion),
+				"ip_version": fmt.Sprintf("IPv%d", subnet.IPVersion),
 				"gateway":    subnet.GatewayIP,
 				"dhcp":       strconv.FormatBool(subnet.EnableDHCP),
 			},
@@ -87,8 +88,10 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 
 func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	switch command.Key {
+	case "s":
+		return r.show(row.ID)
 	case "shift-n":
-		return r.navigateToNetwork(row)
+		return r.network(row)
 	}
 
 	return nil

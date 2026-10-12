@@ -33,7 +33,7 @@ func (r *Resource) Aliases() []string {
 func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
-		{Key: "floating_ip", Title: "FLOATING IP", MinWidth: 14, Flex: 0},
+		{Key: "floating_ip", Title: "FLOATING IP", MinWidth: 15, Flex: 0},
 		{Key: "fixed_ip", Title: "FIXED IP", MinWidth: 14, Flex: 0},
 		{Key: "status", Title: "STATUS", MinWidth: 12, Flex: 0},
 		{Key: "floating_network_id", Title: "FLOATING NETWORK ID", MinWidth: 40, Flex: 0},
@@ -90,9 +90,9 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	switch command.Key {
 	case "shift-r":
-		return r.navigateToRouter(row)
+		return r.router(row)
 	case "shift-p":
-		return r.navigateToPort(row)
+		return r.port(row)
 	}
 
 	return nil

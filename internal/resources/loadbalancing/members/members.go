@@ -37,11 +37,12 @@ func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
 		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
-		{Key: "address", Title: "ADDRESS", MinWidth: 20, Flex: 0},
-		{Key: "protocol_port", Title: "PORT", MinWidth: 8, Flex: 0},
-		{Key: "provisioning_status", Title: "PROVISIONING", MinWidth: 20, Flex: 0},
-		{Key: "operating_status", Title: "OPERATING", MinWidth: 16, Flex: 0},
-		{Key: "subnet_id", Title: "SUBNET ID", MinWidth: 40, Flex: 0},
+		{Key: "address", Title: "ADDRESS", MinWidth: 15, Flex: 0},
+		{Key: "weight", Title: "WEIGHT", MinWidth: 6, Flex: 0},
+		{Key: "protocol_port", Title: "PORT", MinWidth: 5, Flex: 0},
+		{Key: "provisioning_status", Title: "PROVISIONING", MinWidth: 12, Flex: 0},
+		{Key: "operating_status", Title: "OPERATING", MinWidth: 9, Flex: 0},
+		//{Key: "subnet_id", Title: "SUBNET ID", MinWidth: 40, Flex: 0},
 	}
 }
 
@@ -81,6 +82,7 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 				"id":                  item.ID,
 				"name":                item.Name,
 				"address":             item.Address,
+				"weight":              strconv.Itoa(item.Weight),
 				"protocol_port":       strconv.Itoa(item.ProtocolPort),
 				"provisioning_status": item.ProvisioningStatus,
 				"operating_status":    item.OperatingStatus,

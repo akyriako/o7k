@@ -5,7 +5,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (r *Resource) navigateToService(row resource.Row) tea.Cmd {
+func (r *Resource) service(row resource.Row) tea.Cmd {
 	serviceName := row.Fields["service"]
 
 	return func() tea.Msg {

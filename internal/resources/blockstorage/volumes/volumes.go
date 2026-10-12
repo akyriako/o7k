@@ -34,11 +34,13 @@ func (r *Resource) Aliases() []string {
 func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
-		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
-		{Key: "status", Title: "STATUS", MinWidth: 14, Flex: 0},
+		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 3},
+		{Key: "status", Title: "STATUS", MinWidth: 10, Flex: 0},
 		{Key: "size", Title: "SIZE (GB)", MinWidth: 12, Flex: 0},
-		{Key: "type", Title: "TYPE", MinWidth: 20, Flex: 1},
-		{Key: "availability_zone", Title: "AVAILABILITY ZONE", MinWidth: 20, Flex: 1},
+		{Key: "type", Title: "TYPE", MinWidth: 5, Flex: 1},
+		{Key: "bootable", Title: "BOOTABLE", MinWidth: 9, Flex: 0},
+		{Key: "encrypted", Title: "ENCRYPTED", MinWidth: 9, Flex: 0},
+		{Key: "availability_zone", Title: "AZ", MinWidth: 8, Flex: 1},
 	}
 }
 
@@ -77,6 +79,8 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 				"status":            volume.Status,
 				"size":              strconv.Itoa(volume.Size),
 				"type":              volume.VolumeType,
+				"bootable":          volume.Bootable,
+				"encrypted":         strconv.FormatBool(volume.Encrypted),
 				"availability_zone": volume.AvailabilityZone,
 			},
 		})

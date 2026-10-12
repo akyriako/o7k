@@ -29,3 +29,39 @@ func (r *Resource) show(id string) tea.Cmd {
 		}
 	}
 }
+
+func (r *Resource) network(row resource.Row) tea.Cmd {
+	networkID := row.Fields["neutron_net_id"]
+
+	return func() tea.Msg {
+		//if networkID == "" {
+		//	return resource.ErrorMsg{
+		//		Err: fmt.Errorf("share network %q has no neutron network", row.ID),
+		//	}
+		//}
+
+		return resource.NavigateFilteredMsg{
+			Resource: "networks",
+			Field:    "id",
+			Value:    networkID,
+		}
+	}
+}
+
+func (r *Resource) subnet(row resource.Row) tea.Cmd {
+	subnetID := row.Fields["neutron_subnet_id"]
+
+	return func() tea.Msg {
+		//if subnetID == "" {
+		//	return resource.ErrorMsg{
+		//		Err: fmt.Errorf("share network %q has no neutron subnet", row.ID),
+		//	}
+		//}
+
+		return resource.NavigateFilteredMsg{
+			Resource: "subnets",
+			Field:    "id",
+			Value:    subnetID,
+		}
+	}
+}

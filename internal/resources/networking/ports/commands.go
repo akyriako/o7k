@@ -5,7 +5,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (r *Resource) navigateToNetwork(row resource.Row) tea.Cmd {
+func (r *Resource) network(row resource.Row) tea.Cmd {
 	networkID := row.Fields["network_id"]
 
 	return func() tea.Msg {
@@ -17,7 +17,7 @@ func (r *Resource) navigateToNetwork(row resource.Row) tea.Cmd {
 	}
 }
 
-func (r *Resource) navigateToFloatingIPs(row resource.Row) tea.Cmd {
+func (r *Resource) floatingips(row resource.Row) tea.Cmd {
 	portID := row.ID
 
 	return func() tea.Msg {

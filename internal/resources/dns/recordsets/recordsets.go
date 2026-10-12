@@ -102,7 +102,7 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	case "s":
 		return r.show(row.Fields["zone_id"], row.ID)
 	case "shift-z":
-		return r.navigateToZone(row)
+		return r.zone(row)
 	}
 
 	return nil

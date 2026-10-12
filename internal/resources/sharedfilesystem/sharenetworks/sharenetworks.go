@@ -43,6 +43,8 @@ func (r *Resource) Columns() []resource.Column {
 func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
 		{Key: "s", Description: "Show", Default: true},
+		{Key: "shift-n", Description: "Network"},
+		{Key: "shift-b", Description: "Subnet"},
 	}
 }
 
@@ -68,10 +70,12 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 		rows = append(rows, resource.Row{
 			ID: network.ID,
 			Fields: map[string]string{
-				"id":          network.ID,
-				"name":        network.Name,
-				"description": network.Description,
-				"project_id":  network.ProjectID,
+				"id":                network.ID,
+				"name":              network.Name,
+				"description":       network.Description,
+				"project_id":        network.ProjectID,
+				"neutron_net_id":    network.NeutronNetID,
+				"neutron_subnet_id": network.NeutronSubnetID,
 			},
 		})
 	}
@@ -83,6 +87,10 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	switch command.Key {
 	case "s":
 		return r.show(row.ID)
+	case "shift-n":
+		return r.network(row)
+	case "shift-b":
+		return r.subnet(row)
 	}
 
 	return nil
