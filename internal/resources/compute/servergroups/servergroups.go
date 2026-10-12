@@ -36,12 +36,7 @@ func (r *Resource) Columns() []resource.Column {
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
 		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
 		{Key: "policies", Title: "POLICIES", MinWidth: 20, Flex: 1},
-		{Key: "members", Title: "MEMBERS", MinWidth: 40, Flex: 2},
 	}
-}
-
-func (r *Resource) Commands() []resource.Command {
-	return nil
 }
 
 func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
@@ -69,7 +64,6 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 				"id":       serverGroup.ID,
 				"name":     serverGroup.Name,
 				"policies": strings.Join(serverGroup.Policies, ", "),
-				"members":  strings.Join(serverGroup.Members, ", "),
 			},
 		})
 	}
@@ -77,6 +71,20 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 	return rows, nil
 }
 
-func (r *Resource) Execute(_ resource.Command, _ resource.Row) tea.Cmd {
+func (r *Resource) Commands() []resource.Command {
+	return []resource.Command{
+		{Key: "s", Description: "Show", Default: true},
+		{Key: "shift-m", Description: "Members"},
+	}
+}
+
+func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
+	switch command.Key {
+	case "s":
+		return r.show(row.ID)
+	case "shift-m":
+		return r.members(row)
+	}
+
 	return nil
 }
