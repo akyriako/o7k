@@ -35,7 +35,7 @@ func (r *Resource) Columns() []resource.Column {
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
 		{Key: "floating_ip", Title: "FLOATING IP", MinWidth: 15, Flex: 0},
 		{Key: "fixed_ip", Title: "FIXED IP", MinWidth: 14, Flex: 0},
-		{Key: "status", Title: "STATUS", MinWidth: 12, Flex: 0},
+		{Key: "status", Title: "STATUS", MinWidth: 12, Flex: 1},
 		{Key: "floating_network_id", Title: "FLOATING NETWORK ID", MinWidth: 40, Flex: 0},
 		{Key: "port_id", Title: "PORT ID", MinWidth: 40, Flex: 0},
 		{Key: "router_id", Title: "ROUTER ID", MinWidth: 40, Flex: 0},

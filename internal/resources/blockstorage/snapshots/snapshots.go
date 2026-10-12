@@ -20,7 +20,7 @@ func New(context *openstack.Context) *Resource {
 }
 
 func (r *Resource) Kind() string {
-	return "snapshots"
+	return "volume-snapshots"
 }
 
 func (r *Resource) Title() string {
@@ -28,7 +28,7 @@ func (r *Resource) Title() string {
 }
 
 func (r *Resource) Aliases() []string {
-	return []string{"snapshot", "snap"}
+	return []string{"volume-snapshot"}
 }
 
 func (r *Resource) Columns() []resource.Column {
@@ -37,12 +37,13 @@ func (r *Resource) Columns() []resource.Column {
 		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
 		{Key: "status", Title: "STATUS", MinWidth: 14, Flex: 0},
 		{Key: "size", Title: "SIZE (GB)", MinWidth: 12, Flex: 0},
-		{Key: "volume_id", Title: "VOLUME ID", MinWidth: 40, Flex: 0},
+		//{Key: "volume_id", Title: "VOLUME ID", MinWidth: 40, Flex: 0},
 	}
 }
 
 func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
+		{Key: "s", Description: "Show", Default: true},
 		{Key: "shift-v", Description: "Volume"},
 	}
 }
@@ -83,8 +84,10 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 
 func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	switch command.Key {
+	case "s":
+		return r.show(row.ID)
 	case "shift-v":
-		return r.navigateToVolume(row)
+		return r.volume(row)
 	}
 
 	return nil

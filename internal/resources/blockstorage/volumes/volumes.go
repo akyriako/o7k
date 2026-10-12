@@ -35,12 +35,12 @@ func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
 		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 3},
-		{Key: "status", Title: "STATUS", MinWidth: 10, Flex: 0},
+		{Key: "availability_zone", Title: "AZ", MinWidth: 8, Flex: 1},
 		{Key: "size", Title: "SIZE (GB)", MinWidth: 12, Flex: 0},
 		{Key: "type", Title: "TYPE", MinWidth: 5, Flex: 1},
 		{Key: "bootable", Title: "BOOTABLE", MinWidth: 9, Flex: 0},
 		{Key: "encrypted", Title: "ENCRYPTED", MinWidth: 9, Flex: 0},
-		{Key: "availability_zone", Title: "AZ", MinWidth: 8, Flex: 1},
+		{Key: "status", Title: "STATUS", MinWidth: 6, Flex: 1},
 	}
 }
 
@@ -94,9 +94,9 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	case "s":
 		return r.show(row.ID)
 	case "shift-s":
-		return r.navigateToSnapshots(row)
+		return r.snapshots(row)
 	case "shift-b":
-		return r.navigateToBackups(row)
+		return r.backups(row)
 	}
 
 	return nil
