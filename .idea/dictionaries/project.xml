@@ -6,6 +6,7 @@
       <w>loadbalancer</w>
       <w>recordsets</w>
       <w>securitygroups</w>
+      <w>snat</w>
     </words>
   </dictionary>
 </component>
