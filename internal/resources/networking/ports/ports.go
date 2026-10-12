@@ -99,9 +99,9 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	switch command.Key {
 	case "shift-n":
-		return r.navigateToNetwork(row)
+		return r.network(row)
 	case "shift-f":
-		return r.navigateToFloatingIPs(row)
+		return r.floatingips(row)
 	}
 
 	return nil

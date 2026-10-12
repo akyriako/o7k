@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/resource"
@@ -34,7 +35,8 @@ func (r *Resource) Aliases() []string {
 func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
-		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 1},
+		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 2},
+		{Key: "external_fips", Title: "EXTERNAL FIXED IPS", MinWidth: 15, Flex: 1},
 		{Key: "status", Title: "STATUS", MinWidth: 12, Flex: 0},
 		{Key: "admin_state", Title: "ADMIN STATE", MinWidth: 12, Flex: 0},
 		{Key: "distributed", Title: "DISTRIBUTED", MinWidth: 12, Flex: 0},
@@ -44,6 +46,7 @@ func (r *Resource) Columns() []resource.Column {
 
 func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
+		{Key: "s", Description: "Show", Default: true},
 		{Key: "shift-p", Description: "Ports"},
 		{Key: "shift-f", Description: "Floating IPs"},
 	}
@@ -68,15 +71,24 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 	rows := make([]resource.Row, 0, len(items))
 
 	for _, router := range items {
+		var ips strings.Builder
+		for i, fxip := range router.GatewayInfo.ExternalFixedIPs {
+			ips.WriteString(fmt.Sprintf("%s", fxip.IPAddress))
+			if i != 0 && i != len(router.GatewayInfo.ExternalFixedIPs) {
+				ips.WriteString(", ")
+			}
+
+		}
 		rows = append(rows, resource.Row{
 			ID: router.ID,
 			Fields: map[string]string{
-				"id":          router.ID,
-				"name":        router.Name,
-				"status":      router.Status,
-				"admin_state": strconv.FormatBool(router.AdminStateUp),
-				"distributed": strconv.FormatBool(router.Distributed),
-				"project_id":  router.ProjectID,
+				"id":            router.ID,
+				"name":          router.Name,
+				"external_fips": ips.String(),
+				"status":        router.Status,
+				"admin_state":   strconv.FormatBool(router.AdminStateUp),
+				"distributed":   strconv.FormatBool(router.Distributed),
+				"project_id":    router.ProjectID,
 			},
 		})
 	}
@@ -86,10 +98,12 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 
 func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	switch command.Key {
+	case "s":
+		return r.show(row.ID)
 	case "shift-p":
-		return r.navigateToPorts(row)
+		return r.ports(row)
 	case "shift-f":
-		return r.navigateToFloatingIPs(row)
+		return r.floatingips(row)
 	}
 
 	return nil

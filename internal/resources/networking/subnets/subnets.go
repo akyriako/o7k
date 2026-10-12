@@ -45,6 +45,7 @@ func (r *Resource) Columns() []resource.Column {
 
 func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
+		{Key: "s", Description: "Show", Default: true},
 		{Key: "shift-n", Description: "Network"},
 	}
 }
@@ -87,8 +88,10 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 
 func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	switch command.Key {
+	case "s":
+		return r.show(row.ID)
 	case "shift-n":
-		return r.navigateToNetwork(row)
+		return r.network(row)
 	}
 
 	return nil

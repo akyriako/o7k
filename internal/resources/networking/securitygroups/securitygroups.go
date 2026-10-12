@@ -80,7 +80,7 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	switch command.Key {
 	case "shift-r":
-		return r.navigateToRules(row)
+		return r.rules(row)
 	}
 
 	return nil
