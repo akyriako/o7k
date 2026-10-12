@@ -58,6 +58,8 @@ func (r *Resource) Commands() []resource.Command {
 		{Key: "ctrl+t", Description: "Stop", StatusLabel: "Stopping"},
 		{Key: "ctrl+r", Description: "Soft Reboot", StatusLabel: "Rebooting"},
 		{Key: "ctrl+h", Description: "Hard Reboot", StatusLabel: "Hard Rebooting"},
+		{Key: "l", Description: "Log"},
+		{Key: "shift-a", Description: "Actions Log"},
 	}
 }
 
@@ -183,6 +185,11 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 		return r.reboot(row, true)
 	case "ctrl+h":
 		return r.reboot(row, false)
+	case "l":
+		return r.log(row.ID)
+	case "shift-a":
+		return r.actionLogs(row)
+
 	}
 
 	return nil

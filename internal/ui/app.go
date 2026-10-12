@@ -63,6 +63,7 @@ type Model struct {
 	detailViewport viewport.Model
 	detailID       string
 	detailContent  string
+	detailLabel    string
 
 	commandMode bool
 	command     textinput.Model
@@ -559,17 +560,36 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 
-		data, err := json.MarshalIndent(msg.Content, "", "  ")
-		if err != nil {
-			m.err = fmt.Errorf("encoding details: %v", err)
-			return m, nil
+		var displayContent string
+		isJson := true
+
+		switch content := msg.Content.(type) {
+		case string:
+			m.detailContent = content
+			displayContent = content
+			isJson = false
+
+		default:
+			data, err := json.MarshalIndent(content, "", "  ")
+			if err != nil {
+				m.err = fmt.Errorf("encoding details: %v", err)
+				return m, nil
+			}
+
+			m.detailContent = string(data)
+			displayContent = colorizeJSON(data)
 		}
 
 		m.detailMode = true
 		m.detailID = msg.ID
-		m.detailContent = string(data)
-		m.detailViewport.SetContent(colorizeJSON(data))
-		m.detailViewport.GotoTop()
+		m.detailViewport.SetContent(displayContent)
+
+		if isJson {
+			m.detailViewport.GotoTop()
+		} else {
+			m.detailViewport.GotoBottom()
+		}
+
 		m.Resize()
 
 		return m, nil
@@ -659,7 +679,7 @@ func (m Model) View() string {
 				navigationTagStyle.Render(" <"+m.resource.Kind()+"> ") + " ",
 			)
 			resourceTags.WriteString(
-				activeResourceStyle.Render(" <show> "),
+				activeResourceStyle.Render(" <" + strings.ToLower(m.detailLabel) + "> "),
 			)
 		} else {
 			resourceTags.WriteString(

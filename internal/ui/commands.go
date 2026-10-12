@@ -104,6 +104,7 @@ func (m *Model) executeResourceCommand(key string) tea.Cmd {
 
 	for _, command := range m.resource.Commands() {
 		if command.Key == key {
+			m.detailLabel = command.Description
 			row := m.resourceRows[cursor]
 
 			m.showLoading = true
@@ -151,6 +152,7 @@ func (m *Model) switchResource(name string, scope resourceScope) tea.Cmd {
 	m.detailMode = false
 	m.detailID = ""
 	m.detailContent = ""
+	m.detailLabel = ""
 	m.autoRefreshPaused = false
 
 	r, ok := m.registry.Get(name)
