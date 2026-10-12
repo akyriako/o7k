@@ -128,6 +128,7 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 				"addresses":         serverAddresses(server.Addresses),
 				"image":             image,
 				"image_id":          imageID,
+				"host":              server.Host,
 			},
 		})
 	}

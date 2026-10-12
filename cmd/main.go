@@ -16,8 +16,10 @@ import (
 	"github.com/akyriako/o7k/internal/resources/blockstorage/snapshots"
 	"github.com/akyriako/o7k/internal/resources/blockstorage/volumes"
 	"github.com/akyriako/o7k/internal/resources/blockstorage/volumetypes"
+	"github.com/akyriako/o7k/internal/resources/compute/aggregates"
 	"github.com/akyriako/o7k/internal/resources/compute/availabilityzones"
 	"github.com/akyriako/o7k/internal/resources/compute/flavors"
+	"github.com/akyriako/o7k/internal/resources/compute/hypervisors"
 	"github.com/akyriako/o7k/internal/resources/compute/keypairs"
 	"github.com/akyriako/o7k/internal/resources/compute/servergroups"
 	"github.com/akyriako/o7k/internal/resources/compute/servers"
@@ -400,6 +402,14 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 
 	if err := r.Register(volumetypes.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering volume types resource: %w", err))
+	}
+
+	if err := r.Register(hypervisors.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering hypervisors resource: %w", err))
+	}
+
+	if err := r.Register(aggregates.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering host aggregates resource: %w", err))
 	}
 
 	if err := r.Register(servers.New(openstackContext)); err != nil {

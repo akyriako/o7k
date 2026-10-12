@@ -37,10 +37,10 @@ func (r *Resource) Columns() []resource.Column {
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
 		{Key: "name", Title: "NAME", MinWidth: 24, Flex: 2},
 		{Key: "external_fips", Title: "EXTERNAL FIXED IPS", MinWidth: 15, Flex: 1},
-		{Key: "status", Title: "STATUS", MinWidth: 12, Flex: 0},
+		{Key: "enabled_snat", Title: "ENABLED SNAT", MinWidth: 12, Flex: 0},
 		{Key: "admin_state", Title: "ADMIN STATE", MinWidth: 12, Flex: 0},
 		{Key: "distributed", Title: "DISTRIBUTED", MinWidth: 12, Flex: 0},
-		//{Key: "project_id", Title: "PROJECT ID", MinWidth: 40, Flex: 0},
+		{Key: "status", Title: "STATUS", MinWidth: 12, Flex: 0},
 	}
 }
 
@@ -79,6 +79,12 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 			}
 
 		}
+
+		enabledSnat := ""
+		if router.GatewayInfo.EnableSNAT != nil {
+			enabledSnat = strconv.FormatBool(*router.GatewayInfo.EnableSNAT)
+		}
+
 		rows = append(rows, resource.Row{
 			ID: router.ID,
 			Fields: map[string]string{
@@ -89,6 +95,7 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 				"admin_state":   strconv.FormatBool(router.AdminStateUp),
 				"distributed":   strconv.FormatBool(router.Distributed),
 				"project_id":    router.ProjectID,
+				"enabled_snat":  enabledSnat,
 			},
 		})
 	}
