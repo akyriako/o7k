@@ -20,6 +20,7 @@ import (
 	"github.com/akyriako/o7k/internal/resources/compute/availabilityzones"
 	"github.com/akyriako/o7k/internal/resources/compute/flavors"
 	"github.com/akyriako/o7k/internal/resources/compute/hypervisors"
+	"github.com/akyriako/o7k/internal/resources/compute/instanceactions"
 	"github.com/akyriako/o7k/internal/resources/compute/keypairs"
 	"github.com/akyriako/o7k/internal/resources/compute/servergroups"
 	"github.com/akyriako/o7k/internal/resources/compute/servers"
@@ -414,6 +415,10 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 
 	if err := r.Register(servers.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering servers resource: %w", err))
+	}
+
+	if err := r.RegisterNavigationOnly(instanceactions.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering instance actions resource: %w", err))
 	}
 
 	if err := r.Register(flavors.New(openstackContext)); err != nil {

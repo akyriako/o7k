@@ -2,6 +2,7 @@
   <dictionary name="project">
     <words>
       <w>blockstorage</w>
+      <w>instanceactions</w>
       <w>keypairs</w>
       <w>loadbalancer</w>
       <w>recordsets</w>

@@ -248,3 +248,63 @@ func validatePowerAction(action, status string) error {
 		status,
 	)
 }
+
+func (r *Resource) log(id string) tea.Cmd {
+	return func() tea.Msg {
+		client, err := r.context.ComputeV2()
+		if err != nil {
+			return resource.DetailsMsg{Err: err}
+		}
+
+		output, err := computeservers.ShowConsoleOutput(context.Background(), client, id, computeservers.ShowConsoleOutputOpts{}).Extract()
+		if err != nil {
+			return resource.DetailsMsg{
+				Err: fmt.Errorf("getting console log for server %q: %w", id, err),
+			}
+		}
+
+		return resource.DetailsMsg{
+			ID:      id,
+			Content: output,
+		}
+	}
+}
+
+//func (r *Resource) actionLog(id string) tea.Cmd {
+//	return func() tea.Msg {
+//		client, err := r.context.ComputeV2()
+//		if err != nil {
+//			return resource.DetailsMsg{Err: err}
+//		}
+//
+//		pages, err := instanceactions.List(client, id, instanceactions.ListOpts{}).AllPages(context.Background())
+//		if err != nil {
+//			return resource.DetailsMsg{
+//				Err: fmt.Errorf("listing actions for server %q: %w", id, err),
+//			}
+//		}
+//
+//		actions, err := instanceactions.ExtractInstanceActions(pages)
+//		if err != nil {
+//			return resource.DetailsMsg{
+//				Err: fmt.Errorf("extracting actions for server %q: %w", id, err),
+//			}
+//		}
+//
+//		return resource.DetailsMsg{
+//			ID:      id,
+//			Content: actions,
+//		}
+//	}
+//}
+
+func (r *Resource) actionLogs(row resource.Row) tea.Cmd {
+	return func() tea.Msg {
+		return resource.NavigateScopedMsg{
+			Resource: "instanceactions",
+			Scope: map[string]string{
+				"server_id": row.ID,
+			},
+		}
+	}
+}
