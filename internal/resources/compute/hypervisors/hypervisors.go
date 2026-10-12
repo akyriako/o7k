@@ -36,13 +36,14 @@ func (r *Resource) Columns() []resource.Column {
 		{Key: "id", Title: "ID", MinWidth: 36, Flex: 0},
 		{Key: "hostname", Title: "HOSTNAME", MinWidth: 24, Flex: 2},
 		{Key: "type", Title: "TYPE", MinWidth: 12, Flex: 1},
-		{Key: "state", Title: "STATE", MinWidth: 8, Flex: 0},
-		{Key: "status", Title: "STATUS", MinWidth: 10, Flex: 0},
+		{Key: "host_ip", Title: "HOST IP", MinWidth: 15, Flex: 0},
 		{Key: "running_vms", Title: "VMs", MinWidth: 6, Flex: 0},
 		{Key: "vcpus_used", Title: "USED VCPUs", MinWidth: 11, Flex: 0},
 		{Key: "vcpus", Title: "VCPUs", MinWidth: 7, Flex: 0},
 		{Key: "memory_mb_used", Title: "USED RAM (MB)", MinWidth: 14, Flex: 0},
 		{Key: "memory_mb", Title: "RAM (MB)", MinWidth: 10, Flex: 0},
+		{Key: "state", Title: "STATE", MinWidth: 8, Flex: 0},
+		{Key: "status", Title: "STATUS", MinWidth: 10, Flex: 0},
 	}
 }
 
@@ -86,6 +87,7 @@ func (r *Resource) List(ctx context.Context) ([]resource.Row, error) {
 				"vcpus_used":     strconv.Itoa(hypervisor.VCPUsUsed),
 				"memory_mb":      strconv.Itoa(hypervisor.MemoryMB),
 				"memory_mb_used": strconv.Itoa(hypervisor.MemoryMBUsed),
+				"host_ip":        hypervisor.HostIP,
 			},
 		})
 	}
