@@ -142,7 +142,7 @@ func (m Model) renderHeaderCommands(availableWidth int) string {
 		{Key: "esc", Description: "Dismiss/Return"},
 	}
 
-	if m.resource != nil {
+	if m.resource != nil && !m.detailMode {
 		commands = append(commands, m.resource.Commands()...)
 	}
 
