@@ -27,53 +27,33 @@ func (m Model) renderHeader() string {
 		return ""
 	}
 
-	const (
-		commandsPerColumn  = 5
-		commandColumnWidth = 28
-		contextWidth       = 48
-	)
-
-	commandCount := 5
-	if m.resource != nil {
-		commandCount += len(m.resource.Commands())
-	}
-
-	columnCount := (commandCount + commandsPerColumn - 1) / commandsPerColumn
-	preferredCommandsWidth := columnCount * commandColumnWidth
-
 	// Compact mode: commands only, without context or logo.
 	if m.width < compactWidth {
 		return m.renderHeaderCommands(m.width)
 	}
 
-	profile := m.renderHeaderContext()
+	context, contextWidth := m.renderHeaderContext()
 	renderedLogo := logoStyle.Render(logo)
 
-	// Preserve the existing context breakpoint.
 	leftWidth := contextWidth
+	rightWidth := logoWidth
 
 	// The logo is independently anchored to the right edge.
-	// Hide it if it would reduce the commands below their
+	// Hide the context if it would reduce the commands below their
 	// preferred width.
-	showLogo := m.width-leftWidth-preferredCommandsWidth >= logoWidth
+	showContext := m.showHeaderContext()
 
-	rightWidth := 0
-	if showLogo {
-		rightWidth = logoWidth
+	if !showContext {
+		leftWidth = 0
 	}
 
 	centerWidth := max(m.width-leftWidth-rightWidth, 0)
 
 	left := lipgloss.NewStyle().
 		Width(leftWidth).
-		Render(profile)
+		Render(context)
 
 	center := m.renderHeaderCommands(centerWidth)
-
-	if !showLogo {
-		return lipgloss.JoinHorizontal(lipgloss.Top, left, center)
-	}
-
 	// Fill all available space before the logo, so the logo
 	// remains at the terminal's right edge.
 	center = lipgloss.NewStyle().
@@ -85,12 +65,56 @@ func (m Model) renderHeader() string {
 		Align(lipgloss.Right).
 		Render(renderedLogo)
 
+	if !showContext {
+		return lipgloss.JoinHorizontal(lipgloss.Top, center, right)
+	}
+
 	return lipgloss.JoinHorizontal(lipgloss.Top, left, center, right)
 }
 
-func (m Model) renderHeaderContext() string {
+func (m Model) showHeaderContext() bool {
+	if m.width < compactWidth {
+		return false
+	}
+
+	const (
+		commandsPerColumn  = 5
+		commandColumnWidth = 28
+	)
+
+	commandCount := 5
+	if m.resource != nil {
+		commandCount += len(m.resource.Commands())
+	}
+
+	columnCount := (commandCount + commandsPerColumn - 1) / commandsPerColumn
+	preferredCommandsWidth := columnCount * commandColumnWidth
+
+	_, contextWidth := m.renderHeaderContext()
+
+	return m.width-logoWidth-preferredCommandsWidth >= contextWidth
+}
+
+func (m Model) renderHeaderContext() (string, int) {
 	const labelWidth = 10
-	const contextWidth = 48
+	const contextRightMargin = 4
+	var contextWidth = 0
+
+	ctxFields := []struct {
+		label string
+		value string
+	}{
+		{"Cloud", m.context.Cloud},
+		{"Region", m.context.Region},
+		{"Domain", m.context.Domain},
+		{"Project", m.context.Project},
+		{"Version", m.version},
+	}
+
+	for _, f := range ctxFields {
+		width := labelWidth + len(f.value)
+		contextWidth = max(contextWidth, width)
+	}
 
 	valueWidth := contextWidth - labelWidth
 
@@ -101,13 +125,12 @@ func (m Model) renderHeaderContext() string {
 			headerValueStyle.Width(valueWidth).Render(value)
 	}
 
-	return strings.Join([]string{
-		field("Cloud:", m.context.Cloud),
-		field("Region:", m.context.Region),
-		field("Domain:", m.context.Domain),
-		field("Project:", m.context.Project),
-		field("Version:", m.version),
-	}, "\n")
+	fields := make([]string, 0, len(ctxFields))
+	for _, f := range ctxFields {
+		fields = append(fields, field(fmt.Sprintf("%s:", f.label), f.value))
+	}
+
+	return strings.Join(fields, "\n"), contextWidth + contextRightMargin
 }
 
 func (m Model) renderHeaderCommands(availableWidth int) string {
@@ -201,13 +224,13 @@ func (m Model) renderTable() string {
 			m.itemCount,
 		)
 
-		if m.width < compactWidth && m.context.Cloud != "" {
+		if !m.showHeaderContext() && m.context.Cloud != "" {
 			title = fmt.Sprintf(" (%s)%s", m.context.Cloud, title)
 		}
 	}
 
 	innerWidth := max(m.width-2, 1)
-
+	title = ansi.Truncate(title, innerWidth, "…")
 	titleWidth := lipgloss.Width(title)
 	remaining := max(innerWidth-titleWidth, 0)
 
