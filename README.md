@@ -213,7 +213,7 @@ Press `Esc` to return to the previous resource and selection.
 | **Manila / Shared File Systems** | shares, share snapshots, share networks, share types | ✅ |
 | **Manila / Shared File Systems** | share replicas, access rules, export locations | ✅ |
 | **Magnum / Container Infrastructure** | clusters, cluster templates, node groups | ✅ |
-| **Trove / Databases** | instances | ⬜ |
+| **Trove / Databases** | instances, databases, users, backups, datastores | ✅ |
 
 > [!CAUTION]
 > **o7k is early beta and under active development.** Expect bugs, incomplete features, and breaking changes. Behavior and configuration may change without notice.
@@ -281,6 +281,11 @@ Press `Esc` to return to the previous resource and selection.
 | Magnum / Container Infrastructure | Node Groups | `nodegroups` | `nodegroup` |
 | Designate / DNS | Zones | `zones` | `zone`, `dns-zones`, `dns-zone` |
 | Designate / DNS | Recordsets | `recordsets` | `recordset`, `records`, `record` |
+| Trove / Databases | Instances | `db-instances` | `db-instance`, `trove` |
+| Trove / Databases | Databases | `db-databases` | `db-database` |
+| Trove / Databases | Users | `db-users` | `db-user` |
+| Trove / Databases | Backups | `db-backups` | `db-backup` |
+| Trove / Databases | Datastores | `db-datastores` | `db-datastore` |
 
 ## Development
 
