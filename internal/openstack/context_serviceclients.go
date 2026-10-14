@@ -119,3 +119,11 @@ func newContainerInfraV1(provider *gophercloud.ProviderClient, opts gophercloud.
 
 	return client, nil
 }
+
+func (c *Context) DBV1() (*gophercloud.ServiceClient, error) {
+	return c.getClientService(
+		"database",
+		gophercloud.EndpointOpts{Region: c.Region},
+		openstack.NewDBV1,
+	)
+}

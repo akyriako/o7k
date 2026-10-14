@@ -28,6 +28,11 @@ import (
 	"github.com/akyriako/o7k/internal/resources/containers/coe/clustertemplates"
 	"github.com/akyriako/o7k/internal/resources/containers/coe/nodegroups"
 	"github.com/akyriako/o7k/internal/resources/contexts"
+	dbbackups "github.com/akyriako/o7k/internal/resources/database/backups"
+	dbdatabases "github.com/akyriako/o7k/internal/resources/database/databases"
+	"github.com/akyriako/o7k/internal/resources/database/datastores"
+	dbinstances "github.com/akyriako/o7k/internal/resources/database/instances"
+	dbusers "github.com/akyriako/o7k/internal/resources/database/users"
 	"github.com/akyriako/o7k/internal/resources/dns/recordsets"
 	"github.com/akyriako/o7k/internal/resources/dns/zones"
 	"github.com/akyriako/o7k/internal/resources/identity/catalog"
@@ -550,6 +555,26 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 	}
 
 	if err := r.RegisterNavigationOnly(nodegroups.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering COE node groups resource: %w", err))
+	}
+
+	if err := r.Register(dbinstances.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering database instances resource: %w", err))
+	}
+
+	if err := r.RegisterNavigationOnly(dbdatabases.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering COE node groups resource: %w", err))
+	}
+
+	if err := r.RegisterNavigationOnly(dbusers.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering COE node groups resource: %w", err))
+	}
+
+	if err := r.Register(datastores.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering COE node groups resource: %w", err))
+	}
+
+	if err := r.RegisterNavigationOnly(dbbackups.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering COE node groups resource: %w", err))
 	}
 
