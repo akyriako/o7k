@@ -28,7 +28,7 @@ func (r *Resource) Title() string {
 }
 
 func (r *Resource) Aliases() []string {
-	return []string{"db-instance", "trove", "trove-instances"}
+	return []string{"db-instance", "trove"}
 }
 
 func (r *Resource) Columns() []resource.Column {

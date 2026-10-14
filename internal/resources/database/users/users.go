@@ -28,7 +28,7 @@ func (r *Resource) Title() string {
 }
 
 func (r *Resource) Aliases() []string {
-	return []string{"dbuser", "troveusers"}
+	return []string{"db-user"}
 }
 
 func (r *Resource) Columns() []resource.Column {

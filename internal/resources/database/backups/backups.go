@@ -40,7 +40,7 @@ func (r *Resource) Title() string {
 }
 
 func (r *Resource) Aliases() []string {
-	return []string{"dbbackup", "trovebackups"}
+	return []string{"db-backup"}
 }
 
 func (r *Resource) Columns() []resource.Column {
