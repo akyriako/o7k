@@ -87,18 +87,34 @@ import (
 var (
 	logger  *slog.Logger
 	stderr  io.Writer = os.Stderr
-	logFile io.Closer
+	logFile io.WriteCloser
 )
 
 func main() {
-	info := version.GetBuildInfo()
+	if err := run(); err != nil {
+		fmt.Fprintln(stderr, err)
+		os.Exit(1)
+	}
+}
 
+func run() error {
+	var err error
+	logger, stderr, logFile, err = logging.New()
+	if err != nil {
+		return fmt.Errorf("error initializing logging: %w", err)
+	}
+
+	defer logFile.Close()
+
+	slog.SetDefault(logger)
+
+	info := version.GetBuildInfo()
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
 		case "--version":
 			if len(os.Args) != 2 {
 				printUsage()
-				os.Exit(1)
+				return fmt.Errorf("not enough arguments")
 			}
 
 			fmt.Printf("o7k %s\n", info.Version)
@@ -106,31 +122,16 @@ func main() {
 			fmt.Printf("built: %s\n", info.BuildDate)
 			fmt.Printf("go: %s\n", info.GoVersion)
 			fmt.Printf("modified: %s\n", info.Modified)
-			return
+			return nil
 
 		case "plugin":
-			if err := pluginCommand(os.Args[2:]); err != nil {
-				fmt.Fprintf(os.Stderr, "%v\n", err)
-				os.Exit(1)
-			}
-			return
+			return pluginCommand(os.Args[2:])
 
 		default:
 			printUsage()
-			os.Exit(1)
+			return fmt.Errorf("unknown command %q", os.Args[1])
 		}
 	}
-
-	var err error
-
-	logger, stderr, logFile, err = logging.New()
-	if err != nil {
-		fmt.Fprintf(stderr, "error initializing logging: %v\n", err)
-		os.Exit(1)
-	}
-	defer logFile.Close()
-
-	slog.SetDefault(logger)
 
 	logger.Info("starting o7k", "version", info.Version, "commit", info.Commit, "built", info.BuildDate)
 
@@ -139,8 +140,7 @@ func main() {
 	cloudsPaths, err := openstack.DiscoverCloudsFiles("")
 	if err != nil {
 		if _, ok := openstack.EnvCloud(); !ok {
-			fmt.Fprintf(stderr, "error discovering clouds.yaml: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("error discovering clouds.yaml: %w", err)
 		}
 
 		logger.Info("clouds.yaml not found, using OS_* environment variables", "error", err)
@@ -150,14 +150,12 @@ func main() {
 	if len(cloudsPaths) > 0 {
 		_, err = openstack.LoadClouds(cloudsPaths)
 		if err != nil {
-			fmt.Fprintf(stderr, "error loading clouds.yaml: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("error loading clouds.yaml: %w", err)
 		}
 	}
 
 	if err := registry.Register(contexts.New(cloudsPaths)); err != nil {
-		fmt.Fprintf(stderr, "error registering contexts resource: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("error registering contexts resource: %w", err)
 	}
 
 	openstackContext := openstack.Context{}
@@ -168,7 +166,7 @@ func main() {
 				fmt.Fprintf(stderr, "registration error: %v\n", err)
 			}
 		}
-		os.Exit(1)
+		return fmt.Errorf("registration failed")
 	}
 
 	pluginHost := plugins.NewHost(&openstackContext)
@@ -176,8 +174,7 @@ func main() {
 	defer pluginManager.Close()
 
 	if err := registry.Register(pluginresource.New(pluginManager)); err != nil {
-		fmt.Fprintf(stderr, "error registering plugins resource: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("error registering plugins resource: %w", err)
 	}
 
 	pluginPaths, err := plugins.Discover()
@@ -185,7 +182,7 @@ func main() {
 		logger.Error("discovering plugins", "error", err)
 	} else {
 		for _, path := range pluginPaths {
-			if err := pluginManager.Load(path); err != nil {
+			if err := pluginManager.Load(path, logFile); err != nil {
 				logger.Error("loading plugin", "path", path, "error", err)
 				continue
 			}
@@ -197,7 +194,7 @@ func main() {
 	ver := info.GetVersion()
 	update, err := version.CheckForUpdate(context.Background())
 	if err != nil {
-		fmt.Fprintf(stderr, "error checking for updates: %v\n", err)
+		return fmt.Errorf("error checking for updates: %w", err)
 	} else {
 		if update.Available {
 			if info.Version == "" {
@@ -218,9 +215,10 @@ func main() {
 	)
 
 	if _, err := p.Run(); err != nil {
-		fmt.Fprintf(stderr, "error running o7k: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("error running o7k: %w", err)
 	}
+
+	return nil
 }
 
 func pluginCommand(args []string) error {
@@ -267,7 +265,7 @@ func updatePlugins() error {
 	}
 
 	for _, path := range paths {
-		client, err := plugins.NewClient(path, host)
+		client, err := plugins.NewClient(path, host, logFile)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error loading plugin %s: %v\n", path, err)
 			continue
@@ -559,23 +557,23 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 	}
 
 	if err := r.Register(dbinstances.New(openstackContext)); err != nil {
-		errs = errors.Join(errs, fmt.Errorf("registering database instances resource: %w", err))
+		errs = errors.Join(errs, fmt.Errorf("registering trove database instances resource: %w", err))
 	}
 
 	if err := r.RegisterNavigationOnly(dbdatabases.New(openstackContext)); err != nil {
-		errs = errors.Join(errs, fmt.Errorf("registering COE node groups resource: %w", err))
+		errs = errors.Join(errs, fmt.Errorf("registering trove databases resource: %w", err))
 	}
 
 	if err := r.RegisterNavigationOnly(dbusers.New(openstackContext)); err != nil {
-		errs = errors.Join(errs, fmt.Errorf("registering COE node groups resource: %w", err))
+		errs = errors.Join(errs, fmt.Errorf("registering trove database users resource: %w", err))
 	}
 
 	if err := r.Register(datastores.New(openstackContext)); err != nil {
-		errs = errors.Join(errs, fmt.Errorf("registering COE node groups resource: %w", err))
+		errs = errors.Join(errs, fmt.Errorf("registering trove datastores resource: %w", err))
 	}
 
 	if err := r.RegisterNavigationOnly(dbbackups.New(openstackContext)); err != nil {
-		errs = errors.Join(errs, fmt.Errorf("registering COE node groups resource: %w", err))
+		errs = errors.Join(errs, fmt.Errorf("registering trove database backups resource: %w", err))
 	}
 
 	return errs
