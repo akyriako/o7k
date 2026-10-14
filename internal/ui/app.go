@@ -455,8 +455,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.loadingLabel = ""
 
 		if msg.Err != nil {
-			m.err = fmt.Errorf("context activation failed: %v", msg.Err)
-			slog.Error(m.err.Error(), "cloud", msg.Context.Cloud)
+			m.setError(fmt.Errorf("context activation failed: %v", msg.Err))
+			slog.Error(msg.Err.Error(), "cloud", msg.Context.Cloud)
 			return m, nil
 		}
 
@@ -555,8 +555,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.loadingLabel = ""
 
 		if msg.Err != nil {
-			m.err = fmt.Errorf("loading resource details failed: %v", msg.Err)
-			slog.Error(m.err.Error(), "cloud", m.context.Cloud)
+			m.setError(fmt.Errorf("loading resource details failed: %v", msg.Err))
+			slog.Error(msg.Err.Error(), "cloud", m.context.Cloud)
 			return m, nil
 		}
 
@@ -572,7 +572,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		default:
 			data, err := json.MarshalIndent(content, "", "  ")
 			if err != nil {
-				m.err = fmt.Errorf("encoding details: %v", err)
+				m.setError(fmt.Errorf("encoding details: %v", err))
 				return m, nil
 			}
 
@@ -612,8 +612,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case pluginresource.UpdatedMsg:
 		if msg.Err != nil {
-			m.err = fmt.Errorf("updating plugin failed: %v", msg.Err)
-			slog.Error(m.err.Error(), "cloud", m.context.Cloud)
+			m.setError(fmt.Errorf("updating plugin failed: %v", msg.Err))
+			slog.Error(msg.Err.Error(), "cloud", m.context.Cloud)
 			return m, nil
 		}
 
