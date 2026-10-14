@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+
+	"github.com/hashicorp/go-hclog"
 )
 
 func New() (*slog.Logger, io.Writer, io.WriteCloser, error) {
@@ -29,14 +31,20 @@ func New() (*slog.Logger, io.Writer, io.WriteCloser, error) {
 		return nil, nil, nil, fmt.Errorf("open log file: %w", err)
 	}
 
-	handler := slog.NewTextHandler(file, &slog.HandlerOptions{
-		Level: slog.LevelDebug,
-	})
-	logger := slog.New(handler)
+	hl := newLogger(hclog.Debug, file)
+	logger := slog.New(newSlogHandler(hl))
 
 	stderr := io.MultiWriter(os.Stderr, file)
 
 	return logger, stderr, file, nil
+}
+
+func newLogger(level hclog.Level, out io.Writer) hclog.Logger {
+	return hclog.New(&hclog.LoggerOptions{
+		Level:      level,
+		Output:     out,
+		TimeFormat: "2006-01-02T15:04:05.000Z0700",
+	})
 }
 
 func userStateDir() (string, error) {
