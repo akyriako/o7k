@@ -194,7 +194,7 @@ func run() error {
 	ver := info.GetVersion()
 	update, err := version.CheckForUpdate(context.Background())
 	if err != nil {
-		return fmt.Errorf("error checking for updates: %w", err)
+		logger.Error("error checking for updates", "error", err)
 	} else {
 		if update.Available {
 			if info.Version == "" {
