@@ -2,10 +2,12 @@ package plugins
 
 import (
 	"fmt"
+	"io"
 	"os/exec"
 
 	"github.com/akyriako/o7k/internal/resource"
 	"github.com/akyriako/o7k/pluginsdk"
+	"github.com/hashicorp/go-hclog"
 	hplugin "github.com/hashicorp/go-plugin"
 )
 
@@ -14,7 +16,7 @@ type Client struct {
 	plugin pluginsdk.Client
 }
 
-func NewClient(path string, host pluginsdk.Host) (*Client, error) {
+func NewClient(path string, host pluginsdk.Host, writer io.Writer) (*Client, error) {
 	client := hplugin.NewClient(&hplugin.ClientConfig{
 		HandshakeConfig: pluginsdk.HandshakeConfig,
 		Plugins: map[string]hplugin.Plugin{
@@ -26,6 +28,11 @@ func NewClient(path string, host pluginsdk.Host) (*Client, error) {
 		AllowedProtocols: []hplugin.Protocol{
 			hplugin.ProtocolGRPC,
 		},
+		Logger: hclog.New(&hclog.LoggerOptions{
+			Name:   "plugin",
+			Level:  hclog.Debug,
+			Output: writer,
+		}),
 	})
 
 	rpcClient, err := client.Client()

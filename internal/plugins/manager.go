@@ -2,6 +2,7 @@ package plugins
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/akyriako/o7k/internal/resource"
 )
@@ -36,8 +37,8 @@ func NewManager(host *Host, registry *resource.Registry) *Manager {
 	}
 }
 
-func (m *Manager) Load(path string) error {
-	client, err := NewClient(path, m.host)
+func (m *Manager) Load(path string, writer io.Writer) error {
+	client, err := NewClient(path, m.host, writer)
 	if err != nil {
 		m.plugins = append(m.plugins, Info{
 			Path:   path,

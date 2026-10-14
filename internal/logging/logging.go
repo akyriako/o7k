@@ -8,14 +8,14 @@ import (
 	"path/filepath"
 )
 
-func New() (*slog.Logger, io.Writer, io.Closer, error) {
-	stateDir, err := os.UserConfigDir()
+func New() (*slog.Logger, io.Writer, io.WriteCloser, error) {
+	stateDir, err := userStateDir()
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("get user config directory: %w", err)
+		return nil, nil, nil, fmt.Errorf("get user state directory: %w", err)
 	}
 
 	logDir := filepath.Join(stateDir, "o7k")
-	if err := os.MkdirAll(logDir, 0o755); err != nil {
+	if err := os.MkdirAll(logDir, 0o700); err != nil {
 		return nil, nil, nil, fmt.Errorf("create log directory: %w", err)
 	}
 
@@ -23,7 +23,7 @@ func New() (*slog.Logger, io.Writer, io.Closer, error) {
 	file, err := os.OpenFile(
 		logPath,
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY,
-		0o644,
+		0o600,
 	)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("open log file: %w", err)
@@ -37,4 +37,17 @@ func New() (*slog.Logger, io.Writer, io.Closer, error) {
 	stderr := io.MultiWriter(os.Stderr, file)
 
 	return logger, stderr, file, nil
+}
+
+func userStateDir() (string, error) {
+	if dir := os.Getenv("XDG_STATE_HOME"); filepath.IsAbs(dir) {
+		return dir, nil
+	}
+
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(home, ".local", "state"), nil
 }
