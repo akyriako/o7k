@@ -468,7 +468,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		t := time.Now()
 		m.autoRefreshTimestamp = &t
 
-		return m, nil
+		return m, m.scheduleAutoRefresh()
 
 	case autoRefreshMsg:
 		if msg.generation != m.autoRefreshGeneration {
