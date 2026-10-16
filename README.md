@@ -114,7 +114,7 @@ refresh:
   interval: 30
 
 log:
-  level: 0
+  level: info
 ```
 
 Cache TTL, cleanup interval, and refresh interval are specified in **seconds**.
@@ -123,7 +123,7 @@ The `cache.resources` list determines which resources are cached and replaces th
 
 Automatic refresh is always enabled. It pauses when an error occurs to avoid repeated API requests and unnecessary throttling.
 
-The log level uses Go's `slog` numeric levels: Debug (`-4`), Info (`0`), Warn (`4`), and Error (`8`). Intermediate values are also supported.
+The log level uses Go's `slog` [log levels](https://pkg.go.dev/log/slog#hdr-Levels), e.g: `info`, `debug`, `warn`, `error`.
 
 ## Usage
 
