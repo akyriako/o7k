@@ -153,6 +153,20 @@ e.g.:
 
 Resource-specific commands are displayed in the _header_ while a resource is active.
 
+### Resource Caching
+
+**o7k** uses an in-memory cache for selected OpenStack resource listings to reduce API requests and improve navigation 
+performance, particularly in large environments.
+
+Cached entries expire after **5 minutes** and are isolated by OpenStack context, allowing users to switch between clouds 
+and projects without losing previously cached data.
+
+Caching is enabled by default. Only selected, relatively static resources are cached, including images, flavors, regions, 
+services, endpoints, and the service catalog.
+
+Pressing `r` bypasses the cache and retrieves fresh data from OpenStack. Automatic refreshes reuse cached data until its 
+TTL expires.
+
 ## Resource Navigation
 
 **o7k** supports navigation between related OpenStack resources.

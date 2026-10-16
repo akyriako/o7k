@@ -9,7 +9,9 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/charmbracelet/x/ansi v0.11.6
 	github.com/gophercloud/gophercloud/v2 v2.14.0
+	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/go-plugin v1.8.0
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 	golang.design/x/clipboard v0.9.0
 	golang.org/x/mod v0.38.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -30,7 +32,6 @@ require (
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
-	github.com/hashicorp/go-hclog v1.6.3 // indirect
 	github.com/hashicorp/yamux v0.1.2 // indirect
 	github.com/lucasb-eyer/go-colorful v1.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
@@ -42,6 +43,7 @@ require (
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
+	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.design/x/x11 v0.2.0 // indirect
 	golang.org/x/exp/shiny v0.0.0-20250606033433-dcc06ee1d476 // indirect
