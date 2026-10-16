@@ -9,11 +9,15 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const defaultTTL = 300
+const (
+	defaultCacheTTL        = 300
+	defaultRefreshInterval = 30
+)
 
 type Config struct {
-	Cache Cache `yaml:"cache"`
-	Log   Log   `yaml:"log"`
+	Cache   Cache   `yaml:"cache"`
+	Log     Log     `yaml:"log"`
+	Refresh Refresh `yaml:"refresh"`
 }
 
 type Cache struct {
@@ -27,12 +31,17 @@ type Log struct {
 	Level slog.Level `yaml:"level"`
 }
 
+type Refresh struct {
+	Interval      int  `yaml:"interval"`
+	ShowTimestamp bool `yaml:"show_timestamp"`
+}
+
 func Default() Config {
 	return Config{
 		Cache: Cache{
 			Enabled:         true,
-			TTL:             defaultTTL,
-			CleanupInterval: defaultTTL,
+			TTL:             defaultCacheTTL,
+			CleanupInterval: defaultCacheTTL,
 			Resources: []string{
 				"catalog",
 				"regions",
@@ -44,6 +53,9 @@ func Default() Config {
 		},
 		Log: Log{
 			Level: slog.LevelInfo,
+		},
+		Refresh: Refresh{
+			Interval: defaultRefreshInterval,
 		},
 	}
 }
@@ -72,12 +84,16 @@ func Load() (Config, error) {
 
 	if cfg.Cache.Enabled {
 		if cfg.Cache.TTL <= 0 {
-			cfg.Cache.TTL = defaultTTL
+			cfg.Cache.TTL = defaultCacheTTL
 		}
 
 		if cfg.Cache.CleanupInterval <= 0 {
 			cfg.Cache.CleanupInterval = cfg.Cache.TTL
 		}
+	}
+
+	if cfg.Refresh.Interval <= 0 {
+		cfg.Refresh.Interval = defaultRefreshInterval
 	}
 
 	return cfg, nil

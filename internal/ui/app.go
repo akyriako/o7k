@@ -52,6 +52,8 @@ type Model struct {
 
 	autoRefreshTimestamp *time.Time
 	autoRefreshPaused    bool
+	autoRefreshInterval  time.Duration
+	showRefreshTimestamp bool
 
 	width  int
 	height int
@@ -148,6 +150,9 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, plugi
 		useCache:   cfg.Cache.Enabled,
 		cacheables: cacheables,
 
+		autoRefreshInterval:  time.Duration(cfg.Refresh.Interval) * time.Second,
+		showRefreshTimestamp: cfg.Refresh.ShowTimestamp,
+
 		loading:      true,
 		showLoading:  true,
 		loadingLabel: "Loading",
@@ -164,7 +169,7 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, plugi
 func (m Model) Init() tea.Cmd {
 	return tea.Batch(
 		m.loadResource(true),
-		autoRefresh(),
+		autoRefresh(m.autoRefreshInterval),
 		m.spinner.Tick,
 	)
 }
@@ -277,7 +282,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 
 		case autoRefreshMsg:
-			return m, autoRefresh()
+			return m, autoRefresh(m.autoRefreshInterval)
 		}
 
 		var cmd tea.Cmd
@@ -289,7 +294,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.commandMode {
 		switch msg := msg.(type) {
 		case autoRefreshMsg:
-			return m, autoRefresh()
+			return m, autoRefresh(m.autoRefreshInterval)
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "enter":
@@ -456,7 +461,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, tea.Batch(
 			cmd,
-			autoRefresh(),
+			autoRefresh(m.autoRefreshInterval),
 		)
 
 	case tea.WindowSizeMsg:
@@ -712,14 +717,18 @@ func (m Model) View() string {
 		}
 
 		autoRefreshTag := infoStyle.Render(" AutoRefresh ")
-		autoRefreshMsgState := autoRefreshStateOnStyle.Render(" ON ")
+		autoRefreshMsgState := autoRefreshStateOnStyle.Render(fmt.Sprintf(" ON:%ds ", int(m.autoRefreshInterval.Seconds())))
 		if m.autoRefreshPaused {
 			autoRefreshMsgState = autoRefreshStateOffStyle.Render(" OFF ")
 		}
+
 		timeTag := ""
-		if m.autoRefreshTimestamp != nil {
-			timeTag = infoStyle.Render(fmt.Sprintf(" %s ", m.autoRefreshTimestamp.Format(time.RFC3339)))
+		if m.showRefreshTimestamp {
+			if m.autoRefreshTimestamp != nil {
+				timeTag = infoStyle.Render(fmt.Sprintf(" %s ", m.autoRefreshTimestamp.Format(time.RFC3339)))
+			}
 		}
+
 		rightTag := lipgloss.JoinHorizontal(lipgloss.Left, cacheTag, useCachedState, autoRefreshTag, autoRefreshMsgState, timeTag)
 
 		if m.showLoading {

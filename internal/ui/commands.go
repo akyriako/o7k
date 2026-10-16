@@ -70,9 +70,9 @@ func clearStatus(status string) tea.Cmd {
 	})
 }
 
-func autoRefresh() tea.Cmd {
+func autoRefresh(interval time.Duration) tea.Cmd {
 	return tea.Tick(
-		refreshInterval,
+		interval,
 		func(time.Time) tea.Msg {
 			return autoRefreshMsg{}
 		},
