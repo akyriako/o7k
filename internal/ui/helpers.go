@@ -132,6 +132,10 @@ func (m *Model) setError(err error) {
 		return
 	}
 
+	m.autoRefreshPaused = true
+	m.autoRefreshGeneration++
+	m.autoRefreshScheduled = false
+
 	m.resizeErrorViewport()
 }
 

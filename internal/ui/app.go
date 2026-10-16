@@ -218,10 +218,6 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 
-		m.autoRefreshPaused = true
-		m.autoRefreshGeneration++
-		m.autoRefreshScheduled = false
-
 		m.loading = false
 		m.showLoading = false
 		m.loadingLabel = ""
@@ -232,10 +228,6 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case resource.ErrorMsg:
-		m.autoRefreshPaused = true
-		m.autoRefreshGeneration++
-		m.autoRefreshScheduled = false
-
 		m.loading = false
 		m.showLoading = false
 		m.loadingLabel = ""
