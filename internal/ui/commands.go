@@ -52,7 +52,9 @@ type resourceFilter struct {
 	values []string
 }
 
-type autoRefreshMsg struct{}
+type autoRefreshMsg struct {
+	generation uint64
+}
 
 func commandKey(msg tea.KeyMsg) string {
 	key := msg.String()
@@ -70,11 +72,11 @@ func clearStatus(status string) tea.Cmd {
 	})
 }
 
-func autoRefresh(interval time.Duration) tea.Cmd {
+func autoRefresh(interval time.Duration, generation uint64) tea.Cmd {
 	return tea.Tick(
 		interval,
 		func(time.Time) tea.Msg {
-			return autoRefreshMsg{}
+			return autoRefreshMsg{generation: generation}
 		},
 	)
 }
@@ -402,6 +404,15 @@ func (m Model) loadResource(force bool) tea.Cmd {
 			cursor:     cursor,
 		}
 	}
+}
+
+func (m *Model) scheduleAutoRefresh() tea.Cmd {
+	if m.autoRefreshScheduled {
+		return nil
+	}
+
+	m.autoRefreshScheduled = true
+	return autoRefresh(m.autoRefreshInterval, m.autoRefreshGeneration)
 }
 
 func (m *Model) copyDetailsViewport() tea.Cmd {

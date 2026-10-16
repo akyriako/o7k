@@ -51,10 +51,12 @@ type Model struct {
 	loadID       uint64
 	spinner      spinner.Model
 
-	autoRefreshTimestamp *time.Time
-	autoRefreshPaused    bool
-	autoRefreshInterval  time.Duration
-	showRefreshTimestamp bool
+	autoRefreshGeneration uint64
+	autoRefreshScheduled  bool
+	autoRefreshTimestamp  *time.Time
+	autoRefreshPaused     bool
+	autoRefreshInterval   time.Duration
+	showRefreshTimestamp  bool
 
 	width  int
 	height int
@@ -167,15 +169,15 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, plugi
 	return m
 }
 
-func (m Model) Init() tea.Cmd {
+func (m *Model) Init() tea.Cmd {
 	return tea.Batch(
 		m.loadResource(true),
-		autoRefresh(m.autoRefreshInterval),
+		m.scheduleAutoRefresh(),
 		m.spinner.Tick,
 	)
 }
 
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.err != nil {
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
@@ -184,11 +186,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.setError(nil)
 				m.autoRefreshPaused = false
 
+				cmd := m.scheduleAutoRefresh()
+
 				if len(m.navigation) > 0 {
-					return m, m.navigateBack()
+					return m, tea.Batch(m.navigateBack(), cmd)
 				}
 
-				return m, autoRefresh(m.autoRefreshInterval)
+				return m, cmd
 
 			case "ctrl+x":
 				return m, tea.Quit
@@ -215,6 +219,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		m.autoRefreshPaused = true
+		m.autoRefreshGeneration++
+		m.autoRefreshScheduled = false
+
 		m.loading = false
 		m.showLoading = false
 		m.loadingLabel = ""
@@ -226,6 +233,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case resource.ErrorMsg:
 		m.autoRefreshPaused = true
+		m.autoRefreshGeneration++
+		m.autoRefreshScheduled = false
+
 		m.loading = false
 		m.showLoading = false
 		m.loadingLabel = ""
@@ -284,7 +294,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 
 		case autoRefreshMsg:
-			return m, autoRefresh(m.autoRefreshInterval)
+			if msg.generation != m.autoRefreshGeneration {
+				return m, nil
+			}
+
+			m.autoRefreshScheduled = false
+			return m, m.scheduleAutoRefresh()
 		}
 
 		var cmd tea.Cmd
@@ -296,7 +311,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.commandMode {
 		switch msg := msg.(type) {
 		case autoRefreshMsg:
-			return m, autoRefresh(m.autoRefreshInterval)
+			if msg.generation != m.autoRefreshGeneration {
+				return m, nil
+			}
+
+			m.autoRefreshScheduled = false
+			return m, m.scheduleAutoRefresh()
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "enter":
@@ -456,6 +476,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case autoRefreshMsg:
+		if msg.generation != m.autoRefreshGeneration {
+			return m, nil
+		}
+
+		m.autoRefreshScheduled = false
+
 		cmd := m.autoRefreshResource()
 
 		t := time.Now()
@@ -463,7 +489,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, tea.Batch(
 			cmd,
-			autoRefresh(m.autoRefreshInterval),
+			m.scheduleAutoRefresh(),
 		)
 
 	case tea.WindowSizeMsg:
