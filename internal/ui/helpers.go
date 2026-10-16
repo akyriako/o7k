@@ -1,6 +1,9 @@
 package ui
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -130,4 +133,17 @@ func (m *Model) setError(err error) {
 	}
 
 	m.resizeErrorViewport()
+}
+
+func (m Model) buildCacheKey(kind string) string {
+	c := m.context
+	identity := strings.Join([]string{
+		c.Cloud,
+		c.Region,
+		c.Domain,
+		c.Project,
+	}, "\x00")
+
+	hash := sha256.Sum256([]byte(identity))
+	return fmt.Sprintf("%s:%s", hex.EncodeToString(hash[:8]), kind)
 }

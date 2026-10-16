@@ -18,6 +18,7 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/patrickmn/go-cache"
 )
 
 const refreshInterval = 30 * time.Second
@@ -34,6 +35,10 @@ type Model struct {
 
 	err           error
 	errorViewport viewport.Model
+
+	cache      *cache.Cache
+	useCache   bool
+	cacheables map[string]bool
 
 	itemCount    int
 	status       string
@@ -130,6 +135,17 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, plugi
 		detailViewport: detailViewport,
 		errorViewport:  errorViewport,
 
+		cache:    cache.New(5*time.Minute, 5*time.Minute),
+		useCache: true,
+		cacheables: map[string]bool{
+			"catalog":   true,
+			"regions":   true,
+			"services":  true,
+			"endpoints": true,
+			"flavors":   true,
+			"images":    true,
+		},
+
 		loading:      true,
 		showLoading:  true,
 		loadingLabel: "Loading",
@@ -145,7 +161,7 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, plugi
 
 func (m Model) Init() tea.Cmd {
 	return tea.Batch(
-		m.loadResource(),
+		m.loadResource(true),
 		autoRefresh(),
 		m.spinner.Tick,
 	)
@@ -687,7 +703,13 @@ func (m Model) View() string {
 			)
 		}
 
-		rightTag := infoStyle.Render(" AutoRefresh ")
+		cacheTag := infoStyle.Render(" Cache ")
+		useCachedState := autoRefreshStateOnStyle.Render(" ON ")
+		if !m.useCache {
+			useCachedState = autoRefreshStateOffStyle.Render(" OFF ")
+		}
+
+		autoRefreshTag := infoStyle.Render(" AutoRefresh ")
 		autoRefreshMsgState := autoRefreshStateOnStyle.Render(" ON ")
 		if m.autoRefreshPaused {
 			autoRefreshMsgState = autoRefreshStateOffStyle.Render(" OFF ")
@@ -696,7 +718,7 @@ func (m Model) View() string {
 		if m.autoRefreshTimestamp != nil {
 			timeTag = infoStyle.Render(fmt.Sprintf(" %s ", m.autoRefreshTimestamp.Format(time.RFC3339)))
 		}
-		rightTag = lipgloss.JoinHorizontal(lipgloss.Left, rightTag, autoRefreshMsgState, timeTag)
+		rightTag := lipgloss.JoinHorizontal(lipgloss.Left, cacheTag, useCachedState, autoRefreshTag, autoRefreshMsgState, timeTag)
 
 		if m.showLoading {
 			loadingLabelTag := infoStyle.Render(fmt.Sprintf(" %s ", m.loadingLabel))

@@ -3,6 +3,7 @@ package ui
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"slices"
 	"strings"
 	"time"
@@ -180,7 +181,7 @@ func (m *Model) switchResource(name string, scope resourceScope) tea.Cmd {
 	m.Resize()
 
 	return tea.Batch(
-		m.loadResource(),
+		m.loadResource(false),
 		m.spinner.Tick,
 	)
 }
@@ -318,7 +319,7 @@ func (m *Model) refreshResource() tea.Cmd {
 	m.loadID++
 
 	return tea.Batch(
-		m.loadResource(),
+		m.loadResource(true),
 		m.spinner.Tick,
 	)
 }
@@ -338,12 +339,12 @@ func (m *Model) autoRefreshResource() tea.Cmd {
 	m.loadID++
 
 	return tea.Batch(
-		m.loadResource(),
+		m.loadResource(false),
 		m.spinner.Tick,
 	)
 }
 
-func (m Model) loadResource() tea.Cmd {
+func (m Model) loadResource(force bool) tea.Cmd {
 	loadID := m.loadID
 	r := m.resource
 
@@ -367,12 +368,31 @@ func (m Model) loadResource() tea.Cmd {
 		if m.scope != nil {
 			ctx = resource.WithScope(ctx, m.scope)
 		}
+
+		cacheKey := m.buildCacheKey(r.Kind())
+		if !force && m.useCache && m.cacheables[r.Kind()] {
+			if v, ok := m.cache.Get(cacheKey); ok {
+				slog.Debug("getting resource from cache", "cacheKey", cacheKey)
+				return resourcesLoadedMsg{
+					loadID:     loadID,
+					rows:       v.([]resource.Row),
+					selectedID: selectedID,
+					cursor:     cursor,
+				}
+			}
+		}
+
 		rows, err := r.List(ctx)
 		if err != nil {
 			return errMsg{
 				err:    err,
 				loadID: loadID,
 			}
+		}
+
+		if m.useCache && m.cacheables[r.Kind()] {
+			slog.Debug("saving resource to cache", "cacheKey", cacheKey)
+			m.cache.SetDefault(cacheKey, rows)
 		}
 
 		return resourcesLoadedMsg{
