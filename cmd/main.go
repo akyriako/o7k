@@ -211,16 +211,8 @@ func run() error {
 		}
 	}
 
-	p := tea.NewProgram(
-		ui.New(
-			registry,
-			&openstackContext,
-			pluginHost,
-			ver,
-			cfg,
-		),
-		tea.WithAltScreen(),
-	)
+	m := ui.New(registry, &openstackContext, pluginHost, ver, cfg)
+	p := tea.NewProgram(&m, tea.WithAltScreen())
 
 	if _, err := p.Run(); err != nil {
 		return fmt.Errorf("error running o7k: %w", err)
