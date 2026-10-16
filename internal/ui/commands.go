@@ -3,6 +3,7 @@ package ui
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"slices"
 	"strings"
 	"time"
@@ -390,7 +391,7 @@ func (m Model) loadResource(force bool) tea.Cmd {
 		}
 
 		if m.useCache && m.cacheables[r.Kind()] {
-			//slog.Debug("saving resource to cache", "cacheKey", cacheKey)
+			slog.Debug("saving resource to cache", "cacheKey", cacheKey)
 			m.cache.SetDefault(cacheKey, rows)
 		}
 

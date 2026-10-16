@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/akyriako/o7k/internal/config"
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/plugins"
 	"github.com/akyriako/o7k/internal/resource"
@@ -74,7 +75,7 @@ type Model struct {
 	command     textinput.Model
 }
 
-func New(registry *resource.Registry, openstackContext *openstack.Context, pluginHost *plugins.Host, version string) Model {
+func New(registry *resource.Registry, openstackContext *openstack.Context, pluginHost *plugins.Host, version string, cfg config.Config) Model {
 	r, ok := registry.Get("contexts")
 	if !ok {
 		return Model{
@@ -121,6 +122,14 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, plugi
 	s := spinner.New()
 	s.Spinner = spinner.Points
 
+	cacheables := make(map[string]bool, len(cfg.Cache.Resources))
+	for _, kind := range cfg.Cache.Resources {
+		cacheables[kind] = true
+	}
+
+	ttl := time.Duration(cfg.Cache.TTL) * time.Second
+	ttc := time.Duration(cfg.Cache.CleanupInterval) * time.Second
+
 	m := Model{
 		version: version,
 
@@ -135,16 +144,9 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, plugi
 		detailViewport: detailViewport,
 		errorViewport:  errorViewport,
 
-		cache:    cache.New(5*time.Minute, 5*time.Minute),
-		useCache: true,
-		cacheables: map[string]bool{
-			"catalog":   true,
-			"regions":   true,
-			"services":  true,
-			"endpoints": true,
-			"flavors":   true,
-			"images":    true,
-		},
+		cache:      cache.New(ttl, ttc),
+		useCache:   cfg.Cache.Enabled,
+		cacheables: cacheables,
 
 		loading:      true,
 		showLoading:  true,

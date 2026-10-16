@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/akyriako/o7k/internal/config"
 	"github.com/akyriako/o7k/internal/logging"
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/plugins"
@@ -88,6 +89,7 @@ var (
 	logger  *slog.Logger
 	stderr  io.Writer = os.Stderr
 	logFile io.WriteCloser
+	cfg     config.Config
 )
 
 func main() {
@@ -99,11 +101,16 @@ func main() {
 
 func run() error {
 	var err error
-	logger, stderr, logFile, err = logging.New()
+
+	cfg, err = config.Load()
+	if err != nil {
+		return fmt.Errorf("error reading configuration: %w", err)
+	}
+
+	logger, stderr, logFile, err = logging.New(cfg)
 	if err != nil {
 		return fmt.Errorf("error initializing logging: %w", err)
 	}
-
 	defer logFile.Close()
 
 	slog.SetDefault(logger)
@@ -210,6 +217,7 @@ func run() error {
 			&openstackContext,
 			pluginHost,
 			ver,
+			cfg,
 		),
 		tea.WithAltScreen(),
 	)
