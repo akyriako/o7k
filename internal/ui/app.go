@@ -717,7 +717,7 @@ func (m Model) View() string {
 		}
 
 		autoRefreshTag := infoStyle.Render(" AutoRefresh ")
-		autoRefreshMsgState := autoRefreshStateOnStyle.Render(fmt.Sprintf(" ON:%ds ", int(m.autoRefreshInterval.Seconds())))
+		autoRefreshMsgState := autoRefreshStateOnStyle.Render(fmt.Sprintf(" ON/%ds ", int(m.autoRefreshInterval.Seconds())))
 		if m.autoRefreshPaused {
 			autoRefreshMsgState = autoRefreshStateOffStyle.Render(" OFF ")
 		}
