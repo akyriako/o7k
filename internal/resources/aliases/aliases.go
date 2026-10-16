@@ -31,7 +31,7 @@ func (r *Resource) Aliases() []string {
 
 func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
-		{Key: "name", Title: "TITLE", MinWidth: 20, Flex: 1},
+		{Key: "name", Title: "NAME", MinWidth: 20, Flex: 1},
 		{Key: "kind", Title: "KIND", MinWidth: 20, Flex: 1},
 		{Key: "aliases", Title: "ALIASES", MinWidth: 20, Flex: 1},
 	}
@@ -44,7 +44,7 @@ func (r *Resource) Commands() []resource.Command {
 func (r *Resource) List(context.Context) ([]resource.Row, error) {
 	registeredResources := r.registry.Resources()
 	slices.SortFunc(registeredResources, func(a, b resource.Resource) int {
-		return strings.Compare(a.Kind(), b.Kind())
+		return strings.Compare(a.Title(), b.Title())
 	})
 
 	rows := make([]resource.Row, 0, len(registeredResources))
