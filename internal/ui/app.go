@@ -182,12 +182,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch msg.String() {
 			case "esc", "enter":
 				m.setError(nil)
+				m.autoRefreshPaused = false
 
 				if len(m.navigation) > 0 {
 					return m, m.navigateBack()
 				}
 
-				return m, nil
+				return m, autoRefresh(m.autoRefreshInterval)
 
 			case "ctrl+x":
 				return m, tea.Quit
