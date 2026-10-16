@@ -372,7 +372,7 @@ func (m Model) loadResource(force bool) tea.Cmd {
 		cacheKey := m.buildCacheKey(r.Kind())
 		if !force && m.useCache && m.cacheables[r.Kind()] {
 			if v, ok := m.cache.Get(cacheKey); ok {
-				//slog.Debug("getting resource from cache", "cacheKey", cacheKey)
+				slog.Debug("getting resource from cache", "cacheKey", cacheKey)
 				return resourcesLoadedMsg{
 					loadID:     loadID,
 					rows:       v.([]resource.Row),

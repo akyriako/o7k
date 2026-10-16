@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -181,12 +182,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch msg.String() {
 			case "esc", "enter":
 				m.setError(nil)
+				m.autoRefreshPaused = false
 
 				if len(m.navigation) > 0 {
 					return m, m.navigateBack()
 				}
 
-				return m, nil
+				return m, autoRefresh(m.autoRefreshInterval)
 
 			case "ctrl+x":
 				return m, tea.Quit
@@ -729,7 +731,14 @@ func (m Model) View() string {
 			}
 		}
 
-		rightTag := lipgloss.JoinHorizontal(lipgloss.Left, cacheTag, useCachedState, autoRefreshTag, autoRefreshMsgState, timeTag)
+		debugTag := ""
+		debugState := ""
+		if slog.Default().Enabled(context.Background(), slog.LevelDebug) {
+			debugTag = infoStyle.Render(" Debug ")
+			debugState = autoRefreshStateOnStyle.Render(" ON ")
+		}
+
+		rightTag := lipgloss.JoinHorizontal(lipgloss.Left, debugTag, debugState, cacheTag, useCachedState, autoRefreshTag, autoRefreshMsgState, timeTag)
 
 		if m.showLoading {
 			loadingLabelTag := infoStyle.Render(fmt.Sprintf(" %s ", m.loadingLabel))
