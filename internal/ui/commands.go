@@ -3,6 +3,7 @@ package ui
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"slices"
 	"strings"
 	"time"
@@ -69,9 +70,9 @@ func clearStatus(status string) tea.Cmd {
 	})
 }
 
-func autoRefresh() tea.Cmd {
+func autoRefresh(interval time.Duration) tea.Cmd {
 	return tea.Tick(
-		refreshInterval,
+		interval,
 		func(time.Time) tea.Msg {
 			return autoRefreshMsg{}
 		},
@@ -390,7 +391,7 @@ func (m Model) loadResource(force bool) tea.Cmd {
 		}
 
 		if m.useCache && m.cacheables[r.Kind()] {
-			//slog.Debug("saving resource to cache", "cacheKey", cacheKey)
+			slog.Debug("saving resource to cache", "cacheKey", cacheKey)
 			m.cache.SetDefault(cacheKey, rows)
 		}
 

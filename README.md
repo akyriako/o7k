@@ -93,6 +93,38 @@ sudo dnf upgrade --refresh o7k
 o7k --version
 ```
 
+## Configuration
+
+o7k supports an optional configuration file at `~/.config/o7k/config.yaml`. If the file is absent, built-in defaults are used.
+
+```yaml
+cache:
+  enabled: true
+  ttl: 300
+  cleanup_interval: 300
+  resources:
+    - catalog
+    - regions
+    - services
+    - endpoints
+    - flavors
+    - images
+
+refresh:
+  interval: 30
+
+log:
+  level: 0
+```
+
+Cache TTL, cleanup interval, and refresh interval are specified in **seconds**.
+
+The `cache.resources` list determines which resources are cached and replaces the default `List()` functionality when configured. Setting `cache.enabled` to `false` disables caching.
+
+Automatic refresh is always enabled. It pauses when an error occurs to avoid repeated API requests and unnecessary throttling.
+
+The log level uses Go's `slog` numeric levels: Debug (`-4`), Info (`0`), Warn (`4`), and Error (`8`). Intermediate values are also supported.
+
 ## Usage
 
 **o7k** uses the standard OpenStack `clouds.yaml` configuration and automatically discovers the 

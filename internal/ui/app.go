@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/akyriako/o7k/internal/config"
 	"github.com/akyriako/o7k/internal/openstack"
 	"github.com/akyriako/o7k/internal/plugins"
 	"github.com/akyriako/o7k/internal/resource"
@@ -51,6 +52,8 @@ type Model struct {
 
 	autoRefreshTimestamp *time.Time
 	autoRefreshPaused    bool
+	autoRefreshInterval  time.Duration
+	showRefreshTimestamp bool
 
 	width  int
 	height int
@@ -74,7 +77,7 @@ type Model struct {
 	command     textinput.Model
 }
 
-func New(registry *resource.Registry, openstackContext *openstack.Context, pluginHost *plugins.Host, version string) Model {
+func New(registry *resource.Registry, openstackContext *openstack.Context, pluginHost *plugins.Host, version string, cfg config.Config) Model {
 	r, ok := registry.Get("contexts")
 	if !ok {
 		return Model{
@@ -121,6 +124,14 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, plugi
 	s := spinner.New()
 	s.Spinner = spinner.Points
 
+	cacheables := make(map[string]bool, len(cfg.Cache.Resources))
+	for _, kind := range cfg.Cache.Resources {
+		cacheables[kind] = true
+	}
+
+	ttl := time.Duration(cfg.Cache.TTL) * time.Second
+	ttc := time.Duration(cfg.Cache.CleanupInterval) * time.Second
+
 	m := Model{
 		version: version,
 
@@ -135,16 +146,12 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, plugi
 		detailViewport: detailViewport,
 		errorViewport:  errorViewport,
 
-		cache:    cache.New(5*time.Minute, 5*time.Minute),
-		useCache: true,
-		cacheables: map[string]bool{
-			"catalog":   true,
-			"regions":   true,
-			"services":  true,
-			"endpoints": true,
-			"flavors":   true,
-			"images":    true,
-		},
+		cache:      cache.New(ttl, ttc),
+		useCache:   cfg.Cache.Enabled,
+		cacheables: cacheables,
+
+		autoRefreshInterval:  time.Duration(cfg.Refresh.Interval) * time.Second,
+		showRefreshTimestamp: cfg.Refresh.ShowTimestamp,
 
 		loading:      true,
 		showLoading:  true,
@@ -162,7 +169,7 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, plugi
 func (m Model) Init() tea.Cmd {
 	return tea.Batch(
 		m.loadResource(true),
-		autoRefresh(),
+		autoRefresh(m.autoRefreshInterval),
 		m.spinner.Tick,
 	)
 }
@@ -275,7 +282,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 
 		case autoRefreshMsg:
-			return m, autoRefresh()
+			return m, autoRefresh(m.autoRefreshInterval)
 		}
 
 		var cmd tea.Cmd
@@ -287,7 +294,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.commandMode {
 		switch msg := msg.(type) {
 		case autoRefreshMsg:
-			return m, autoRefresh()
+			return m, autoRefresh(m.autoRefreshInterval)
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "enter":
@@ -454,7 +461,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, tea.Batch(
 			cmd,
-			autoRefresh(),
+			autoRefresh(m.autoRefreshInterval),
 		)
 
 	case tea.WindowSizeMsg:
@@ -710,14 +717,18 @@ func (m Model) View() string {
 		}
 
 		autoRefreshTag := infoStyle.Render(" AutoRefresh ")
-		autoRefreshMsgState := autoRefreshStateOnStyle.Render(" ON ")
+		autoRefreshMsgState := autoRefreshStateOnStyle.Render(fmt.Sprintf(" ON/%ds ", int(m.autoRefreshInterval.Seconds())))
 		if m.autoRefreshPaused {
 			autoRefreshMsgState = autoRefreshStateOffStyle.Render(" OFF ")
 		}
+
 		timeTag := ""
-		if m.autoRefreshTimestamp != nil {
-			timeTag = infoStyle.Render(fmt.Sprintf(" %s ", m.autoRefreshTimestamp.Format(time.RFC3339)))
+		if m.showRefreshTimestamp {
+			if m.autoRefreshTimestamp != nil {
+				timeTag = infoStyle.Render(fmt.Sprintf(" %s ", m.autoRefreshTimestamp.Format(time.RFC3339)))
+			}
 		}
+
 		rightTag := lipgloss.JoinHorizontal(lipgloss.Left, cacheTag, useCachedState, autoRefreshTag, autoRefreshMsgState, timeTag)
 
 		if m.showLoading {

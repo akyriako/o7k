@@ -7,10 +7,11 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/akyriako/o7k/internal/config"
 	"github.com/hashicorp/go-hclog"
 )
 
-func New() (*slog.Logger, io.Writer, io.WriteCloser, error) {
+func New(cfg config.Config) (*slog.Logger, io.Writer, io.WriteCloser, error) {
 	stateDir, err := userStateDir()
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("get user state directory: %w", err)
@@ -31,7 +32,7 @@ func New() (*slog.Logger, io.Writer, io.WriteCloser, error) {
 		return nil, nil, nil, fmt.Errorf("open log file: %w", err)
 	}
 
-	hl := newLogger(hclog.Debug, file)
+	hl := newLogger(hclog.Level(int32(cfg.Log.Level)), file)
 	logger := slog.New(newSlogHandler(hl))
 
 	stderr := io.MultiWriter(os.Stderr, file)
