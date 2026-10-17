@@ -1,0 +1,50 @@
+# Norton Commander 5.5-inspired palette based on the supplied screenshot.
+# For full DOS-blue panels, set your terminal background to #0000AA.
+resource_tag:
+  foreground: "#FFFF55"
+  background: "#0000AA"
+navigation_tag:
+  foreground: "#000000"
+  background: "#00AAAA"
+status:
+  foreground: "#000000"
+  background: "#00AAAA"
+loading:
+  foreground: "#000000"
+  background: "#FFFF55"
+info:
+  foreground: "#000000"
+  background: "#00AAAA"
+state_on:
+  foreground: "#000000"
+  background: "#55FF55"
+state_off:
+  foreground: "#FFFFFF"
+  background: "#AA0000"
+modal_button:
+  foreground: "#000000"
+  background: "#00AAAA"
+table_selected:
+  foreground: "#000000"
+  background: "#00AAAA"
+command: "#55FFFF"
+command_ghost: "#00AAAA"
+command_placeholder: "#00AAAA"
+header_label: "#FFFF55"
+header_value: "#55FFFF"
+header_command_key: "#FFFF55"
+header_command_text: "#55FFFF"
+logo: "#FFFF55"
+json_key: "#55FFFF"
+json_string: "#55FFFF"
+json_number: "#FFFF55"
+json_bool: "#FFFF55"
+json_null: "#00AAAA"
+table_title: "#FFFF55"
+table_border: "#55FFFF"
+detail_border: "#55FFFF"
+error_modal:
+  foreground: "#FFFFFF"
+  background: "#AA0000"
+error_border: "#FF5555"
+error_title: "#FFFF55"

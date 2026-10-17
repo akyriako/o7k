@@ -238,7 +238,7 @@ func (m Model) renderTable() string {
 	right := remaining - left
 
 	borderStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#00BFFF"))
+		Foreground(lipgloss.Color(m.skin.TableBorder))
 
 	top := borderStyle.Render(
 		"┌" +
@@ -326,7 +326,7 @@ func (m Model) renderDetails() string {
 	right := remaining - left
 
 	borderStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#00BFFF"))
+		Foreground(lipgloss.Color(m.skin.DetailBorder))
 
 	top := borderStyle.Render(
 		"┌" +

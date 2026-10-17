@@ -27,6 +27,7 @@ const refreshInterval = 30 * time.Second
 
 type Model struct {
 	version string
+	skin    config.Skin
 
 	registry     *resource.Registry
 	resource     resource.Resource
@@ -81,6 +82,8 @@ type Model struct {
 }
 
 func New(registry *resource.Registry, openstackContext *openstack.Context, pluginHost *plugins.Host, version string, cfg config.Config) Model {
+	initStyles(cfg.SkinColors)
+
 	r, ok := registry.Get("contexts")
 	if !ok {
 		return Model{
@@ -107,17 +110,17 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, plugi
 		table.WithHeight(10),
 	)
 
-	t.SetStyles(tableStyles())
+	t.SetStyles(tableStyles(cfg.SkinColors))
 
 	command := textinput.New()
 	command.Prompt = ":"
 	command.CharLimit = 64
 	command.ShowSuggestions = true
 
-	command.PromptStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#87CEFA"))
-	command.TextStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#87CEFA"))
-	command.Cursor.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("#87CEFA"))
-	command.PlaceholderStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#666666"))
+	command.PromptStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.SkinColors.Command))
+	command.TextStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.SkinColors.Command))
+	command.Cursor.Style = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.SkinColors.Command))
+	command.PlaceholderStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.SkinColors.CommandPlaceholder))
 
 	detailViewport := viewport.New(1, 1)
 	detailViewport.SetHorizontalStep(4)
@@ -137,6 +140,7 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, plugi
 
 	m := Model{
 		version: version,
+		skin:    cfg.SkinColors,
 
 		registry: registry,
 		resource: r,

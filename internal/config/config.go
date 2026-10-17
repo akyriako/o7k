@@ -15,9 +15,11 @@ const (
 )
 
 type Config struct {
-	Cache   Cache   `yaml:"cache"`
-	Log     Log     `yaml:"log"`
-	Refresh Refresh `yaml:"refresh"`
+	Cache      Cache   `yaml:"cache"`
+	Log        Log     `yaml:"log"`
+	Refresh    Refresh `yaml:"refresh"`
+	Skin       string  `yaml:"skin"`
+	SkinColors Skin    `yaml:"-"`
 }
 
 type Cache struct {
@@ -68,13 +70,15 @@ func Load() (Config, error) {
 		return cfg, err
 	}
 
-	path := filepath.Join(dir, "o7k", "config.yaml")
+	dir = filepath.Join(dir, "o7k")
+	path := filepath.Join(dir, "config.yaml")
 
 	data, err := os.ReadFile(path)
-	if os.IsNotExist(err) {
-		return cfg, nil
-	}
-	if err != nil {
+	if err == nil {
+		if err := yaml.Unmarshal(data, &cfg); err != nil {
+			return cfg, err
+		}
+	} else if !os.IsNotExist(err) {
 		return cfg, fmt.Errorf("reading config: %w", err)
 	}
 
@@ -94,6 +98,18 @@ func Load() (Config, error) {
 
 	if cfg.Refresh.Interval <= 0 {
 		cfg.Refresh.Interval = defaultRefreshInterval
+	}
+
+	if cfg.Skin == "" {
+		cfg.Skin = "default"
+	}
+
+	if err := installSkins(dir); err != nil {
+		return cfg, err
+	}
+	cfg.SkinColors, err = loadSkin(dir, cfg.Skin)
+	if err != nil {
+		return cfg, err
 	}
 
 	return cfg, nil
