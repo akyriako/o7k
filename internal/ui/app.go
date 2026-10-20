@@ -117,10 +117,10 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, plugi
 	command.CharLimit = 64
 	command.ShowSuggestions = true
 
-	command.PromptStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.SkinColors.Command))
-	command.TextStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.SkinColors.Command))
-	command.Cursor.Style = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.SkinColors.Command))
-	command.PlaceholderStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.SkinColors.CommandPlaceholder))
+	command.PromptStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.SkinColors.Command.Foreground)).Background(lipgloss.Color(cfg.SkinColors.Command.Background))
+	command.TextStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.SkinColors.Command.Foreground)).Background(lipgloss.Color(cfg.SkinColors.Command.Background))
+	command.Cursor.Style = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.SkinColors.Command.Foreground)).Background(lipgloss.Color(cfg.SkinColors.Command.Background))
+	command.PlaceholderStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.SkinColors.CommandPlaceholder)).Background(lipgloss.Color(cfg.SkinColors.Command.Background))
 
 	detailViewport := viewport.New(1, 1)
 	detailViewport.SetHorizontalStep(4)
@@ -714,19 +714,19 @@ func (m Model) View() string {
 		if m.width > compactWidth {
 			for _, entry := range m.navigation {
 				resourceTags.WriteString(
-					navigationTagStyle.Render(" <"+entry.resource+"> ") + " ",
+					navigationTagStyle.Render(" <"+entry.resource+"> ") + mainStyle.Render(" "),
 				)
 			}
 		}
 
 		activeResourceStyle := resourceTagStyle
 		if color := plugins.ResourceColor(m.resource); color != "" {
-			activeResourceStyle = activeResourceStyle.Background(lipgloss.Color(color))
+			activeResourceStyle = activeResourceStyle.Background(lipgloss.Color(color)).Foreground(lipgloss.Color("#FFFFFF"))
 		}
 
 		if m.detailMode {
 			resourceTags.WriteString(
-				navigationTagStyle.Render(" <"+m.resource.Kind()+"> ") + " ",
+				navigationTagStyle.Render(" <"+m.resource.Kind()+"> ") + mainStyle.Render(" "),
 			)
 			resourceTags.WriteString(
 				activeResourceStyle.Render(" <" + strings.ToLower(m.detailLabel) + "> "),
@@ -776,6 +776,7 @@ func (m Model) View() string {
 			lipgloss.Top,
 			lipgloss.NewStyle().
 				Width(max(m.width-lipgloss.Width(rightTag), 1)).
+				Background(lipgloss.Color(m.skin.Main.Background)).
 				Render(resourceTags.String()),
 			rightTag,
 		)
@@ -793,6 +794,11 @@ func (m Model) View() string {
 		commandLine = m.command.View()
 	}
 
+	commandLine = lipgloss.NewStyle().
+		Width(m.width).
+		Background(lipgloss.Color(m.skin.Main.Background)).
+		Render(commandLine)
+
 	view := header +
 		"\n\n" +
 		contentView +
@@ -801,10 +807,14 @@ func (m Model) View() string {
 		"\n" +
 		commandLine
 
+	view = lipgloss.NewStyle().
+		Width(m.width).
+		Height(m.height).
+		Background(lipgloss.Color(m.skin.Main.Background)).
+		Render(view)
+
 	if m.err != nil {
-		if m.err != nil {
-			return overlayCenter(view, m.renderErrorModal())
-		}
+		return overlayCenter(view, m.renderErrorModal())
 	}
 
 	return view

@@ -1,14 +1,29 @@
-# Norton Commander 5.5-inspired palette based on the supplied screenshot.
-# For full DOS-blue panels, set your terminal background to #0000AA.
-resource_tag:
-  foreground: "#FFFF55"
+main:
+  foreground: "#55FFFF"
   background: "#0000AA"
-navigation_tag:
+table:
+  foreground: "#55FFFF"
+  background: "#0000AA"
+table_title: "#FFFF55"
+table_header: "#FFFF55"
+table_selected:
   foreground: "#000000"
+  background: "#FFFF55"
+context:
+  foreground: "#55FFFF"
+  background: "#0000AA"
+command:
+  foreground: "#55FFFF"
+  background: "#0000AA"
+resource_tag:
+  foreground: "#000000"
+  background: "#55FF55"
+navigation_tag:
+  foreground: "#FFFFFF"
   background: "#00AAAA"
 status:
   foreground: "#000000"
-  background: "#00AAAA"
+  background: "#FFA500"
 loading:
   foreground: "#000000"
   background: "#FFFF55"
@@ -24,10 +39,6 @@ state_off:
 modal_button:
   foreground: "#000000"
   background: "#00AAAA"
-table_selected:
-  foreground: "#000000"
-  background: "#00AAAA"
-command: "#55FFFF"
 command_ghost: "#00AAAA"
 command_placeholder: "#00AAAA"
 header_label: "#FFFF55"
@@ -40,11 +51,4 @@ json_string: "#55FFFF"
 json_number: "#FFFF55"
 json_bool: "#FFFF55"
 json_null: "#00AAAA"
-table_title: "#FFFF55"
-table_border: "#55FFFF"
-detail_border: "#55FFFF"
-error_modal:
-  foreground: "#FFFFFF"
-  background: "#AA0000"
-error_border: "#FF5555"
 error_title: "#FFFF55"

@@ -9,10 +9,11 @@ import (
 //Header and AppView
 
 var (
+	mainStyle                 lipgloss.Style
+	tableBodyStyle            lipgloss.Style
+	detailBodyStyle           lipgloss.Style
 	resourceTagStyle          lipgloss.Style
 	navigationTagStyle        lipgloss.Style
-	commandStyle              lipgloss.Style
-	commandGhostStyle         lipgloss.Style
 	statusStyle               lipgloss.Style
 	headerLabelStyle          lipgloss.Style
 	headerValueStyle          lipgloss.Style
@@ -39,6 +40,13 @@ var (
 )
 
 func initStyles(skin config.Skin) {
+	mainStyle = lipgloss.NewStyle().
+		Foreground(lipgloss.Color(skin.Main.Foreground)).
+		Background(lipgloss.Color(skin.Main.Background))
+
+	tableBodyStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(skin.Table.Foreground)).Background(lipgloss.Color(skin.Table.Background))
+	detailBodyStyle = mainStyle
+
 	resourceTagStyle = lipgloss.NewStyle().
 		Foreground(lipgloss.Color(skin.ResourceTag.Foreground)).
 		Background(lipgloss.Color(skin.ResourceTag.Background)).
@@ -48,13 +56,6 @@ func initStyles(skin config.Skin) {
 		Foreground(lipgloss.Color(skin.NavigationTag.Foreground)).
 		Background(lipgloss.Color(skin.NavigationTag.Background))
 
-	commandStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color(skin.Command))
-
-	commandGhostStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color(skin.CommandGhost)).
-		Faint(true)
-
 	statusStyle = lipgloss.NewStyle().
 		Foreground(lipgloss.Color(skin.Status.Foreground)).
 		Background(lipgloss.Color(skin.Status.Background)).
@@ -62,20 +63,25 @@ func initStyles(skin config.Skin) {
 
 	headerLabelStyle = lipgloss.NewStyle().
 		Foreground(lipgloss.Color(skin.HeaderLabel)).
+		Background(lipgloss.Color(skin.Context.Background)).
 		Bold(true)
 
 	headerValueStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color(skin.HeaderValue))
+		Foreground(lipgloss.Color(skin.HeaderValue)).
+		Background(lipgloss.Color(skin.Context.Background))
 
 	headerCommandKeyStyle = lipgloss.NewStyle().
 		Foreground(lipgloss.Color(skin.HeaderCommandKey)).
+		Background(lipgloss.Color(skin.Main.Background)).
 		Bold(true)
 
 	headerCommandTextStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color(skin.HeaderCommandText))
+		Foreground(lipgloss.Color(skin.HeaderCommandText)).
+		Background(lipgloss.Color(skin.Main.Background))
 
 	logoStyle = lipgloss.NewStyle().
 		Foreground(lipgloss.Color(skin.Logo)).
+		Background(lipgloss.Color(skin.Main.Background)).
 		Bold(true)
 
 	loadingStyle = lipgloss.NewStyle().
@@ -121,18 +127,20 @@ func initStyles(skin config.Skin) {
 		Foreground(lipgloss.Color(skin.JSONNull))
 
 	detailScrollbarTrackStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color(skin.DetailBorder))
+		Foreground(lipgloss.Color(skin.Main.Foreground))
 
 	detailScrollbarThumbStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color(skin.DetailBorder)).
+		Foreground(lipgloss.Color(skin.Main.Foreground)).
 		Bold(true)
 
 	//ErrorView
 
 	errorModalStyle = lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color(skin.ErrorBorder)).
-		Foreground(lipgloss.Color(skin.ErrorModal.Foreground)).
+		BorderForeground(lipgloss.Color(skin.Main.Foreground)).
+		BorderBackground(lipgloss.Color(skin.Main.Background)).
+		Foreground(lipgloss.Color(skin.Main.Foreground)).
+		Background(lipgloss.Color(skin.Main.Background)).
 		Padding(1, 1).
 		Width(60)
 
@@ -140,24 +148,28 @@ func initStyles(skin config.Skin) {
 		Foreground(lipgloss.Color(skin.ErrorTitle)).
 		Bold(true)
 
+	errorScrollbarTrackStyle = lipgloss.NewStyle().
+		Foreground(lipgloss.Color(skin.Main.Foreground))
+
+	errorScrollbarThumbStyle = lipgloss.NewStyle().
+		Foreground(lipgloss.Color(skin.Main.Foreground))
+
 	//TableView
 
 	tableTitleStyle = lipgloss.NewStyle().
 		Foreground(lipgloss.Color(skin.TableTitle)).Bold(true)
-
-	errorScrollbarTrackStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color(skin.ErrorBorder))
-
-	errorScrollbarThumbStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color(skin.ErrorBorder))
-
-	if skin.ErrorModal.Background != "" {
-		errorModalStyle = errorModalStyle.Background(lipgloss.Color(skin.ErrorModal.Background))
-	}
 }
 
 func tableStyles(skin config.Skin) table.Styles {
 	styles := table.DefaultStyles()
+
+	styles.Cell = styles.Cell.
+		Foreground(lipgloss.Color(skin.Table.Foreground)).
+		Background(lipgloss.Color(skin.Table.Background))
+
+	styles.Header = styles.Header.
+		Foreground(lipgloss.Color(skin.TableHeader)).
+		Background(lipgloss.Color(skin.Table.Background))
 
 	styles.Selected = styles.Selected.
 		Foreground(lipgloss.Color(skin.TableSelected.Foreground)).

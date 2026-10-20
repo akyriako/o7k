@@ -6,6 +6,11 @@ type ColorPair struct {
 }
 
 type Skin struct {
+	Main    ColorPair `yaml:"main"`
+	Table   ColorPair `yaml:"table"`
+	Context ColorPair `yaml:"context"`
+	Command ColorPair `yaml:"command"`
+
 	ResourceTag   ColorPair `yaml:"resource_tag"`
 	NavigationTag ColorPair `yaml:"navigation_tag"`
 	Status        ColorPair `yaml:"status"`
@@ -16,7 +21,6 @@ type Skin struct {
 	ModalButton   ColorPair `yaml:"modal_button"`
 	TableSelected ColorPair `yaml:"table_selected"`
 
-	Command            string `yaml:"command"`
 	CommandGhost       string `yaml:"command_ghost"`
 	CommandPlaceholder string `yaml:"command_placeholder"`
 
@@ -32,11 +36,7 @@ type Skin struct {
 	JSONBool   string `yaml:"json_bool"`
 	JSONNull   string `yaml:"json_null"`
 
-	TableTitle   string `yaml:"table_title"`
-	TableBorder  string `yaml:"table_border"`
-	DetailBorder string `yaml:"detail_border"`
-
-	ErrorModal  ColorPair `yaml:"error_modal"`
-	ErrorBorder string    `yaml:"error_border"`
-	ErrorTitle  string    `yaml:"error_title"`
+	TableTitle  string `yaml:"table_title"`
+	TableHeader string `yaml:"table_header"`
+	ErrorTitle  string `yaml:"error_title"`
 }
