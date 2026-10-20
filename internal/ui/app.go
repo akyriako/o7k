@@ -697,6 +697,11 @@ func (m Model) View() string {
 		)
 	}
 
+	compactMode := false
+	if m.width <= compactWidth {
+		compactMode = true
+	}
+
 	header := m.renderHeader()
 
 	contentView := m.renderTable()
@@ -710,7 +715,7 @@ func (m Model) View() string {
 	if m.resource != nil {
 		var resourceTags strings.Builder
 
-		if m.width > compactWidth {
+		if !compactMode {
 			for _, entry := range m.navigation {
 				resourceTags.WriteString(
 					navigationTagStyle.Render(" <"+entry.resource+"> ") + mainStyle.Render(" "),
@@ -763,6 +768,9 @@ func (m Model) View() string {
 		}
 
 		rightTag := lipgloss.JoinHorizontal(lipgloss.Left, debugTag, debugState, cacheTag, useCachedState, autoRefreshTag, autoRefreshMsgState, timeTag)
+		if compactMode {
+			rightTag = lipgloss.JoinHorizontal(lipgloss.Left, timeTag)
+		}
 
 		if m.showLoading {
 			loadingLabelTag := infoStyle.Render(fmt.Sprintf(" %s ", m.loadingLabel))

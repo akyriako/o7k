@@ -224,14 +224,13 @@ func (m Model) renderTable() string {
 	title := ""
 
 	if m.resource != nil {
-		title = fmt.Sprintf(
-			" %s[%d] ",
-			m.resource.Kind(),
-			m.itemCount,
-		)
+		title = fmt.Sprintf(" %s[%d] ", m.resource.Kind(), m.itemCount)
 
-		if !m.showHeaderContext() && m.context.Cloud != "" {
-			title = fmt.Sprintf(" (%s)%s", m.context.Cloud, title)
+		if len(m.navigation) > 0 {
+			parent := m.navigation[len(m.navigation)-1]
+			title = fmt.Sprintf(" %s(%s/%s)[%d] ", m.resource.Kind(), parent.resource, parent.id, m.itemCount)
+		} else if !m.showHeaderContext() && m.context.Cloud != "" && m.resource.Kind() != "contexts" {
+			title = fmt.Sprintf(" %s(%s)[%d] ", m.resource.Kind(), m.context.Cloud, m.itemCount)
 		}
 	}
 
@@ -296,10 +295,6 @@ func (m Model) renderTable() string {
 			body = header + "\n" + emptyContent
 		}
 	}
-	//
-	//selectedStyle := lipgloss.NewStyle().
-	//	Foreground(lipgloss.Color(m.skin.TableSelected.Foreground)).
-	//	Background(lipgloss.Color(m.skin.TableSelected.Background))
 
 	paddingStyle := lipgloss.NewStyle().
 		Background(lipgloss.Color(m.skin.Table.Background))
@@ -333,7 +328,7 @@ func (m Model) renderDetails() string {
 	}
 
 	if m.resource != nil && m.detailID != "" {
-		title = fmt.Sprintf(" %s %s ", m.resource.Kind(), m.detailID)
+		title = fmt.Sprintf(" %s/%s ", m.resource.Kind(), m.detailID)
 	}
 
 	innerWidth := max(m.width-2, 1)
