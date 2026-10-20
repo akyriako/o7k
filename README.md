@@ -125,6 +125,25 @@ Automatic refresh is always enabled. It pauses when an error occurs to avoid rep
 
 The log level uses Go's `slog` [log levels](https://pkg.go.dev/log/slog#hdr-Levels), e.g: `info`, `debug`, `warn`, `error`.
 
+### Themes
+
+**o7k** supports customizable YAML-based color themes (skins). Built-in skins are available under `internal/config/skins/`
+and users can create their own.
+
+Four accessibility-oriented themes are included: **High Contrast**, **Protanopia**, **Deuteranopia**, and **Tritanopia**.
+
+To select a theme, set the `skin` property in `~/.config/o7k/config.yaml`:
+
+```yaml
+skin: dracula
+```
+
+Custom skins can be placed in `~/.config/o7k/skins/` and selected by their filename without the `.yaml` extension:
+
+```yaml
+skin: my-custom-theme
+```
+
 ## Usage
 
 **o7k** uses the standard OpenStack `clouds.yaml` configuration and automatically discovers the 

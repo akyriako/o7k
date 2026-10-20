@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -150,4 +151,19 @@ func (m Model) buildCacheKey(kind string) string {
 
 	hash := sha256.Sum256([]byte(identity))
 	return fmt.Sprintf("%s:%s", hex.EncodeToString(hash[:8]), kind)
+}
+
+var ansiSGR = regexp.MustCompile("\x1b\\[[0-9;]*m")
+
+func preserveBackground(content string, background lipgloss.Color) string {
+	style := lipgloss.NewStyle().Background(background)
+	prefix := ansiSGR.FindString(style.Render("x"))
+
+	if prefix == "" {
+		return content
+	}
+
+	return prefix + ansiSGR.ReplaceAllStringFunc(content, func(sequence string) string {
+		return sequence + prefix
+	})
 }

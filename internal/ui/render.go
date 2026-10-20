@@ -51,18 +51,19 @@ func (m Model) renderHeader() string {
 
 	left := lipgloss.NewStyle().
 		Width(leftWidth).
+		Background(lipgloss.Color(m.skin.Main.Background)).
 		Render(context)
 
 	center := m.renderHeaderCommands(centerWidth)
-	// Fill all available space before the logo, so the logo
-	// remains at the terminal's right edge.
 	center = lipgloss.NewStyle().
 		Width(centerWidth).
+		Background(lipgloss.Color(m.skin.Main.Background)).
 		Render(center)
 
 	right := lipgloss.NewStyle().
 		Width(rightWidth).
 		Align(lipgloss.Right).
+		Background(lipgloss.Color(m.skin.Main.Background)).
 		Render(renderedLogo)
 
 	if !showContext {
@@ -201,11 +202,16 @@ func (m Model) renderHeaderCommands(availableWidth int) string {
 			}
 
 			text = ansi.Truncate(text, max(width-keyWidth-1, 0), "")
-			lines = append(lines, key+text+" ")
+			line := key + text
+			lineWidth := lipgloss.Width(line)
+			if lineWidth < width {
+				line += mainStyle.Render(strings.Repeat(" ", width-lineWidth))
+			}
+			lines = append(lines, line)
 		}
 
 		for len(lines) < commandsPerColumn {
-			lines = append(lines, "")
+			lines = append(lines, mainStyle.Render(strings.Repeat(" ", width)))
 		}
 
 		columns = append(columns, strings.Join(lines, "\n"))
@@ -238,7 +244,8 @@ func (m Model) renderTable() string {
 	right := remaining - left
 
 	borderStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#00BFFF"))
+		Foreground(lipgloss.Color(m.skin.Main.Foreground)).
+		Background(lipgloss.Color(m.skin.Main.Background))
 
 	top := borderStyle.Render(
 		"┌" +
@@ -280,23 +287,38 @@ func (m Model) renderTable() string {
 				emptyMessage,
 			)
 
+			emptyLines := strings.Split(emptyContent, "\n")
+			for i, line := range emptyLines {
+				emptyLines[i] = tableBodyStyle.Width(innerWidth).Align(lipgloss.Center).Render(line)
+			}
+			emptyContent = strings.Join(emptyLines, "\n")
+
 			body = header + "\n" + emptyContent
 		}
 	}
 
+	selectedStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(m.skin.TableSelected.Foreground)).
+		Background(lipgloss.Color(m.skin.TableSelected.Background))
+
+	paddingStyle := lipgloss.NewStyle().
+		Background(lipgloss.Color(m.skin.Table.Background))
+
 	bodyLines := strings.Split(body, "\n")
-
 	for i, line := range bodyLines {
-		lineWidth := lipgloss.Width(line)
-
-		if lineWidth < innerWidth {
-			line += strings.Repeat(" ", innerWidth-lineWidth)
+		selected := i > 0 && i-1 == m.table.Cursor()
+		if selected {
+			line = selectedStyle.Render(ansi.Strip(line))
+		} else if i > 0 && strings.TrimSpace(ansi.Strip(line)) == "" {
+			line = paddingStyle.Render(strings.Repeat(" ", innerWidth))
 		}
 
-		bodyLines[i] =
-			borderStyle.Render("│") +
-				line +
-				borderStyle.Render("│")
+		lineWidth := lipgloss.Width(line)
+		if lineWidth < innerWidth {
+			line += paddingStyle.Render(strings.Repeat(" ", innerWidth-lineWidth))
+		}
+
+		bodyLines[i] = borderStyle.Render("│") + line + borderStyle.Render("│")
 	}
 
 	return top +
@@ -326,7 +348,8 @@ func (m Model) renderDetails() string {
 	right := remaining - left
 
 	borderStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#00BFFF"))
+		Foreground(lipgloss.Color(m.skin.Main.Foreground)).
+		Background(lipgloss.Color(m.skin.Main.Background))
 
 	top := borderStyle.Render(
 		"┌" +
@@ -367,7 +390,7 @@ func (m Model) renderDetails() string {
 
 		bodyLines[i] =
 			borderStyle.Render("│") +
-				line +
+				preserveBackground(detailBodyStyle.Render(line), lipgloss.Color(m.skin.Main.Background)) +
 				rightBorder
 	}
 
@@ -442,17 +465,16 @@ func overlayCenter(background, foreground string) string {
 }
 
 func (m Model) renderErrorModal() string {
-	hint := lipgloss.NewStyle().
-		Faint(true).
-		Render("Press ") +
+	hintStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(m.skin.Main.Foreground)).
+		Background(lipgloss.Color(m.skin.Main.Background)).
+		Faint(true)
+
+	hint := hintStyle.Render("Press ") +
 		modalButtonStyle.Render(" Esc ") +
-		lipgloss.NewStyle().
-			Faint(true).
-			Render(" or ") +
+		hintStyle.Render(" or ") +
 		modalButtonStyle.Render(" Enter ") +
-		lipgloss.NewStyle().
-			Faint(true).
-			Render(" to dismiss")
+		hintStyle.Render(" to dismiss")
 
 	content := errorTitleStyle.Render("Error") +
 		"\n\n" +
