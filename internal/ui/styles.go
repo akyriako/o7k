@@ -4,6 +4,7 @@ import (
 	"github.com/akyriako/o7k/internal/config"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/ansi"
 )
 
 //Header and AppView
@@ -181,7 +182,8 @@ func tableStyles(skin config.Skin) table.Styles {
 	styles.Selected = styles.Selected.
 		Foreground(lipgloss.Color(skin.TableSelected.Foreground)).
 		Background(lipgloss.Color(skin.TableSelected.Background)).
-		Bold(true)
+		Bold(true).
+		Transform(ansi.Strip)
 
 	return styles
 }

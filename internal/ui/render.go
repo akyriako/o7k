@@ -296,20 +296,17 @@ func (m Model) renderTable() string {
 			body = header + "\n" + emptyContent
 		}
 	}
-
-	selectedStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(m.skin.TableSelected.Foreground)).
-		Background(lipgloss.Color(m.skin.TableSelected.Background))
+	//
+	//selectedStyle := lipgloss.NewStyle().
+	//	Foreground(lipgloss.Color(m.skin.TableSelected.Foreground)).
+	//	Background(lipgloss.Color(m.skin.TableSelected.Background))
 
 	paddingStyle := lipgloss.NewStyle().
 		Background(lipgloss.Color(m.skin.Table.Background))
 
 	bodyLines := strings.Split(body, "\n")
 	for i, line := range bodyLines {
-		selected := i > 0 && i-1 == m.table.Cursor()
-		if selected {
-			line = selectedStyle.Render(ansi.Strip(line))
-		} else if i > 0 && strings.TrimSpace(ansi.Strip(line)) == "" {
+		if i > 0 && strings.TrimSpace(ansi.Strip(line)) == "" {
 			line = paddingStyle.Render(strings.Repeat(" ", innerWidth))
 		}
 
