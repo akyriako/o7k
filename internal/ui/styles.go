@@ -112,25 +112,32 @@ func initStyles(skin config.Skin) {
 	//DetailsView
 
 	jsonKeyStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color(skin.JSONKey))
+		Foreground(lipgloss.Color(skin.JSONKey)).
+		Background(lipgloss.Color(skin.Main.Background))
 
 	jsonStringStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color(skin.JSONString))
+		Foreground(lipgloss.Color(skin.JSONString)).
+		Background(lipgloss.Color(skin.Main.Background))
 
 	jsonNumberStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color(skin.JSONNumber))
+		Foreground(lipgloss.Color(skin.JSONNumber)).
+		Background(lipgloss.Color(skin.Main.Background))
 
 	jsonBoolStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color(skin.JSONBool))
+		Foreground(lipgloss.Color(skin.JSONBool)).
+		Background(lipgloss.Color(skin.Main.Background))
 
 	jsonNullStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color(skin.JSONNull))
+		Foreground(lipgloss.Color(skin.JSONNull)).
+		Background(lipgloss.Color(skin.Main.Background))
 
 	detailScrollbarTrackStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color(skin.Main.Foreground))
+		Foreground(lipgloss.Color(skin.Main.Foreground)).
+		Background(lipgloss.Color(skin.Main.Background))
 
 	detailScrollbarThumbStyle = lipgloss.NewStyle().
 		Foreground(lipgloss.Color(skin.Main.Foreground)).
+		Background(lipgloss.Color(skin.Main.Background)).
 		Bold(true)
 
 	//ErrorView

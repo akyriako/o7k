@@ -390,7 +390,7 @@ func (m Model) renderDetails() string {
 
 		bodyLines[i] =
 			borderStyle.Render("│") +
-				detailBodyStyle.Render(line) +
+				preserveBackground(detailBodyStyle.Render(line), lipgloss.Color(m.skin.Main.Background)) +
 				rightBorder
 	}
 
