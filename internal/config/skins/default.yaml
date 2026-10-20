@@ -4,6 +4,10 @@ main:
 table:
   foreground: "#FFFFFF"
   background: ""
+table_selected:
+  foreground: "255"
+  background: "#ED1944"
+table_header: "#FFFFFF"
 context:
   foreground: "#FFFFFF"
   background: ""
@@ -34,10 +38,6 @@ state_off:
 modal_button:
   foreground: "#000000"
   background: "#00BFFF"
-table_selected:
-  foreground: "255"
-  background: "#ED1944"
-table_header: "#FFFFFF"
 command_ghost: "#5C6370"
 command_placeholder: "#666666"
 header_label: "#FFA500"

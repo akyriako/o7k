@@ -1,0 +1,54 @@
+main:
+  foreground: "#C0CAF5"
+  background: "#1A1B26"
+table:
+  foreground: "#C0CAF5"
+  background: "#1A1B26"
+context:
+  foreground: "#C0CAF5"
+  background: "#1A1B26"
+command:
+  foreground: "#7AA2F7"
+  background: "#1A1B26"
+resource_tag:
+  foreground: "#1A1B26"
+  background: "#F7768E"
+navigation_tag:
+  foreground: "#1A1B26"
+  background: "#BB9AF7"
+status:
+  foreground: "#1A1B26"
+  background: "#E0AF68"
+loading:
+  foreground: "#1A1B26"
+  background: "#FF9E64"
+info:
+  foreground: "#1A1B26"
+  background: "#7DCFFF"
+state_on:
+  foreground: "#1A1B26"
+  background: "#9ECE6A"
+state_off:
+  foreground: "#1A1B26"
+  background: "#F7768E"
+modal_button:
+  foreground: "#1A1B26"
+  background: "#7AA2F7"
+table_selected:
+  foreground: "#1A1B26"
+  background: "#7AA2F7"
+table_header: "#C0CAF5"
+command_ghost: "#565F89"
+command_placeholder: "#565F89"
+header_label: "#E0AF68"
+header_value: "#C0CAF5"
+header_command_key: "#7DCFFF"
+header_command_text: "#C0CAF5"
+logo: "#7AA2F7"
+json_key: "#7DCFFF"
+json_string: "#9ECE6A"
+json_number: "#FF9E64"
+json_bool: "#BB9AF7"
+json_null: "#565F89"
+table_title: "#C0CAF5"
+error_title: "#F7768E"

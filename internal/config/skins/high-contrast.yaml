@@ -1,3 +1,15 @@
+main:
+  foreground: "#FFFFFF"
+  background: "#000000"
+table:
+  foreground: "#FFFFFF"
+  background: "#000000"
+context:
+  foreground: "#FFFFFF"
+  background: "#000000"
+command:
+  foreground: "#00FFFF"
+  background: "#000000"
 resource_tag:
   foreground: "#FFFFFF"
   background: "#9B0000"
@@ -25,7 +37,7 @@ modal_button:
 table_selected:
   foreground: "#000000"
   background: "#FFFF00"
-command: "#00FFFF"
+table_header: "#FFFFFF"
 command_ghost: "#B3B3B3"
 command_placeholder: "#B3B3B3"
 header_label: "#FFFF00"
@@ -39,10 +51,4 @@ json_number: "#FFFF00"
 json_bool: "#FF80FF"
 json_null: "#B3B3B3"
 table_title: "#FFFFFF"
-table_border: "#FFFFFF"
-detail_border: "#FFFFFF"
-error_modal:
-  foreground: "#FFFFFF"
-  background: ""
-error_border: "#FF5555"
 error_title: "#FF5555"
