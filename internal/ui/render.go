@@ -228,9 +228,9 @@ func (m Model) renderTable() string {
 
 		if len(m.navigation) > 0 {
 			parent := m.navigation[len(m.navigation)-1]
-			title = fmt.Sprintf(" %s(%s/%s)[%d]", m.resource.Kind(), parent.resource, parent.id, m.itemCount)
+			title = fmt.Sprintf(" %s(%s/%s)[%d] ", m.resource.Kind(), parent.resource, parent.id, m.itemCount)
 		} else if !m.showHeaderContext() && m.context.Cloud != "" && m.resource.Kind() != "contexts" {
-			title = fmt.Sprintf(" %s(%s)[%d]", m.resource.Kind(), m.context.Cloud, m.itemCount)
+			title = fmt.Sprintf(" %s(%s)[%d] ", m.resource.Kind(), m.context.Cloud, m.itemCount)
 		}
 	}
 
