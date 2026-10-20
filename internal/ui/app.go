@@ -799,6 +799,10 @@ func (m Model) View() string {
 		Background(lipgloss.Color(m.skin.Main.Background)).
 		Render(commandLine)
 
+	if commandLine == "" {
+		commandLine = mainStyle.Render(strings.Repeat(" ", m.width))
+	}
+
 	view := header +
 		"\n\n" +
 		contentView +
