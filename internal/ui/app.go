@@ -465,8 +465,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				cursor = min(msg.cursor, len(msg.rows)-1)
 			}
 
-			m.table.SetCursor(0)
-			m.table.MoveDown(cursor)
+			m.table.SetCursor(cursor)
 		}
 
 		t := time.Now()
