@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/gophercloud/gophercloud/v2"
+	ops "github.com/gophercloud/gophercloud/v2/openstack"
 	"github.com/gophercloud/gophercloud/v2/openstack/config"
 	"github.com/gophercloud/gophercloud/v2/openstack/config/clouds"
 	identitytokens "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
@@ -44,7 +45,44 @@ func (c *Context) Connect(ctx context.Context, cloudsPath string) error {
 	c.Provider = provider
 	c.CloudsPath = cloudsPath
 
+	if c.Domain == "" {
+		if err := c.resolveIdentity(ctx); err != nil {
+			slog.Error(fmt.Sprintf("resolving cloud identity: %v", err))
+		}
+	}
+
 	slog.Info("connected to cloud", "cloud", c.Cloud, "identityEndpoint", provider.IdentityEndpoint)
+
+	return nil
+}
+func (c *Context) resolveIdentity(ctx context.Context) error {
+	client, err := ops.NewIdentityV3(
+		c.Provider,
+		gophercloud.EndpointOpts{},
+	)
+	if err != nil {
+		return fmt.Errorf("creating identity client: %w", err)
+	}
+
+	result := identitytokens.Get(ctx, client, c.Provider.TokenID)
+	project, err := result.ExtractProject()
+	if err != nil {
+		return fmt.Errorf("extracting token project: %w", err)
+	}
+
+	if project == nil {
+		return fmt.Errorf("project not found")
+	}
+
+	if project.ID != "" {
+		if c.Project == "" {
+			c.Project = project.Name
+		}
+
+		if c.Domain == "" {
+			c.Domain = project.Domain.Name
+		}
+	}
 
 	return nil
 }
