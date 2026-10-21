@@ -5,6 +5,8 @@
       <w>instanceactions</w>
       <w>keypairs</w>
       <w>loadbalancer</w>
+      <w>microversion</w>
+      <w>microversions</w>
       <w>recordsets</w>
       <w>securitygroups</w>
       <w>snat</w>

@@ -86,7 +86,7 @@ func (r *Resource) Commands() []resource.Command {
 		{Key: "s", Description: "Show", Default: true},
 		{Key: "shift-t", Description: "Cluster Template"},
 		{Key: "shift-n", Description: "Node Groups"},
-		{Key: "k", Description: "Show Kubeconfig"},
+		{Key: "k", Description: "Kubeconfig"},
 		{Key: "ctrl+k", Description: "Get Kubeconfig", StatusLabel: "Downloading"},
 	}
 }
