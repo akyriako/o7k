@@ -44,6 +44,7 @@ func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
 		{Key: "s", Description: "Show", Default: true},
 		{Key: "o", Description: "Outputs"},
+		{Key: "i", Description: "Config"},
 	}
 }
 
@@ -96,6 +97,8 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 		return r.show(row)
 	case "o":
 		return r.outputs(row)
+	case "i":
+		return r.config(row)
 	}
 
 	return nil

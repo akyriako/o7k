@@ -2,6 +2,7 @@ package softwaredeployments
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/akyriako/o7k/internal/resource"
@@ -62,6 +63,52 @@ func (r *Resource) outputs(row resource.Row) tea.Cmd {
 		redacted := promptveil.Redact(content)
 		return resource.DetailsMsg{
 			ID:          row.ID,
+			Content:     redacted.Text,
+			WrapContent: new(true),
+		}
+	}
+}
+
+func (r *Resource) config(row resource.Row) tea.Cmd {
+	return func() tea.Msg {
+		client, err := r.context.OrchestrationV1()
+		if err != nil {
+			return resource.DetailsMsg{Err: err}
+		}
+
+		var deployment struct {
+			SoftwareDeployment struct {
+				ConfigID string `json:"config_id"`
+			} `json:"software_deployment"`
+		}
+
+		_, err = client.Get(context.Background(), client.ServiceURL("software_deployments", row.ID), &deployment, nil)
+		if err != nil {
+			return resource.DetailsMsg{Err: fmt.Errorf("getting software deployment %q: %w", row.ID, err)}
+		}
+
+		configID := deployment.SoftwareDeployment.ConfigID
+		if configID == "" {
+			return resource.DetailsMsg{Err: fmt.Errorf("software deployment %q has no config_id", row.ID)}
+		}
+
+		var result struct {
+			SoftwareConfig map[string]any `json:"software_config"`
+		}
+
+		_, err = client.Get(context.Background(), client.ServiceURL("software_configs", configID), &result, nil)
+		if err != nil {
+			return resource.DetailsMsg{Err: fmt.Errorf("getting software config %q: %w", configID, err)}
+		}
+
+		content, err := json.MarshalIndent(result.SoftwareConfig, "", "  ")
+		if err != nil {
+			return resource.DetailsMsg{Err: fmt.Errorf("marshalling software config %q: %w", configID, err)}
+		}
+
+		redacted := promptveil.Redact(string(content))
+		return resource.DetailsMsg{
+			ID:          configID,
 			Content:     redacted.Text,
 			WrapContent: new(true),
 		}
