@@ -31,12 +31,12 @@ func (r *Resource) Aliases() []string {
 
 func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
-		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
-		{Key: "config_id", Title: "CONFIG ID", MinWidth: 40, Flex: 0},
-		{Key: "server_id", Title: "SERVER ID", MinWidth: 40, Flex: 0},
-		{Key: "action", Title: "ACTION", MinWidth: 6, Flex: 1},
-		{Key: "status", Title: "STATUS", MinWidth: 6, Flex: 1},
-		{Key: "status_reason", Title: "REASON", MinWidth: 40, Flex: 2},
+		{Key: "id", Title: "ID", MinWidth: 36, Flex: 0},
+		{Key: "config_id", Title: "CONFIG ID", MinWidth: 36, Flex: 0},
+		{Key: "server_id", Title: "SERVER ID", MinWidth: 36, Flex: 0},
+		{Key: "action", Title: "ACTION", MinWidth: 6, Flex: 2},
+		{Key: "status", Title: "STATUS", MinWidth: 6, Flex: 2},
+		{Key: "status_reason", Title: "REASON", MinWidth: 21, Flex: 1},
 	}
 }
 
