@@ -6,6 +6,7 @@ import (
 
 	"github.com/akyriako/o7k/internal/resource"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/dc9-dev/promptveil"
 )
 
 func (r *Resource) show(row resource.Row) tea.Cmd {
@@ -58,9 +59,10 @@ func (r *Resource) outputs(row resource.Row) tea.Cmd {
 			outputs["deploy_status_code"],
 		)
 
+		redacted := promptveil.Redact(content)
 		return resource.DetailsMsg{
 			ID:          row.ID,
-			Content:     content,
+			Content:     redacted.Text,
 			WrapContent: new(true),
 		}
 	}
