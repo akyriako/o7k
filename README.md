@@ -256,29 +256,30 @@ Press `Esc` to return to the previous resource and selection.
 
 ## Currently Supported Resources
 
-| Service | Resources | Status |
-|---|---|:-:|
-| **Local / Auth** | contexts | Partial |
-| **Keystone / Identity** | domains, projects, users, groups, roles | ✅ |
-| **Keystone / Catalog** | catalog, services, endpoints, regions | ✅ |
-| **Cinder / Block Storage** | volumes, snapshots, volume types, volume backups | ✅ |
-| **Glance / Image** | images | ✅ |
-| **Swift / Object Storage** | swift containers, swift objects | ✅ |
-| **Nova / Compute** | servers, flavors | ✅ |
-| **Nova / Compute** | keypairs, server groups, availability zones | ✅ |
-| **Nova / Compute** | hypervisors, host aggregates | ✅ |
-| **Neutron / Network** | networks, subnets, ports, routers, floating IPs, security groups | ✅ |
-| **Neutron / Network** | security group rules | ✅ |
-| **Neutron / Network** | router interfaces | ⬜ |
-| **Designate / DNS** | zones, recordsets | ✅ |
-| **Heat / Orchestration** | stacks, stack resources, stack events | ✅ |
-| **Octavia / Load Balancing** | load balancers, listeners, pools, members | ✅ |
-| **Octavia / Load Balancing** | health monitors, L7 policies, L7 rules | ✅ |
-| **Barbican / Key Manager** | secrets, secret containers, orders | ✅ |
-| **Manila / Shared File Systems** | shares, share snapshots, share networks, share types | ✅ |
-| **Manila / Shared File Systems** | share replicas, access rules, export locations | ✅ |
-| **Magnum / Container Infrastructure** | clusters, cluster templates, node groups | ✅ |
-| **Trove / Databases** | instances, databases, users, backups, datastores | ✅ |
+| Service                               | Resources                                                        | Status  |
+|---------------------------------------|------------------------------------------------------------------|:-------:|
+| **Local / Auth**                      | contexts                                                         | Partial |
+| **Keystone / Identity**               | domains, projects, users, groups, roles                          |   ✅    |
+| **Keystone / Catalog**                | catalog, services, endpoints, regions                            |   ✅    |
+| **Cinder / Block Storage**            | volumes, snapshots, volume types, volume backups                 |   ✅    |
+| **Glance / Image**                    | images                                                           |   ✅    |
+| **Swift / Object Storage**            | swift containers, swift objects                                  |   ✅    |
+| **Nova / Compute**                    | servers, flavors                                                 |   ✅    |
+| **Nova / Compute**                    | keypairs, server groups, availability zones                      |   ✅    |
+| **Nova / Compute**                    | hypervisors, host aggregates                                     |   ✅    |
+| **Neutron / Network**                 | networks, subnets, ports, routers, floating IPs, security groups |   ✅    |
+| **Neutron / Network**                 | security group rules                                             |   ✅    |
+| **Neutron / Network**                 | router interfaces                                                |   ⬜    |
+| **Designate / DNS**                   | zones, recordsets                                                |   ✅    |
+| **Heat / Orchestration**              | stacks, stack resources, stack events                            |   ✅    |
+| **Heat / Orchestration**              | software deployments                                             |   ✅    |
+| **Octavia / Load Balancing**          | load balancers, listeners, pools, members                        |   ✅    |
+| **Octavia / Load Balancing**          | health monitors, L7 policies, L7 rules                           |   ✅    |
+| **Barbican / Key Manager**            | secrets, secret containers, orders                               |   ✅    |
+| **Manila / Shared File Systems**      | shares, share snapshots, share networks, share types             |   ✅    |
+| **Manila / Shared File Systems**      | share replicas, access rules, export locations                   |   ✅    |
+| **Magnum / Container Infrastructure** | clusters, cluster templates, node groups                         |   ✅    |
+| **Trove / Databases**                 | instances, databases, users, backups, datastores                 |   ✅    |
 
 > [!CAUTION]
 > **o7k is early beta and under active development.** Expect bugs, incomplete features, and breaking changes. Behavior and configuration may change without notice.
@@ -287,70 +288,71 @@ Press `Esc` to return to the previous resource and selection.
 
 ### Aliases
 
-| Service | Resource | Command | Aliases |
-|---|---|---|---|
-| Command Palette | Aliases | `commands` | `command`, `cmd`, `aliases`, `alias` |
-| Local / Auth | Contexts | `contexts` | `context`, `ctx`, `cloud`, `clouds` |
-| Keystone / Catalog | Catalog | `catalog` | `cat` |
-| Keystone / Catalog | Services | `services` | `service`, `svc` |
-| Keystone / Catalog | Endpoints | `endpoints` | `endpoint` |
-| Keystone / Catalog | Regions | `regions` | `region` |
-| Keystone / Identity | Domains | `domains` | `domain` |
-| Keystone / Identity | Projects | `projects` | `project` |
-| Keystone / Identity | Users | `users` | `user` |
-| Keystone / Identity | Groups | `groups` | `group` |
-| Keystone / Identity | Roles | `roles` | `role` |
-| Nova / Compute | Servers | `servers` | `server`, `srv` |
-| Nova / Compute | Flavors | `flavors` | `flavor` |
-| Nova / Compute | Keypairs | `keypairs` | `keypair`, `keys`, `key` |
-| Nova / Compute | Server Groups | `servergroups` | `servergroup`, `sgroups`, `sgroup` |
-| Nova / Compute | Availability Zones | `availabilityzones` | `availabilityzone`, `azs`, `az` |
-| Nova / Compute | Hypervisors | `hypervisors` | `hypervisor`, `hyp`, `hyps` |
-| Nova / Compute | Host Aggregates | `aggregates` | `aggregate`, `hostaggregates`, `hostaggregate` |
-| Neutron / Network | Networks | `networks` | `network`, `net` |
-| Neutron / Network | Subnets | `subnets` | `subnet` |
-| Neutron / Network | Ports | `ports` | `port` |
-| Neutron / Network | Routers | `routers` | `router` |
-| Neutron / Network | Floating IPs | `floatingips` | `floatingip`, `fips`, `fip` |
-| Neutron / Network | Security Groups | `securitygroups` | `securitygroup`, `secgroups`, `secgroup`, `sg` |
-| Neutron / Network | Security Group Rules | `securitygrouprules` | `securitygrouprule`, `secrules`, `secrule`, `sgr` |
-| Cinder / Block Storage | Volumes | `volumes` | `volume`, `vol` |
-| Cinder / Block Storage | Snapshots | `snapshots` | `snapshot`, `snap` |
-| Cinder / Block Storage | Volume Types | `volumetypes` | `volumetype` |
-| Cinder / Block Storage | Volume Backups | `backups` | `backup`, `volume-backups`, `volume-backup` |
-| Glance / Image | Images | `images` | `image`, `img` |
-| Swift / Object Storage | Swift Containers | `swift-containers` | `swift-container` |
-| Swift / Object Storage | Swift Objects | `swift-objects` | `swift-object` |
-| Heat / Orchestration | Stacks | `stacks` | `stack` |
-| Heat / Orchestration | Stack Resources | `stack-resources` | `stack-resource` |
-| Heat / Orchestration | Stack Events | `stack-events` | `stack-event` |
-| Octavia / Load Balancing | Load Balancers | `loadbalancers` | `loadbalancer`, `lbs`, `lb` |
-| Octavia / Load Balancing | Listeners | `listeners` | `listener` |
-| Octavia / Load Balancing | Pools | `pools` | `pool` |
-| Octavia / Load Balancing | Members | `members` | `member` |
-| Octavia / Load Balancing | Health Monitors | `healthmonitors` | `healthmonitor`, `monitors`, `monitor` |
-| Octavia / Load Balancing | L7 Policies | `l7policies` | `l7policy`, `l7-policies`, `l7-policy` |
-| Octavia / Load Balancing | L7 Rules | `l7rules` | `l7rule`, `l7-rules`, `l7-rule` |
-| Barbican / Key Manager | Secrets | `secrets` | `secret` |
-| Barbican / Key Manager | Secret Containers | `secret-containers` | `secret-container` |
-| Barbican / Key Manager | Orders | `orders` | `order` |
-| Manila / Shared File Systems | Shares | `shares` | `share` |
-| Manila / Shared File Systems | Share Snapshots | `share-snapshots` | `share-snapshot` |
-| Manila / Shared File Systems | Share Replicas | `share-replicas` | `share-replica` |
-| Manila / Shared File Systems | Share Networks | `share-networks` | `share-network` |
-| Manila / Shared File Systems | Share Types | `share-types` | `share-type` |
-| Manila / Shared File Systems | Share Access Rules | `share-access-rules` | `share-access-rule` |
-| Manila / Shared File Systems | Share Export Locations | `share-export-locations` | `share-export-location` |
-| Magnum / Container Infrastructure | Clusters | `clusters` | `cluster`, `coe` |
-| Magnum / Container Infrastructure | Cluster Templates | `clustertemplates` | `clustertemplate` |
-| Magnum / Container Infrastructure | Node Groups | `nodegroups` | `nodegroup` |
-| Designate / DNS | Zones | `zones` | `zone`, `dns-zones`, `dns-zone` |
-| Designate / DNS | Recordsets | `recordsets` | `recordset`, `records`, `record` |
-| Trove / Databases | Instances | `db-instances` | `db-instance`, `trove` |
-| Trove / Databases | Databases | `db-databases` | `db-database` |
-| Trove / Databases | Users | `db-users` | `db-user` |
-| Trove / Databases | Backups | `db-backups` | `db-backup` |
-| Trove / Databases | Datastores | `db-datastores` | `db-datastore` |
+| Service                           | Resource               | Command                  | Aliases                                           |
+|-----------------------------------|------------------------|--------------------------|---------------------------------------------------|
+| Command Palette                   | Aliases                | `commands`               | `command`, `cmd`, `aliases`, `alias`              |
+| Local / Auth                      | Contexts               | `contexts`               | `context`, `ctx`, `cloud`, `clouds`               |
+| Keystone / Catalog                | Catalog                | `catalog`                | `cat`                                             |
+| Keystone / Catalog                | Services               | `services`               | `service`, `svc`                                  |
+| Keystone / Catalog                | Endpoints              | `endpoints`              | `endpoint`                                        |
+| Keystone / Catalog                | Regions                | `regions`                | `region`                                          |
+| Keystone / Identity               | Domains                | `domains`                | `domain`                                          |
+| Keystone / Identity               | Projects               | `projects`               | `project`                                         |
+| Keystone / Identity               | Users                  | `users`                  | `user`                                            |
+| Keystone / Identity               | Groups                 | `groups`                 | `group`                                           |
+| Keystone / Identity               | Roles                  | `roles`                  | `role`                                            |
+| Nova / Compute                    | Servers                | `servers`                | `server`, `srv`                                   |
+| Nova / Compute                    | Flavors                | `flavors`                | `flavor`                                          |
+| Nova / Compute                    | Keypairs               | `keypairs`               | `keypair`, `keys`, `key`                          |
+| Nova / Compute                    | Server Groups          | `servergroups`           | `servergroup`, `sgroups`, `sgroup`                |
+| Nova / Compute                    | Availability Zones     | `availabilityzones`      | `availabilityzone`, `azs`, `az`                   |
+| Nova / Compute                    | Hypervisors            | `hypervisors`            | `hypervisor`, `hyp`, `hyps`                       |
+| Nova / Compute                    | Host Aggregates        | `aggregates`             | `aggregate`, `hostaggregates`, `hostaggregate`    |
+| Neutron / Network                 | Networks               | `networks`               | `network`, `net`                                  |
+| Neutron / Network                 | Subnets                | `subnets`                | `subnet`                                          |
+| Neutron / Network                 | Ports                  | `ports`                  | `port`                                            |
+| Neutron / Network                 | Routers                | `routers`                | `router`                                          |
+| Neutron / Network                 | Floating IPs           | `floatingips`            | `floatingip`, `fips`, `fip`                       |
+| Neutron / Network                 | Security Groups        | `securitygroups`         | `securitygroup`, `secgroups`, `secgroup`, `sg`    |
+| Neutron / Network                 | Security Group Rules   | `securitygrouprules`     | `securitygrouprule`, `secrules`, `secrule`, `sgr` |
+| Cinder / Block Storage            | Volumes                | `volumes`                | `volume`, `vol`                                   |
+| Cinder / Block Storage            | Snapshots              | `snapshots`              | `snapshot`, `snap`                                |
+| Cinder / Block Storage            | Volume Types           | `volumetypes`            | `volumetype`                                      |
+| Cinder / Block Storage            | Volume Backups         | `backups`                | `backup`, `volume-backups`, `volume-backup`       |
+| Glance / Image                    | Images                 | `images`                 | `image`, `img`                                    |
+| Swift / Object Storage            | Swift Containers       | `swift-containers`       | `swift-container`                                 |
+| Swift / Object Storage            | Swift Objects          | `swift-objects`          | `swift-object`                                    |
+| Heat / Orchestration              | Stacks                 | `stacks`                 | `stack`                                           |
+| Heat / Orchestration              | Stack Resources        | `stack-resources`        | `stack-resource`                                  |
+| Heat / Orchestration              | Stack Events           | `stack-events`           | `stack-event`                                     |
+| Heat / Orchestration              | Software Deployments   | `software-deployments`   | `software-deployment`                             |
+| Octavia / Load Balancing          | Load Balancers         | `loadbalancers`          | `loadbalancer`, `lbs`, `lb`                       |
+| Octavia / Load Balancing          | Listeners              | `listeners`              | `listener`                                        |
+| Octavia / Load Balancing          | Pools                  | `pools`                  | `pool`                                            |
+| Octavia / Load Balancing          | Members                | `members`                | `member`                                          |
+| Octavia / Load Balancing          | Health Monitors        | `healthmonitors`         | `healthmonitor`, `monitors`, `monitor`            |
+| Octavia / Load Balancing          | L7 Policies            | `l7policies`             | `l7policy`, `l7-policies`, `l7-policy`            |
+| Octavia / Load Balancing          | L7 Rules               | `l7rules`                | `l7rule`, `l7-rules`, `l7-rule`                   |
+| Barbican / Key Manager            | Secrets                | `secrets`                | `secret`                                          |
+| Barbican / Key Manager            | Secret Containers      | `secret-containers`      | `secret-container`                                |
+| Barbican / Key Manager            | Orders                 | `orders`                 | `order`                                           |
+| Manila / Shared File Systems      | Shares                 | `shares`                 | `share`                                           |
+| Manila / Shared File Systems      | Share Snapshots        | `share-snapshots`        | `share-snapshot`                                  |
+| Manila / Shared File Systems      | Share Replicas         | `share-replicas`         | `share-replica`                                   |
+| Manila / Shared File Systems      | Share Networks         | `share-networks`         | `share-network`                                   |
+| Manila / Shared File Systems      | Share Types            | `share-types`            | `share-type`                                      |
+| Manila / Shared File Systems      | Share Access Rules     | `share-access-rules`     | `share-access-rule`                               |
+| Manila / Shared File Systems      | Share Export Locations | `share-export-locations` | `share-export-location`                           |
+| Magnum / Container Infrastructure | Clusters               | `clusters`               | `cluster`, `coe`                                  |
+| Magnum / Container Infrastructure | Cluster Templates      | `clustertemplates`       | `clustertemplate`                                 |
+| Magnum / Container Infrastructure | Node Groups            | `nodegroups`             | `nodegroup`                                       |
+| Designate / DNS                   | Zones                  | `zones`                  | `zone`, `dns-zones`, `dns-zone`                   |
+| Designate / DNS                   | Recordsets             | `recordsets`             | `recordset`, `records`, `record`                  |
+| Trove / Databases                 | Instances              | `db-instances`           | `db-instance`, `trove`                            |
+| Trove / Databases                 | Databases              | `db-databases`           | `db-database`                                     |
+| Trove / Databases                 | Users                  | `db-users`               | `db-user`                                         |
+| Trove / Databases                 | Backups                | `db-backups`             | `db-backup`                                       |
+| Trove / Databases                 | Datastores             | `db-datastores`          | `db-datastore`                                    |
 
 ## Development
 

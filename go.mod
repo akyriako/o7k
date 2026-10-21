@@ -8,6 +8,7 @@ require (
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/charmbracelet/x/ansi v0.11.6
+	github.com/dc9-dev/promptveil v0.0.0-20260914101915-1cf7b430f7a8
 	github.com/gophercloud/gophercloud/v2 v2.14.0
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/go-plugin v1.8.0

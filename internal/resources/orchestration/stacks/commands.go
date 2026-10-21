@@ -2,10 +2,13 @@ package stacks
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/akyriako/o7k/internal/resource"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/dc9-dev/promptveil"
+	"github.com/gophercloud/gophercloud/v2/openstack/orchestration/v1/stackresources"
 	orchestrationstacks "github.com/gophercloud/gophercloud/v2/openstack/orchestration/v1/stacks"
 )
 
@@ -55,6 +58,64 @@ func (r *Resource) events(row resource.Row) tea.Cmd {
 				"stack_name": row.Fields["name"],
 				"stack_id":   row.ID,
 			},
+		}
+	}
+}
+
+func (r *Resource) deployments(row resource.Row) tea.Cmd {
+	return func() tea.Msg {
+		client, err := r.context.OrchestrationV1()
+		if err != nil {
+			return resource.ErrorMsg{Err: err}
+		}
+
+		pages, err := stackresources.List(client, row.Fields["name"], row.ID, &stackresources.ListOpts{Depth: 99}).AllPages(context.Background())
+		if err != nil {
+			return resource.ErrorMsg{Err: fmt.Errorf("listing stack resources: %w", err)}
+		}
+
+		items, err := stackresources.ExtractResources(pages)
+		if err != nil {
+			return resource.ErrorMsg{Err: fmt.Errorf("extracting stack resources: %w", err)}
+		}
+
+		ids := make([]string, 0)
+		for _, item := range items {
+			if item.Type == "OS::Heat::SoftwareDeployment" && item.PhysicalID != "" {
+				ids = append(ids, item.PhysicalID)
+			}
+		}
+
+		return resource.NavigateFilteredMultiMsg{
+			Resource: "software-deployments",
+			Field:    "id",
+			Values:   ids,
+		}
+	}
+}
+
+func (r *Resource) environment(row resource.Row) tea.Cmd {
+	return func() tea.Msg {
+		client, err := r.context.OrchestrationV1()
+		if err != nil {
+			return resource.DetailsMsg{Err: err}
+		}
+
+		var environment map[string]any
+		_, err = client.Get(context.Background(), client.ServiceURL("stacks", row.Fields["name"], row.ID, "environment"), &environment, nil)
+		if err != nil {
+			return resource.DetailsMsg{Err: fmt.Errorf("getting stack environment %q: %w", row.ID, err)}
+		}
+
+		content, err := json.MarshalIndent(environment, "", "  ")
+		if err != nil {
+			return resource.DetailsMsg{Err: fmt.Errorf("marshalling stack environment %q: %w", row.ID, err)}
+		}
+
+		redacted := promptveil.Redact(string(content))
+		return resource.DetailsMsg{
+			ID:      row.ID,
+			Content: redacted.Text,
 		}
 	}
 }

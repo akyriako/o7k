@@ -66,6 +66,7 @@ import (
 	"github.com/akyriako/o7k/internal/resources/networking/subnets"
 	swiftcontainers "github.com/akyriako/o7k/internal/resources/objectstorage/containers"
 	swiftobjects "github.com/akyriako/o7k/internal/resources/objectstorage/objects"
+	"github.com/akyriako/o7k/internal/resources/orchestration/softwaredeployments"
 	"github.com/akyriako/o7k/internal/resources/orchestration/stackevents"
 	"github.com/akyriako/o7k/internal/resources/orchestration/stackresources"
 	"github.com/akyriako/o7k/internal/resources/orchestration/stacks"
@@ -454,6 +455,10 @@ func registerAll(r *resource.Registry, openstackContext *openstack.Context) (err
 
 	if err := r.RegisterNavigationOnly(stackevents.New(openstackContext)); err != nil {
 		errs = errors.Join(errs, fmt.Errorf("registering stacks resources: %w", err))
+	}
+
+	if err := r.Register(softwaredeployments.New(openstackContext)); err != nil {
+		errs = errors.Join(errs, fmt.Errorf("registering stacks resource: %w", err))
 	}
 
 	if err := r.Register(zones.New(openstackContext)); err != nil {

@@ -18,9 +18,10 @@ type NavigateFilteredMultiMsg struct {
 }
 
 type DetailsMsg struct {
-	ID      string
-	Content any
-	Err     error
+	ID          string
+	Content     any
+	Err         error
+	WrapContent *bool
 }
 
 type NavigateScopedMsg struct {
