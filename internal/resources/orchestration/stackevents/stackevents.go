@@ -32,12 +32,14 @@ func (r *Resource) Aliases() []string {
 	}
 }
 
+const ReasonColumnLength = 50
+
 func (r *Resource) Columns() []resource.Column {
 	return []resource.Column{
 		{Key: "id", Title: "ID", MinWidth: 40, Flex: 0},
 		{Key: "resource", Title: "RESOURCE", MinWidth: 24, Flex: 1},
 		{Key: "status", Title: "STATUS", MinWidth: 20, Flex: 0},
-		{Key: "reason", Title: "REASON", MinWidth: 50, Flex: 1},
+		{Key: "reason", Title: "REASON", MinWidth: ReasonColumnLength, Flex: 1},
 		{Key: "physical_id", Title: "PHYSICAL ID", MinWidth: 40, Flex: 0},
 		{Key: "time", Title: "TIME", MinWidth: 24, Flex: 1},
 	}
@@ -45,7 +47,8 @@ func (r *Resource) Columns() []resource.Column {
 
 func (r *Resource) Commands() []resource.Command {
 	return []resource.Command{
-		{Key: "s", Description: "Show", Default: true},
+		{Key: "s", Description: "Show"},
+		{Key: "z", Description: "Reason", Default: true},
 	}
 }
 
@@ -99,6 +102,8 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	switch command.Key {
 	case "s":
 		return r.show(row)
+	case "z":
+		return r.reason(row)
 	}
 
 	return nil

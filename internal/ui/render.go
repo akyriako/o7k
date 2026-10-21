@@ -333,6 +333,7 @@ func (m Model) renderDetails() string {
 
 	innerWidth := max(m.width-2, 1)
 
+	title = ansi.Truncate(title, innerWidth, "…")
 	titleWidth := lipgloss.Width(title)
 	remaining := max(innerWidth-titleWidth, 0)
 
@@ -368,6 +369,7 @@ func (m Model) renderDetails() string {
 	}
 
 	for i, line := range bodyLines {
+		line = ansi.Truncate(line, innerWidth, "")
 		lineWidth := lipgloss.Width(line)
 
 		if lineWidth < innerWidth {
