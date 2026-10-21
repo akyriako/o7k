@@ -3,10 +3,12 @@ package openstack
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack"
 	"github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/apiversions"
+	"golang.org/x/mod/semver"
 )
 
 type clientServiceBuilder func(*gophercloud.ProviderClient, gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error)
@@ -27,6 +29,48 @@ func (c *Context) getClientService(key string, opts gophercloud.EndpointOpts, bu
 
 	actual, _ := c.serviceClients.LoadOrStore(key, client)
 	return actual.(*gophercloud.ServiceClient), nil
+}
+
+func getAPIVersions(ctx context.Context, client *gophercloud.ServiceClient) ([]apiversions.APIVersion, error) {
+	pages, err := apiversions.List(client).AllPages(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("listing API versions for %s failed: %w", client.Endpoint, err)
+	}
+
+	versions, err := apiversions.ExtractAPIVersions(pages)
+	if err != nil {
+		return nil, fmt.Errorf("listing API versions for %s failed: %w", client.Endpoint, err)
+	}
+
+	return versions, nil
+}
+
+func checkMicroversion(ctx context.Context, client *gophercloud.ServiceClient, minimum, required string) error {
+	versions, err := getAPIVersions(ctx, client)
+	if err != nil {
+		return err
+	}
+
+	for _, v := range versions {
+		if semver.Compare(minimum, v.ID) != 0 {
+			continue
+		}
+
+		version := strings.TrimSpace(v.Version)
+		if version != "" && !strings.HasPrefix(version, "v") {
+			version = "v" + version
+		}
+
+		if !semver.IsValid(version) {
+			version = v.ID
+		}
+
+		if semver.Compare(required, version) <= 0 {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("requested microversion %s is unsupported", required)
 }
 
 func (c *Context) IdentityV3() (*gophercloud.ServiceClient, error) {
@@ -79,26 +123,15 @@ func newSharedFileSystemV2(provider *gophercloud.ProviderClient, opts gopherclou
 		return nil, err
 	}
 
-	pages, err := apiversions.List(client).AllPages(context.Background())
+	minimum := "v2.0"
+	required := "v2.60"
+
+	err = checkMicroversion(context.Background(), client, minimum, required)
 	if err != nil {
-		return nil, fmt.Errorf("listing shared file system API versions: %w", err)
+		return nil, err
 	}
 
-	versions, err := apiversions.ExtractAPIVersions(pages)
-	if err != nil {
-		return nil, fmt.Errorf("extracting shared file system API versions: %w", err)
-	}
-
-	for _, version := range versions {
-		if version.ID != "v2.0" {
-			continue
-		}
-
-		client.Microversion = min(version.Version, "2.60")
-		return client, nil
-	}
-
-	return nil, fmt.Errorf("shared file system API v2 not found")
+	return client, nil
 }
 
 func (c *Context) ContainerInfraV1() (*gophercloud.ServiceClient, error) {
@@ -115,7 +148,13 @@ func newContainerInfraV1(provider *gophercloud.ProviderClient, opts gophercloud.
 		return nil, err
 	}
 
-	client.Microversion = "1.14"
+	minimum := "v1"
+	required := "v1"
+
+	err = checkMicroversion(context.Background(), client, minimum, required)
+	if err != nil {
+		return nil, err
+	}
 
 	return client, nil
 }
