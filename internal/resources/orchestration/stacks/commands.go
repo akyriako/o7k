@@ -6,6 +6,7 @@ import (
 
 	"github.com/akyriako/o7k/internal/resource"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/gophercloud/gophercloud/v2/openstack/orchestration/v1/stackresources"
 	orchestrationstacks "github.com/gophercloud/gophercloud/v2/openstack/orchestration/v1/stacks"
 )
 
@@ -55,6 +56,38 @@ func (r *Resource) events(row resource.Row) tea.Cmd {
 				"stack_name": row.Fields["name"],
 				"stack_id":   row.ID,
 			},
+		}
+	}
+}
+
+func (r *Resource) deployments(row resource.Row) tea.Cmd {
+	return func() tea.Msg {
+		client, err := r.context.OrchestrationV1()
+		if err != nil {
+			return resource.ErrorMsg{Err: err}
+		}
+
+		pages, err := stackresources.List(client, row.Fields["name"], row.ID, &stackresources.ListOpts{Depth: 99}).AllPages(context.Background())
+		if err != nil {
+			return resource.ErrorMsg{Err: fmt.Errorf("listing stack resources: %w", err)}
+		}
+
+		items, err := stackresources.ExtractResources(pages)
+		if err != nil {
+			return resource.ErrorMsg{Err: fmt.Errorf("extracting stack resources: %w", err)}
+		}
+
+		ids := make([]string, 0)
+		for _, item := range items {
+			if item.Type == "OS::Heat::SoftwareDeployment" && item.PhysicalID != "" {
+				ids = append(ids, item.PhysicalID)
+			}
+		}
+
+		return resource.NavigateFilteredMultiMsg{
+			Resource: "software-deployments",
+			Field:    "id",
+			Values:   ids,
 		}
 	}
 }

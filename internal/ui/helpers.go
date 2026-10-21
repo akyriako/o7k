@@ -168,17 +168,46 @@ func preserveBackground(content string, background lipgloss.Color) string {
 	})
 }
 
+//func (m *Model) wrapDetailContent() {
+//	content := m.detailContent
+//
+//	if m.detailContentIsJson {
+//		m.detailViewport.SetContent(colorizeJSON([]byte(content)))
+//
+//		if !m.detailContentWrap {
+//			return
+//		}
+//	}
+//
+//	wrapped := lipgloss.NewStyle().
+//		Width(max(m.detailViewport.Width, 1)).
+//		Render(content)
+//
+//	if m.detailContentIsJson {
+//		m.detailViewport.SetContent(colorizeJSON([]byte(wrapped)))
+//	}
+//
+//	m.detailViewport.SetContent(wrapped)
+//}
+
 func (m *Model) wrapDetailContent() {
 	content := m.detailContent
 
-	if m.detailContentIsJson {
-		m.detailViewport.SetContent(colorizeJSON([]byte(content)))
+	if !m.detailContentWrap {
+		if m.detailContentIsJson {
+			content = colorizeJSON([]byte(content))
+		}
+		m.detailViewport.SetContent(content)
 		return
 	}
 
 	wrapped := lipgloss.NewStyle().
 		Width(max(m.detailViewport.Width, 1)).
 		Render(content)
+
+	if m.detailContentIsJson {
+		wrapped = colorizeJSON([]byte(wrapped))
+	}
 
 	m.detailViewport.SetContent(wrapped)
 }

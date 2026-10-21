@@ -76,6 +76,7 @@ type Model struct {
 	detailID            string
 	detailContent       string
 	detailContentIsJson bool
+	detailContentWrap   bool
 	detailLabel         string
 
 	commandMode bool
@@ -259,6 +260,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if keyMsg, ok := msg.(tea.KeyMsg); ok && keyMsg.String() == "esc" {
 		if m.detailMode {
 			m.detailContentIsJson = false
+			m.detailContentWrap = false
 			m.detailMode = false
 			m.detailContent = ""
 			m.detailID = ""
@@ -613,12 +615,14 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		var displayContent string
 		isJson := true
+		wrap := false
 
 		switch content := msg.Content.(type) {
 		case string:
 			m.detailContent = content
 			displayContent = content
 			isJson = false
+			wrap = true
 
 		default:
 			data, err := json.MarshalIndent(content, "", "  ")
@@ -631,7 +635,12 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			displayContent = colorizeJSON(data)
 		}
 
+		if msg.WrapContent != nil {
+			wrap = *msg.WrapContent
+		}
+
 		m.detailContentIsJson = isJson
+		m.detailContentWrap = wrap
 		m.detailMode = true
 		m.detailID = msg.ID
 		m.detailViewport.SetContent(displayContent)
