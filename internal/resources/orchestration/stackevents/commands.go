@@ -20,14 +20,7 @@ func (r *Resource) show(row resource.Row) tea.Cmd {
 		stackID := row.Fields["stack_id"]
 		resourceName := row.Fields["resource"]
 
-		event, err := stackevents.Get(
-			context.Background(),
-			client,
-			stackName,
-			stackID,
-			resourceName,
-			row.ID,
-		).Extract()
+		event, err := stackevents.Get(context.Background(), client, stackName, stackID, resourceName, row.ID).Extract()
 		if err != nil {
 			return resource.DetailsMsg{
 				Err: fmt.Errorf("getting stack event %q: %w", row.ID, err),
@@ -37,6 +30,20 @@ func (r *Resource) show(row resource.Row) tea.Cmd {
 		return resource.DetailsMsg{
 			ID:      event.ID,
 			Content: event,
+		}
+	}
+}
+
+func (r *Resource) reason(row resource.Row) tea.Cmd {
+	reason := row.Fields["reason"]
+	if len(reason) < ReasonColumnLength {
+		return r.show(row)
+	}
+
+	return func() tea.Msg {
+		return resource.DetailsMsg{
+			ID:      row.ID,
+			Content: reason,
 		}
 	}
 }

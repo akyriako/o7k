@@ -167,3 +167,18 @@ func preserveBackground(content string, background lipgloss.Color) string {
 		return sequence + prefix
 	})
 }
+
+func (m *Model) wrapDetailContent() {
+	content := m.detailContent
+
+	if m.detailContentIsJson {
+		m.detailViewport.SetContent(colorizeJSON([]byte(content)))
+		return
+	}
+
+	wrapped := lipgloss.NewStyle().
+		Width(max(m.detailViewport.Width, 1)).
+		Render(content)
+
+	m.detailViewport.SetContent(wrapped)
+}

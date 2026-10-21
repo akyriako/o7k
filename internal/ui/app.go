@@ -71,11 +71,12 @@ type Model struct {
 	filter     *resourceFilter
 	scope      resourceScope
 
-	detailMode     bool
-	detailViewport viewport.Model
-	detailID       string
-	detailContent  string
-	detailLabel    string
+	detailMode          bool
+	detailViewport      viewport.Model
+	detailID            string
+	detailContent       string
+	detailContentIsJson bool
+	detailLabel         string
 
 	commandMode bool
 	command     textinput.Model
@@ -257,6 +258,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	if keyMsg, ok := msg.(tea.KeyMsg); ok && keyMsg.String() == "esc" {
 		if m.detailMode {
+			m.detailContentIsJson = false
 			m.detailMode = false
 			m.detailContent = ""
 			m.detailID = ""
@@ -629,6 +631,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			displayContent = colorizeJSON(data)
 		}
 
+		m.detailContentIsJson = isJson
 		m.detailMode = true
 		m.detailID = msg.ID
 		m.detailViewport.SetContent(displayContent)
@@ -848,8 +851,17 @@ func (m *Model) Resize() {
 
 	m.table.SetHeight(contentHeight)
 
+	wasAtBottom := m.detailViewport.AtBottom()
 	m.detailViewport.Width = max(m.width-2, 1)
 	m.detailViewport.Height = contentHeight
+
+	if m.detailMode {
+		m.wrapDetailContent()
+
+		if !m.detailContentIsJson && wasAtBottom {
+			m.detailViewport.GotoBottom()
+		}
+	}
 
 	if m.resource == nil {
 		return
