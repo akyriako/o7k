@@ -219,3 +219,35 @@ func (r *Resource) getKubeconfig(row resource.Row) tea.Cmd {
 		return nil
 	}
 }
+
+func (r *Resource) k9s(row resource.Row) tea.Cmd {
+	return func() tea.Msg {
+		data, err := r.getKubeconfigData(context.Background(), row.ID)
+		if err != nil {
+			return resource.DetailsMsg{Err: err}
+		}
+
+		f, err := os.CreateTemp("", "o7k-generated_kubeconfig-*.yaml")
+		if err != nil {
+			return resource.DetailsMsg{Err: fmt.Errorf("creating temporary kubeconfig failed: %w", err)}
+		}
+
+		path := f.Name()
+
+		if _, err := f.Write(data); err != nil {
+			f.Close()
+			os.Remove(path)
+			return resource.DetailsMsg{Err: fmt.Errorf("writing temporary kubeconfig failed: %w", err)}
+		}
+
+		if err := f.Close(); err != nil {
+			os.Remove(path)
+			return resource.DetailsMsg{Err: fmt.Errorf("closing temporary kubeconfig failed: %w", err)}
+		}
+
+		return resource.LaunchTerminalMsg{
+			Command: "k9s",
+			Args:    []string{"--kubeconfig", path},
+		}
+	}
+}

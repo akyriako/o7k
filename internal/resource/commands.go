@@ -37,3 +37,8 @@ type CommandCompletedMsg struct {
 	LoadID              uint64
 	RefreshOnCompletion bool
 }
+
+type LaunchTerminalMsg struct {
+	Command string
+	Args    []string
+}

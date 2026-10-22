@@ -105,7 +105,7 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 	case "ctrl+k":
 		return r.getKubeconfig(row)
 	case "9":
-		return r.openK9s(row)
+		return r.k9s(row)
 	}
 
 	return nil
