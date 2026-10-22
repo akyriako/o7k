@@ -3,6 +3,7 @@ package pluginsdk
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 )
 
 type Client interface {
@@ -67,6 +68,7 @@ type Resource interface {
 type Result struct {
 	Details  *Details
 	Navigate *Navigate
+	Terminal *Terminal
 }
 
 type Details struct {
@@ -91,4 +93,30 @@ func WithScope(ctx context.Context, scope map[string]string) context.Context {
 func Scope(ctx context.Context) map[string]string {
 	scope, _ := ctx.Value(scopeContextKey{}).(map[string]string)
 	return scope
+}
+
+type Terminal struct {
+	Command string
+	Args    []string
+}
+
+func (r Result) isValid() error {
+	actions := 0
+	if r.Details != nil {
+		actions++
+	}
+
+	if r.Navigate != nil {
+		actions++
+	}
+
+	if r.Terminal != nil {
+		actions++
+	}
+
+	if actions > 1 {
+		return fmt.Errorf("plugin result cannot contain multiple actions")
+	}
+
+	return nil
 }

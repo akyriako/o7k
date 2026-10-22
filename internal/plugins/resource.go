@@ -139,6 +139,13 @@ func (r *pluginResource) Execute(command resource.Command, row resource.Row) tea
 			}
 		}
 
+		if result.Terminal != nil {
+			return resource.LaunchTerminalMsg{
+				Command: result.Terminal.Command,
+				Args:    result.Terminal.Args,
+			}
+		}
+
 		return nil
 	}
 }

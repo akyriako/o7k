@@ -156,5 +156,12 @@ func (r *grpcResource) Execute(ctx context.Context, command Command, row Row) (R
 		}
 	}
 
+	if response.Result.Terminal != nil {
+		result.Terminal = &Terminal{
+			Command: response.Result.Terminal.Command,
+			Args:    response.Result.Terminal.Args,
+		}
+	}
+
 	return result, nil
 }
