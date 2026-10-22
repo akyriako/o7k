@@ -21,6 +21,7 @@ func Open(command string, args []string, preferred *string) error {
 			{"kitty", "--", executable},
 			{"alacritty", "-e", executable},
 			{"xterm", "-e", executable},
+			{"ghostty", "-e", executable},
 		}
 
 		if preferred != nil {
@@ -44,28 +45,62 @@ func Open(command string, args []string, preferred *string) error {
 		return fmt.Errorf("no supported terminal found")
 
 	case "darwin":
-		if preferred != nil && *preferred != "Terminal" {
-			return fmt.Errorf("unsupported terminal %q on macOS", *preferred)
+		candidates := []string{"Terminal", "iTerm"}
+
+		if preferred != nil {
+			candidates = []string{*preferred}
 		}
 
-		parts := append([]string{executable}, args...)
-		for i, part := range parts {
-			parts[i] = shellQuote(part)
-		}
+		for _, candidate := range candidates {
+			if candidate != "Terminal" && candidate != "iTerm" {
+				return fmt.Errorf("unsupported terminal %q on macOS", candidate)
+			}
 
-		script := `on run argv
+			if err := exec.Command("open", "-Ra", candidate).Run(); err != nil {
+				if preferred != nil {
+					return fmt.Errorf("configured terminal %q not found: %w", candidate, err)
+				}
+				continue
+			}
+
+			parts := append([]string{executable}, args...)
+			for i, part := range parts {
+				parts[i] = shellQuote(part)
+			}
+			command := strings.Join(parts, " ")
+
+			var script string
+
+			switch candidate {
+			case "Terminal":
+				script = `on run argv
     tell application "Terminal"
         activate
         do script (item 1 of argv)
     end tell
 end run`
 
-		out, err := exec.Command("osascript", "-e", script, strings.Join(parts, " ")).CombinedOutput()
-		if err != nil {
-			return fmt.Errorf("opening Terminal.app failed: %w: %s", err, strings.TrimSpace(string(out)))
+			case "iTerm":
+				script = `on run argv
+    tell application "iTerm"
+        activate
+        create window with default profile
+        tell current session of current window
+            write text (item 1 of argv)
+        end tell
+    end tell
+end run`
+			}
+
+			out, err := exec.Command("osascript", "-e", script, command).CombinedOutput()
+			if err != nil {
+				return fmt.Errorf("opening %s failed: %w: %s", candidate, err, strings.TrimSpace(string(out)))
+			}
+
+			return nil
 		}
 
-		return nil
+		return fmt.Errorf("no supported terminal found on macOS")
 
 	default:
 		return fmt.Errorf("unsupported OS: %s", runtime.GOOS)
