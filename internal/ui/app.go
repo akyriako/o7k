@@ -289,6 +289,12 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			case "c":
 				return m, m.copyDetailsViewport()
+			case "ctrl+up", "home":
+				m.detailViewport.GotoTop()
+				return m, nil
+			case "ctrl+down", "end":
+				m.detailViewport.GotoBottom()
+				return m, nil
 			}
 		}
 
@@ -390,6 +396,15 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.maxTableXOffset(),
 			)
 			return m, nil
+
+		case "ctrl+up", "home":
+			m.table.GotoTop()
+			return m, nil
+
+		case "ctrl+down", "end":
+			m.table.GotoBottom()
+			return m, nil
+
 		}
 
 		if cmd := m.executeResourceCommand(commandKey(msg)); cmd != nil {
