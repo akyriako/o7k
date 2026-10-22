@@ -88,6 +88,7 @@ func (r *Resource) Commands() []resource.Command {
 		{Key: "shift-n", Description: "Node Groups"},
 		{Key: "k", Description: "Kubeconfig"},
 		{Key: "ctrl+k", Description: "Get Kubeconfig", StatusLabel: "Downloading"},
+		{Key: "9", Description: "Open K9s", StatusLabel: "Launching"},
 	}
 }
 
@@ -103,6 +104,8 @@ func (r *Resource) Execute(command resource.Command, row resource.Row) tea.Cmd {
 		return r.kubeconfig(row.ID)
 	case "ctrl+k":
 		return r.getKubeconfig(row)
+	case "9":
+		return r.k9s(row)
 	}
 
 	return nil

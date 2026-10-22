@@ -115,6 +115,9 @@ refresh:
 
 log:
   level: info
+
+skin: dracula
+terminal: ghostty
 ```
 
 Cache TTL, cleanup interval, and refresh interval are specified in **seconds**.
@@ -143,6 +146,19 @@ Custom skins can be placed in `~/.config/o7k/skins/` and selected by their filen
 ```yaml
 skin: my-custom-theme
 ```
+
+### Terminal
+
+**o7k** supports launching external terminal applications for commands such as K9s or opening an SSH session. You can 
+specify your preferred terminal in `~/.config/o7k/config.yaml`:
+
+```yaml
+terminal: kitty
+```
+
+If the preferred terminal is unavailable or fails to launch, o7k automatically falls back to another supported terminal. 
+When the setting is omitted, **o7k** selects the first available terminal. Supported terminals include **GNOME Terminal, 
+Konsole, kitty, Alacritty, Ghostty** and **xterm** on Linux, and **Terminal** and **iTerm2** on macOS.
 
 ## Usage
 

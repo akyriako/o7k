@@ -14,6 +14,7 @@ import (
 	"github.com/akyriako/o7k/internal/resource"
 	"github.com/akyriako/o7k/internal/resources/contexts"
 	pluginresource "github.com/akyriako/o7k/internal/resources/plugins"
+	"github.com/akyriako/o7k/internal/terminal"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -26,8 +27,9 @@ import (
 const refreshInterval = 30 * time.Second
 
 type Model struct {
-	version string
-	skin    config.Skin
+	version  string
+	skin     config.Skin
+	terminal *string
 
 	registry     *resource.Registry
 	resource     resource.Resource
@@ -141,8 +143,9 @@ func New(registry *resource.Registry, openstackContext *openstack.Context, plugi
 	ttc := time.Duration(cfg.Cache.CleanupInterval) * time.Second
 
 	m := Model{
-		version: version,
-		skin:    cfg.SkinColors,
+		version:  version,
+		skin:     cfg.SkinColors,
+		terminal: cfg.Terminal,
 
 		registry: registry,
 		resource: r,
@@ -690,6 +693,14 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		)
 
 		return m, clearStatus(m.status)
+
+	case resource.LaunchTerminalMsg:
+		return m, func() tea.Msg {
+			if err := terminal.Open(msg.Command, msg.Args, m.terminal); err != nil {
+				return resource.ErrorMsg{Err: err}
+			}
+			return nil
+		}
 	}
 
 	var cmd tea.Cmd

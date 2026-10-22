@@ -20,6 +20,7 @@ type Config struct {
 	Refresh    Refresh `yaml:"refresh"`
 	Skin       string  `yaml:"skin"`
 	SkinColors Skin    `yaml:"-"`
+	Terminal   *string `yaml:"terminal"`
 }
 
 type Cache struct {
