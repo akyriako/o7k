@@ -222,15 +222,27 @@ func (m Model) renderHeaderCommands(availableWidth int) string {
 
 func (m Model) renderTable() string {
 	title := ""
-
 	if m.resource != nil {
-		title = fmt.Sprintf(" %s[%d] ", m.resource.Kind(), m.itemCount)
+		kindStyle := lipgloss.NewStyle().Foreground(navigationTagStyle.GetBackground())
+		kind := kindStyle.Render(m.resource.Kind())
+
+		itemCountStyle := lipgloss.NewStyle().Foreground(navigationTagStyle.GetBackground())
+		itemCount := itemCountStyle.Render(fmt.Sprintf("[%d]", m.itemCount))
+
+		title = fmt.Sprintf(" %s%s ", kind, itemCount)
 
 		if len(m.navigation) > 0 {
 			parent := m.navigation[len(m.navigation)-1]
-			title = fmt.Sprintf(" %s(%s/%s)[%d] ", m.resource.Kind(), parent.resource, parent.id, m.itemCount)
+
+			parentResourceStyle := lipgloss.NewStyle().Background(headerCommandKeyStyle.GetBackground()).Foreground(headerCommandKeyStyle.GetForeground())
+			parentResource := parentResourceStyle.Render(fmt.Sprintf("%s/%s", parent.resource, parent.id))
+
+			title = fmt.Sprintf(" %s(%s)%s ", kind, parentResource, itemCount)
 		} else if !m.showHeaderContext() && m.context.Cloud != "" && m.resource.Kind() != "contexts" {
-			title = fmt.Sprintf(" %s(%s)[%d] ", m.resource.Kind(), m.context.Cloud, m.itemCount)
+			openstackContextStyle := lipgloss.NewStyle().Foreground(headerCommandKeyStyle.GetForeground())
+			openstackContext := openstackContextStyle.Render(fmt.Sprintf("%s", m.context.Cloud))
+
+			title = openstackContextStyle.Render(fmt.Sprintf(" %s(%s)%s ", kind, openstackContext, itemCount))
 		}
 	}
 
@@ -246,13 +258,9 @@ func (m Model) renderTable() string {
 		Foreground(lipgloss.Color(m.skin.Main.Foreground)).
 		Background(lipgloss.Color(m.skin.Main.Background))
 
-	top := borderStyle.Render(
-		"┌" +
-			repeat("─", left) +
-			title +
-			repeat("─", right) +
-			"┐",
-	)
+	top := borderStyle.Render("┌"+repeat("─", left)) +
+		preserveBackground(title, lipgloss.Color(m.skin.Main.Background)) +
+		borderStyle.Render(repeat("─", right)+"┐")
 
 	bottom := borderStyle.Render(
 		"└" +
@@ -322,15 +330,17 @@ func (m Model) renderTable() string {
 
 func (m Model) renderDetails() string {
 	title := " details "
+	titleStyle := lipgloss.NewStyle().Background(headerCommandKeyStyle.GetBackground()).Foreground(headerCommandKeyStyle.GetForeground())
 
 	if m.resource != nil {
-		title = fmt.Sprintf(" %s details ", m.resource.Kind())
+		title = titleStyle.Render(fmt.Sprintf("%s details", m.resource.Kind()))
 	}
 
 	if m.resource != nil && m.detailID != "" {
-		title = fmt.Sprintf(" %s/%s ", m.resource.Kind(), m.detailID)
+		title = titleStyle.Render(fmt.Sprintf("%s/%s", m.resource.Kind(), m.detailID))
 	}
 
+	title = fmt.Sprintf(" %s ", title)
 	innerWidth := max(m.width-2, 1)
 
 	title = ansi.Truncate(title, innerWidth, "…")
@@ -344,13 +354,9 @@ func (m Model) renderDetails() string {
 		Foreground(lipgloss.Color(m.skin.Main.Foreground)).
 		Background(lipgloss.Color(m.skin.Main.Background))
 
-	top := borderStyle.Render(
-		"┌" +
-			repeat("─", left) +
-			title +
-			repeat("─", right) +
-			"┐",
-	)
+	top := borderStyle.Render("┌"+repeat("─", left)) +
+		preserveBackground(title, lipgloss.Color(m.skin.Main.Background)) +
+		borderStyle.Render(repeat("─", right)+"┐")
 
 	bottom := borderStyle.Render(
 		"└" +
