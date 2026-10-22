@@ -765,6 +765,7 @@ type Result struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Details       *Details               `protobuf:"bytes,1,opt,name=details,proto3" json:"details,omitempty"`
 	Navigate      *Navigate              `protobuf:"bytes,2,opt,name=navigate,proto3" json:"navigate,omitempty"`
+	Terminal      *Terminal              `protobuf:"bytes,3,opt,name=terminal,proto3" json:"terminal,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -809,6 +810,13 @@ func (x *Result) GetDetails() *Details {
 func (x *Result) GetNavigate() *Navigate {
 	if x != nil {
 		return x.Navigate
+	}
+	return nil
+}
+
+func (x *Result) GetTerminal() *Terminal {
+	if x != nil {
+		return x.Terminal
 	}
 	return nil
 }
@@ -941,6 +949,58 @@ func (x *Navigate) GetScope() map[string]string {
 	return nil
 }
 
+type Terminal struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Command       string                 `protobuf:"bytes,1,opt,name=command,proto3" json:"command,omitempty"`
+	Args          []string               `protobuf:"bytes,2,rep,name=args,proto3" json:"args,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Terminal) Reset() {
+	*x = Terminal{}
+	mi := &file_pluginsdk_proto_plugin_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Terminal) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Terminal) ProtoMessage() {}
+
+func (x *Terminal) ProtoReflect() protoreflect.Message {
+	mi := &file_pluginsdk_proto_plugin_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Terminal.ProtoReflect.Descriptor instead.
+func (*Terminal) Descriptor() ([]byte, []int) {
+	return file_pluginsdk_proto_plugin_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *Terminal) GetCommand() string {
+	if x != nil {
+		return x.Command
+	}
+	return ""
+}
+
+func (x *Terminal) GetArgs() []string {
+	if x != nil {
+		return x.Args
+	}
+	return nil
+}
+
 var File_pluginsdk_proto_plugin_proto protoreflect.FileDescriptor
 
 const file_pluginsdk_proto_plugin_proto_rawDesc = "" +
@@ -1006,10 +1066,11 @@ const file_pluginsdk_proto_plugin_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"@\n" +
 	"\x0fExecuteResponse\x12-\n" +
-	"\x06result\x18\x01 \x01(\v2\x15.o7k.plugin.v1.ResultR\x06result\"o\n" +
+	"\x06result\x18\x01 \x01(\v2\x15.o7k.plugin.v1.ResultR\x06result\"\xa4\x01\n" +
 	"\x06Result\x120\n" +
 	"\adetails\x18\x01 \x01(\v2\x16.o7k.plugin.v1.DetailsR\adetails\x123\n" +
-	"\bnavigate\x18\x02 \x01(\v2\x17.o7k.plugin.v1.NavigateR\bnavigate\"3\n" +
+	"\bnavigate\x18\x02 \x01(\v2\x17.o7k.plugin.v1.NavigateR\bnavigate\x123\n" +
+	"\bterminal\x18\x03 \x01(\v2\x17.o7k.plugin.v1.TerminalR\bterminal\"3\n" +
 	"\aDetails\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
 	"\acontent\x18\x02 \x01(\fR\acontent\"\xd6\x01\n" +
@@ -1022,7 +1083,10 @@ const file_pluginsdk_proto_plugin_proto_rawDesc = "" +
 	"\n" +
 	"ScopeEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x012\xd7\x02\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"8\n" +
+	"\bTerminal\x12\x18\n" +
+	"\acommand\x18\x01 \x01(\tR\acommand\x12\x12\n" +
+	"\x04args\x18\x02 \x03(\tR\x04args2\xd7\x02\n" +
 	"\x06Plugin\x12D\n" +
 	"\n" +
 	"Initialize\x12 .o7k.plugin.v1.InitializeRequest\x1a\x14.o7k.plugin.v1.Empty\x12<\n" +
@@ -1046,7 +1110,7 @@ func file_pluginsdk_proto_plugin_proto_rawDescGZIP() []byte {
 	return file_pluginsdk_proto_plugin_proto_rawDescData
 }
 
-var file_pluginsdk_proto_plugin_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_pluginsdk_proto_plugin_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
 var file_pluginsdk_proto_plugin_proto_goTypes = []any{
 	(*Empty)(nil),             // 0: o7k.plugin.v1.Empty
 	(*InitializeRequest)(nil), // 1: o7k.plugin.v1.InitializeRequest
@@ -1064,42 +1128,44 @@ var file_pluginsdk_proto_plugin_proto_goTypes = []any{
 	(*Result)(nil),            // 13: o7k.plugin.v1.Result
 	(*Details)(nil),           // 14: o7k.plugin.v1.Details
 	(*Navigate)(nil),          // 15: o7k.plugin.v1.Navigate
-	nil,                       // 16: o7k.plugin.v1.Row.FieldsEntry
-	nil,                       // 17: o7k.plugin.v1.ListRequest.ScopeEntry
-	nil,                       // 18: o7k.plugin.v1.ExecuteRequest.ScopeEntry
-	nil,                       // 19: o7k.plugin.v1.Navigate.ScopeEntry
+	(*Terminal)(nil),          // 16: o7k.plugin.v1.Terminal
+	nil,                       // 17: o7k.plugin.v1.Row.FieldsEntry
+	nil,                       // 18: o7k.plugin.v1.ListRequest.ScopeEntry
+	nil,                       // 19: o7k.plugin.v1.ExecuteRequest.ScopeEntry
+	nil,                       // 20: o7k.plugin.v1.Navigate.ScopeEntry
 }
 var file_pluginsdk_proto_plugin_proto_depIdxs = []int32{
 	5,  // 0: o7k.plugin.v1.Resources.resources:type_name -> o7k.plugin.v1.Resource
 	6,  // 1: o7k.plugin.v1.Resource.columns:type_name -> o7k.plugin.v1.Column
 	7,  // 2: o7k.plugin.v1.Resource.commands:type_name -> o7k.plugin.v1.Command
-	16, // 3: o7k.plugin.v1.Row.fields:type_name -> o7k.plugin.v1.Row.FieldsEntry
-	17, // 4: o7k.plugin.v1.ListRequest.scope:type_name -> o7k.plugin.v1.ListRequest.ScopeEntry
+	17, // 3: o7k.plugin.v1.Row.fields:type_name -> o7k.plugin.v1.Row.FieldsEntry
+	18, // 4: o7k.plugin.v1.ListRequest.scope:type_name -> o7k.plugin.v1.ListRequest.ScopeEntry
 	8,  // 5: o7k.plugin.v1.ListResponse.rows:type_name -> o7k.plugin.v1.Row
 	7,  // 6: o7k.plugin.v1.ExecuteRequest.command:type_name -> o7k.plugin.v1.Command
 	8,  // 7: o7k.plugin.v1.ExecuteRequest.row:type_name -> o7k.plugin.v1.Row
-	18, // 8: o7k.plugin.v1.ExecuteRequest.scope:type_name -> o7k.plugin.v1.ExecuteRequest.ScopeEntry
+	19, // 8: o7k.plugin.v1.ExecuteRequest.scope:type_name -> o7k.plugin.v1.ExecuteRequest.ScopeEntry
 	13, // 9: o7k.plugin.v1.ExecuteResponse.result:type_name -> o7k.plugin.v1.Result
 	14, // 10: o7k.plugin.v1.Result.details:type_name -> o7k.plugin.v1.Details
 	15, // 11: o7k.plugin.v1.Result.navigate:type_name -> o7k.plugin.v1.Navigate
-	19, // 12: o7k.plugin.v1.Navigate.scope:type_name -> o7k.plugin.v1.Navigate.ScopeEntry
-	1,  // 13: o7k.plugin.v1.Plugin.Initialize:input_type -> o7k.plugin.v1.InitializeRequest
-	0,  // 14: o7k.plugin.v1.Plugin.GetMetadata:input_type -> o7k.plugin.v1.Empty
-	0,  // 15: o7k.plugin.v1.Plugin.GetResources:input_type -> o7k.plugin.v1.Empty
-	9,  // 16: o7k.plugin.v1.Plugin.List:input_type -> o7k.plugin.v1.ListRequest
-	11, // 17: o7k.plugin.v1.Plugin.Execute:input_type -> o7k.plugin.v1.ExecuteRequest
-	0,  // 18: o7k.plugin.v1.Host.GetContext:input_type -> o7k.plugin.v1.Empty
-	0,  // 19: o7k.plugin.v1.Plugin.Initialize:output_type -> o7k.plugin.v1.Empty
-	2,  // 20: o7k.plugin.v1.Plugin.GetMetadata:output_type -> o7k.plugin.v1.Metadata
-	4,  // 21: o7k.plugin.v1.Plugin.GetResources:output_type -> o7k.plugin.v1.Resources
-	10, // 22: o7k.plugin.v1.Plugin.List:output_type -> o7k.plugin.v1.ListResponse
-	12, // 23: o7k.plugin.v1.Plugin.Execute:output_type -> o7k.plugin.v1.ExecuteResponse
-	3,  // 24: o7k.plugin.v1.Host.GetContext:output_type -> o7k.plugin.v1.Context
-	19, // [19:25] is the sub-list for method output_type
-	13, // [13:19] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	16, // 12: o7k.plugin.v1.Result.terminal:type_name -> o7k.plugin.v1.Terminal
+	20, // 13: o7k.plugin.v1.Navigate.scope:type_name -> o7k.plugin.v1.Navigate.ScopeEntry
+	1,  // 14: o7k.plugin.v1.Plugin.Initialize:input_type -> o7k.plugin.v1.InitializeRequest
+	0,  // 15: o7k.plugin.v1.Plugin.GetMetadata:input_type -> o7k.plugin.v1.Empty
+	0,  // 16: o7k.plugin.v1.Plugin.GetResources:input_type -> o7k.plugin.v1.Empty
+	9,  // 17: o7k.plugin.v1.Plugin.List:input_type -> o7k.plugin.v1.ListRequest
+	11, // 18: o7k.plugin.v1.Plugin.Execute:input_type -> o7k.plugin.v1.ExecuteRequest
+	0,  // 19: o7k.plugin.v1.Host.GetContext:input_type -> o7k.plugin.v1.Empty
+	0,  // 20: o7k.plugin.v1.Plugin.Initialize:output_type -> o7k.plugin.v1.Empty
+	2,  // 21: o7k.plugin.v1.Plugin.GetMetadata:output_type -> o7k.plugin.v1.Metadata
+	4,  // 22: o7k.plugin.v1.Plugin.GetResources:output_type -> o7k.plugin.v1.Resources
+	10, // 23: o7k.plugin.v1.Plugin.List:output_type -> o7k.plugin.v1.ListResponse
+	12, // 24: o7k.plugin.v1.Plugin.Execute:output_type -> o7k.plugin.v1.ExecuteResponse
+	3,  // 25: o7k.plugin.v1.Host.GetContext:output_type -> o7k.plugin.v1.Context
+	20, // [20:26] is the sub-list for method output_type
+	14, // [14:20] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_pluginsdk_proto_plugin_proto_init() }
@@ -1113,7 +1179,7 @@ func file_pluginsdk_proto_plugin_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pluginsdk_proto_plugin_proto_rawDesc), len(file_pluginsdk_proto_plugin_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   20,
+			NumMessages:   21,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

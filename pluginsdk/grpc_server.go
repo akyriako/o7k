@@ -135,8 +135,8 @@ func (s *grpcServer) Execute(ctx context.Context, request *pb.ExecuteRequest) (*
 		return nil, err
 	}
 
-	if result.Details != nil && result.Navigate != nil {
-		return nil, fmt.Errorf("plugin result cannot contain both details and navigation")
+	if err := result.isValid(); err != nil {
+		return nil, fmt.Errorf("invalid result: %w", err)
 	}
 
 	response := &pb.Result{}
@@ -155,6 +155,13 @@ func (s *grpcServer) Execute(ctx context.Context, request *pb.ExecuteRequest) (*
 			Field:    result.Navigate.Field,
 			Value:    result.Navigate.Value,
 			Scope:    result.Navigate.Scope,
+		}
+	}
+
+	if result.Terminal != nil {
+		response.Terminal = &pb.Terminal{
+			Command: result.Terminal.Command,
+			Args:    result.Terminal.Args,
 		}
 	}
 

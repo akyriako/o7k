@@ -1,3 +1,4 @@
+
 syntax = "proto3";
 
 package o7k.plugin.v1;
@@ -91,6 +92,7 @@ message ExecuteResponse {
 message Result {
   Details details = 1;
   Navigate navigate = 2;
+  Terminal terminal = 3;
 }
 
 message Details {
@@ -104,4 +106,9 @@ message Navigate {
   string field = 3;
   string value = 4;
   map<string, string> scope = 5;
+}
+
+message Terminal {
+  string command = 1;
+  repeated string args = 2;
 }
