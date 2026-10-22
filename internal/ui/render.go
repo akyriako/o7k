@@ -239,7 +239,7 @@ func (m Model) renderTable() string {
 
 			title = fmt.Sprintf(" %s(%s)%s ", kind, parentResource, itemCount)
 		} else if !m.showHeaderContext() && m.context.Cloud != "" && m.resource.Kind() != "contexts" {
-			openstackContextStyle := lipgloss.NewStyle().Foreground(headerCommandKeyStyle.GetBackground())
+			openstackContextStyle := lipgloss.NewStyle().Foreground(headerCommandKeyStyle.GetForeground())
 			openstackContext := openstackContextStyle.Render(fmt.Sprintf("%s", m.context.Cloud))
 
 			title = openstackContextStyle.Render(fmt.Sprintf(" %s(%s)%s ", kind, openstackContext, itemCount))
