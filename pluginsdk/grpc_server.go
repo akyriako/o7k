@@ -139,7 +139,9 @@ func (s *grpcServer) Execute(ctx context.Context, request *pb.ExecuteRequest) (*
 		return nil, fmt.Errorf("invalid result: %w", err)
 	}
 
-	response := &pb.Result{}
+	response := &pb.Result{
+		RefreshOnComplete: result.RefreshOnComplete,
+	}
 
 	if result.Details != nil {
 		response.Details = &pb.Details{
