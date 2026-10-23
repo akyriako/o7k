@@ -137,7 +137,9 @@ func (r *grpcResource) Execute(ctx context.Context, command Command, row Row) (R
 		return Result{}, nil
 	}
 
-	result := Result{}
+	result := Result{
+		RefreshOnComplete: response.Result.RefreshOnComplete,
+	}
 
 	if response.Result.Details != nil {
 		result.Details = &Details{

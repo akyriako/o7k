@@ -762,12 +762,13 @@ func (x *ExecuteResponse) GetResult() *Result {
 }
 
 type Result struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Details       *Details               `protobuf:"bytes,1,opt,name=details,proto3" json:"details,omitempty"`
-	Navigate      *Navigate              `protobuf:"bytes,2,opt,name=navigate,proto3" json:"navigate,omitempty"`
-	Terminal      *Terminal              `protobuf:"bytes,3,opt,name=terminal,proto3" json:"terminal,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Details           *Details               `protobuf:"bytes,1,opt,name=details,proto3" json:"details,omitempty"`
+	Navigate          *Navigate              `protobuf:"bytes,2,opt,name=navigate,proto3" json:"navigate,omitempty"`
+	Terminal          *Terminal              `protobuf:"bytes,3,opt,name=terminal,proto3" json:"terminal,omitempty"`
+	RefreshOnComplete bool                   `protobuf:"varint,4,opt,name=refresh_on_complete,json=refreshOnComplete,proto3" json:"refresh_on_complete,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *Result) Reset() {
@@ -819,6 +820,13 @@ func (x *Result) GetTerminal() *Terminal {
 		return x.Terminal
 	}
 	return nil
+}
+
+func (x *Result) GetRefreshOnComplete() bool {
+	if x != nil {
+		return x.RefreshOnComplete
+	}
+	return false
 }
 
 type Details struct {
@@ -1066,11 +1074,12 @@ const file_pluginsdk_proto_plugin_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"@\n" +
 	"\x0fExecuteResponse\x12-\n" +
-	"\x06result\x18\x01 \x01(\v2\x15.o7k.plugin.v1.ResultR\x06result\"\xa4\x01\n" +
+	"\x06result\x18\x01 \x01(\v2\x15.o7k.plugin.v1.ResultR\x06result\"\xd4\x01\n" +
 	"\x06Result\x120\n" +
 	"\adetails\x18\x01 \x01(\v2\x16.o7k.plugin.v1.DetailsR\adetails\x123\n" +
 	"\bnavigate\x18\x02 \x01(\v2\x17.o7k.plugin.v1.NavigateR\bnavigate\x123\n" +
-	"\bterminal\x18\x03 \x01(\v2\x17.o7k.plugin.v1.TerminalR\bterminal\"3\n" +
+	"\bterminal\x18\x03 \x01(\v2\x17.o7k.plugin.v1.TerminalR\bterminal\x12.\n" +
+	"\x13refresh_on_complete\x18\x04 \x01(\bR\x11refreshOnComplete\"3\n" +
 	"\aDetails\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
 	"\acontent\x18\x02 \x01(\fR\acontent\"\xd6\x01\n" +

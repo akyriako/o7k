@@ -66,9 +66,10 @@ type Resource interface {
 }
 
 type Result struct {
-	Details  *Details
-	Navigate *Navigate
-	Terminal *Terminal
+	Details           *Details
+	Navigate          *Navigate
+	Terminal          *Terminal
+	RefreshOnComplete bool
 }
 
 type Details struct {

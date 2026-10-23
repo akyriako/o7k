@@ -93,6 +93,7 @@ message Result {
   Details details = 1;
   Navigate navigate = 2;
   Terminal terminal = 3;
+  bool refresh_on_complete = 4;
 }
 
 message Details {

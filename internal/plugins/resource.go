@@ -146,6 +146,12 @@ func (r *pluginResource) Execute(command resource.Command, row resource.Row) tea
 			}
 		}
 
+		if result.RefreshOnComplete {
+			return resource.CommandCompletedMsg{
+				RefreshOnCompletion: result.RefreshOnComplete,
+			}
+		}
+
 		return nil
 	}
 }
