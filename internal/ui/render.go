@@ -41,7 +41,8 @@ func (m Model) renderHeader() string {
 	// The logo is independently anchored to the right edge.
 	// Hide the context if it would reduce the commands below their
 	// preferred width.
-	showContext := m.showHeaderContext()
+	// m.showHeaderContext()
+	showContext := true
 
 	if !showContext {
 		leftWidth = 0
@@ -135,12 +136,16 @@ func (m Model) renderHeaderContext() (string, int) {
 }
 
 func (m Model) renderHeaderCommands(availableWidth int) string {
-	commands := []resource.Command{
-		{Key: "ctrl+x", Description: "Quit"},
-		{Key: ":", Description: "Resource"},
-		{Key: "r", Description: "Refresh"},
-		{Key: "c", Description: "Copy"},
-		{Key: "esc", Description: "Dismiss/Return"},
+	var commands []resource.Command
+
+	if m.showHeaderContext() || m.width <= compactWidth || m.detailMode {
+		commands = []resource.Command{
+			{Key: "ctrl+x", Description: "Quit"},
+			{Key: ":", Description: "Resource"},
+			{Key: "r", Description: "Refresh"},
+			{Key: "c", Description: "Copy"},
+			{Key: "esc", Description: "Dismiss/Return"},
+		}
 	}
 
 	if m.resource != nil && !m.detailMode {
@@ -153,12 +158,11 @@ func (m Model) renderHeaderCommands(availableWidth int) string {
 		keyWidth           = 10
 	)
 
-	columnCount := (len(commands) + commandsPerColumn - 1) / commandsPerColumn
-
 	if availableWidth <= 0 {
 		return strings.Repeat("\n", commandsPerColumn-1)
 	}
 
+	columnCount := max(1, (len(commands)+commandsPerColumn-1)/commandsPerColumn)
 	widths := make([]int, columnCount)
 	baseWidth := availableWidth / columnCount
 	remainder := availableWidth % columnCount
