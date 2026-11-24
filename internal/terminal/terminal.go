@@ -16,12 +16,18 @@ func Open(command string, args []string, preferred *string) error {
 	switch runtime.GOOS {
 	case "linux":
 		candidates := [][]string{
+			{"ptyxis", "--", executable},
+			{"kgx", "--", executable},
 			{"gnome-terminal", "--", executable},
 			{"konsole", "-e", executable},
-			{"kitty", "--", executable},
+			{"kitty", executable},
 			{"alacritty", "-e", executable},
 			{"xterm", "-e", executable},
 			{"ghostty", "-e", executable},
+			{"wezterm", "start", "--", executable},
+			{"foot", executable},
+			{"tilix", "-n", "-e", executable},
+			{"xfce4-terminal", "-x", executable},
 		}
 
 		if preferred != nil {
